@@ -1,7 +1,12 @@
 package com.guild.gui;
 
-import java.util.Arrays;
-
+import com.guild.GuildPlugin;
+import com.guild.core.gui.GUI;
+import com.guild.core.utils.ColorUtils;
+import com.guild.core.utils.CompatibleScheduler;
+import com.guild.models.Guild;
+import com.guild.models.GuildMember;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -9,11 +14,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.guild.GuildPlugin;
-import com.guild.core.gui.GUI;
-import com.guild.core.utils.ColorUtils;
-import com.guild.models.Guild;
-import com.guild.models.GuildMember;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * GUI de Configurações da Guilda
@@ -127,7 +129,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-name.name", "&eAlterar Nome")),
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-name.lore.1", "&7Alterar nome da guilda"))
         );
-        inventory.setItem(11, changeName);
+        inventory.setItem(10, changeName);
         
         // Botão de alterar descrição
         ItemStack changeDescription = createItem(
@@ -135,7 +137,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-description.name", "&eAlterar Descrição")),
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-description.lore.1", "&7Alterar descrição da guilda"))
         );
-        inventory.setItem(12, changeDescription);
+        inventory.setItem(11, changeDescription);
         
         // Botão de alterar tag
         ItemStack changeTag = createItem(
@@ -143,7 +145,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-tag.name", "&eAlterar Tag")),
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-tag.lore.1", "&7Alterar tag da guilda"))
         );
-        inventory.setItem(13, changeTag);
+        inventory.setItem(12, changeTag);
         
         // Botão de configurações de permissão
         ItemStack permissions = createItem(
@@ -151,7 +153,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.permissions.name", "&eConfigurar Permissões")),
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.permissions.lore.1", "&7Gerenciar permissões de membros"))
         );
-        inventory.setItem(14, permissions);
+        inventory.setItem(16, permissions);
     }
     
     /**
@@ -164,7 +166,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.invite-member", "&aConvidar Membro")),
             ColorUtils.colorize("&7Convidar novos membros para a guilda")
         );
-        inventory.setItem(19, inviteMember);
+        inventory.setItem(20, inviteMember);
         
         // Botão de expulsar membro
         ItemStack kickMember = createItem(
@@ -172,7 +174,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.kick-member", "&cExpulsar Membro")),
             ColorUtils.colorize("&7Expulsar membro da guilda")
         );
-        inventory.setItem(21, kickMember);
+        inventory.setItem(22, kickMember);
         
         // Botão de promover membro
         ItemStack promoteMember = createItem(
@@ -180,7 +182,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.promote-member", "&6Promover Membro")),
             ColorUtils.colorize("&7Promover cargo do membro")
         );
-        inventory.setItem(23, promoteMember);
+        inventory.setItem(24, promoteMember);
         
         // Botão de rebaixar membro
         ItemStack demoteMember = createItem(
@@ -188,7 +190,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.demote-member", "&7Rebaixar Membro")),
             ColorUtils.colorize("&7Rebaixar cargo do membro")
         );
-        inventory.setItem(25, demoteMember);
+        inventory.setItem(26, demoteMember);
         
         // Botão de processar solicitações
         ItemStack applications = createItem(
@@ -212,7 +214,7 @@ public class GuildSettingsGUI implements GUI {
             Material.BOOK,
             ColorUtils.colorize("&6Logs da Guilda"),
             ColorUtils.colorize("&7Ver histórico de operações da guilda"),
-            ColorUtils.colorize("&7Registra todas as operações importantes")
+            ColorUtils.colorize("&7Registrar todas as operações importantes")
         );
         inventory.setItem(32, guildLogs);
         
@@ -231,7 +233,7 @@ public class GuildSettingsGUI implements GUI {
             ColorUtils.colorize("&7Excluir a guilda inteira"),
             ColorUtils.colorize("&cEsta operação é irreversível!")
         );
-        inventory.setItem(28, deleteGuild);
+        inventory.setItem(36, deleteGuild);
         
         // Botão de voltar
         ItemStack back = createItem(
@@ -480,8 +482,6 @@ public class GuildSettingsGUI implements GUI {
         // Abre GUI de confirmação de exclusão
         plugin.getGuiManager().openGUI(player, new ConfirmDeleteGuildGUI(plugin, guild));
     }
-    
-
     
     /**
      * Cria item

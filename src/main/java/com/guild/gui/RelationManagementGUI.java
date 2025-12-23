@@ -1,12 +1,10 @@
 package com.guild.gui;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
+import com.guild.GuildPlugin;
+import com.guild.core.gui.GUI;
+import com.guild.core.utils.ColorUtils;
+import com.guild.models.Guild;
+import com.guild.models.GuildRelation;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,14 +13,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.guild.GuildPlugin;
-import com.guild.core.gui.GUI;
-import com.guild.core.utils.ColorUtils;
-import com.guild.models.Guild;
-import com.guild.models.GuildRelation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * GUI de Gerenciamento de Relações - Exclusivo para Administradores
+ * GUI de Gerenciamento de Relações - Apenas para Administradores
  */
 public class RelationManagementGUI implements GUI {
     
@@ -41,7 +40,7 @@ public class RelationManagementGUI implements GUI {
     public RelationManagementGUI(GuildPlugin plugin, Player player) {
         this.plugin = plugin;
         this.player = player;
-        // Verificar permissões de administrador
+        // Verifica permissão de administrador
         if (!player.hasPermission("guild.admin")) {
             player.sendMessage(ColorUtils.colorize("&cVocê não tem permissão de administrador!"));
             return;
@@ -61,22 +60,22 @@ public class RelationManagementGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // Preencher borda
+        // Preenche a borda
         fillBorder(inventory);
         
-        // Configurar lista de relações
+        // Configura a lista de relações
         setupRelationList(inventory);
         
-        // Configurar botões de paginação
+        // Configura os botões de paginação
         setupPaginationButtons(inventory);
         
-        // Configurar botões de ação
+        // Configura os botões de ação
         setupActionButtons(inventory);
     }
     
     private void setupRelationList(Inventory inventory) {
         if (isLoading) {
-            // Exibir carregando
+            // Mostra carregando
             ItemStack loadingItem = createItem(Material.SAND, ColorUtils.colorize("&eCarregando..."), 
                 ColorUtils.colorize("&7Carregando dados de relação..."));
             inventory.setItem(22, loadingItem);
@@ -84,7 +83,7 @@ public class RelationManagementGUI implements GUI {
         }
         
         if (allRelations.isEmpty()) {
-            // Exibir sem dados
+            // Mostra sem dados
             ItemStack emptyItem = createItem(Material.BARRIER, ColorUtils.colorize("&cSem dados de relação"), 
                 ColorUtils.colorize("&7Nenhuma relação de guilda encontrada"));
             inventory.setItem(22, emptyItem);
@@ -98,7 +97,7 @@ public class RelationManagementGUI implements GUI {
             if (startIndex + i < endIndex) {
                 GuildRelation relation = allRelations.get(startIndex + i);
                 
-                // Calcular posição nas colunas 2-8, linhas 2-5 (slots 10-43)
+                // Calcula a posição nas colunas 2-8, linhas 2-5 (slots 10-43)
                 int row = (i / 7) + 1; // Linhas 2-5
                 int col = (i % 7) + 1; // Colunas 2-8
                 int slot = row * 9 + col;
@@ -112,7 +111,7 @@ public class RelationManagementGUI implements GUI {
         Material material = getRelationMaterial(relation.getType());
         String status = getRelationStatus(relation.getStatus());
         
-        // Verificar se está em estado de exclusão pendente
+        // Verifica se está em estado de exclusão pendente
         boolean isPendingDeletion = pendingDeletions.containsKey(player.getUniqueId()) && 
                                   pendingDeletions.get(player.getUniqueId()).getId() == relation.getId();
         
@@ -188,7 +187,7 @@ public class RelationManagementGUI implements GUI {
                 ColorUtils.colorize("&7Página " + (currentPage) + "")));
         }
         
-        // Informação de página
+        // Informação do número da página
         inventory.setItem(49, createItem(Material.PAPER, ColorUtils.colorize("&ePágina " + (currentPage + 1) + " de " + totalPages + ""),
             ColorUtils.colorize("&7Total de " + allRelations.size() + " relações")));
         
@@ -212,7 +211,7 @@ public class RelationManagementGUI implements GUI {
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
         
-        // Preencher borda
+        // Preenche a borda
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, border);
             inventory.setItem(i + 45, border);
@@ -225,11 +224,11 @@ public class RelationManagementGUI implements GUI {
     }
     
     private void loadRelations() {
-        if (isLoading) return; // Prevenir carregamento duplicado
+        if (isLoading) return; // Previne carregamento duplicado
         
         isLoading = true;
         
-        // Obter relações de todas as guildas
+        // Obtém relações de todas as guildas
         plugin.getGuildService().getAllGuildsAsync().thenCompose(guilds -> {
             List<CompletableFuture<List<GuildRelation>>> relationFutures = new ArrayList<>();
             
@@ -256,7 +255,7 @@ public class RelationManagementGUI implements GUI {
                 isLoading = false;
                 
                 if (player.isOnline()) {
-                    // Usar método de atualização seguro
+                    // Usa método seguro de atualização
                     plugin.getGuiManager().refreshGUI(player);
                 }
             });
@@ -274,7 +273,7 @@ public class RelationManagementGUI implements GUI {
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
-        // Verificar permissões de administrador
+        // Verifica permissão de administrador
         if (!player.hasPermission("guild.admin")) {
             player.sendMessage(ColorUtils.colorize("&cVocê não tem permissão de administrador!"));
             return;
@@ -302,7 +301,7 @@ public class RelationManagementGUI implements GUI {
             currentPage++;
             plugin.getGuiManager().refreshGUI(player);
         } else if (slot >= 10 && slot <= 43) {
-            // Item de relação - verificar se está na faixa de colunas 2-8, linhas 2-5
+            // Item de relação - verifica se está no intervalo de colunas 2-8, linhas 2-5
             int row = slot / 9;
             int col = slot % 9;
             if (row >= 1 && row <= 4 && col >= 1 && col <= 7) {
@@ -318,7 +317,7 @@ public class RelationManagementGUI implements GUI {
     
     private void handleRelationClick(Player player, GuildRelation relation, ClickType clickType) {
         if (clickType == ClickType.LEFT) {
-            // Processar botão esquerdo
+            // Processamento de clique esquerdo
             if (pendingDeletions.containsKey(player.getUniqueId()) && 
                 pendingDeletions.get(player.getUniqueId()).getId() == relation.getId()) {
                 // Confirmar exclusão
@@ -328,7 +327,7 @@ public class RelationManagementGUI implements GUI {
                 startDeleteRelation(player, relation);
             }
         } else if (clickType == ClickType.RIGHT) {
-            // Processar botão direito
+            // Processamento de clique direito
             if (pendingDeletions.containsKey(player.getUniqueId()) && 
                 pendingDeletions.get(player.getUniqueId()).getId() == relation.getId()) {
                 // Cancelar exclusão
@@ -341,7 +340,7 @@ public class RelationManagementGUI implements GUI {
     }
     
     private void startDeleteRelation(Player player, GuildRelation relation) {
-        // Definir estado de exclusão pendente
+        // Define estado de exclusão pendente
         pendingDeletions.put(player.getUniqueId(), relation);
         deletionTimers.put(player.getUniqueId(), System.currentTimeMillis());
         
@@ -349,10 +348,10 @@ public class RelationManagementGUI implements GUI {
         player.sendMessage(ColorUtils.colorize("&cBotão Esquerdo: Confirmar | Botão Direito: Cancelar"));
         player.sendMessage(ColorUtils.colorize("&eCancelamento automático em 10 segundos"));
         
-        // Atualizar GUI para exibir estado de exclusão pendente
+        // Atualiza GUI para mostrar estado de exclusão pendente
         plugin.getGuiManager().refreshGUI(player);
         
-        // Configurar tarefa de timeout
+        // Define tarefa de timeout
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (pendingDeletions.containsKey(player.getUniqueId()) && 
                 pendingDeletions.get(player.getUniqueId()).getId() == relation.getId()) {
@@ -362,18 +361,18 @@ public class RelationManagementGUI implements GUI {
     }
     
     private void confirmDeleteRelation(Player player, GuildRelation relation) {
-        // Limpar estado de exclusão pendente
+        // Limpa estado de exclusão pendente
         pendingDeletions.remove(player.getUniqueId());
         deletionTimers.remove(player.getUniqueId());
         
-        // Executar exclusão
+        // Executa exclusão
         plugin.getGuildService().deleteGuildRelationAsync(relation.getId()).thenAccept(success -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (success) {
                     player.sendMessage(ColorUtils.colorize("&aRelação excluída: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name()));
-                    // Remover da lista
+                    // Remove da lista
                     allRelations.remove(relation);
-                    // Atualizar GUI
+                    // Atualiza GUI
                     plugin.getGuiManager().refreshGUI(player);
                 } else {
                     player.sendMessage(ColorUtils.colorize("&cFalha ao excluir relação!"));
@@ -393,7 +392,7 @@ public class RelationManagementGUI implements GUI {
         
         if (relation != null) {
             player.sendMessage(ColorUtils.colorize("&eExclusão de relação cancelada: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name()));
-            // Atualizar GUI
+            // Atualiza GUI
             plugin.getGuiManager().refreshGUI(player);
         }
     }
@@ -436,16 +435,16 @@ public class RelationManagementGUI implements GUI {
     
     @Override
     public void onClose(Player player) {
-        // Limpar recursos
+        // Limpa recursos
         allRelations.clear();
-        // Limpar estado de exclusão pendente
+        // Limpa estado de exclusão pendente
         pendingDeletions.remove(player.getUniqueId());
         deletionTimers.remove(player.getUniqueId());
     }
     
     @Override
     public void refresh(Player player) {
-        // Usar método de atualização seguro do GUIManager
+        // Usa método seguro de atualização do GUIManager
         if (player.isOnline()) {
             plugin.getGuiManager().refreshGUI(player);
         }

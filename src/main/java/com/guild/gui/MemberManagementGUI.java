@@ -1,22 +1,23 @@
 package com.guild.gui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
 import com.guild.GuildPlugin;
 import com.guild.core.gui.GUI;
 import com.guild.core.utils.ColorUtils;
 import com.guild.core.utils.PlaceholderUtils;
 import com.guild.models.Guild;
 import com.guild.models.GuildMember;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * GUI de Gerenciamento de Membros
@@ -26,7 +27,7 @@ public class MemberManagementGUI implements GUI {
     private final GuildPlugin plugin;
     private final Guild guild;
     private int currentPage = 0;
-    private static final int MEMBERS_PER_PAGE = 28; // 4 linhas x 7 colunas, excluindo borda
+    private static final int MEMBERS_PER_PAGE = 28; // 4 linhas 7 colunas, excluindo borda
     
     public MemberManagementGUI(GuildPlugin plugin, Guild guild) {
         this.plugin = plugin;
@@ -45,38 +46,38 @@ public class MemberManagementGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // Preencher borda
+        // Preenche a borda
         fillBorder(inventory);
         
-        // Adicionar botões de função
+        // Adiciona botões de função
         setupFunctionButtons(inventory);
         
-        // Carregar lista de membros
+        // Carrega lista de membros
         loadMembers(inventory);
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
-        // Verificar se é botão de função
+        // Verifica se é botão de função
         if (isFunctionButton(slot)) {
             handleFunctionButton(player, slot);
             return;
         }
         
-        // Verificar se é botão de paginação
+        // Verifica se é botão de paginação
         if (isPaginationButton(slot)) {
             handlePaginationButton(player, slot);
             return;
         }
         
-        // Verificar se é botão de membro
+        // Verifica se é botão de membro
         if (isMemberSlot(slot)) {
             handleMemberClick(player, slot, clickedItem, clickType);
         }
     }
     
     /**
-     * Preencher borda
+     * Preenche a borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -91,7 +92,7 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Configurar botões de função
+     * Configura botões de função
      */
     private void setupFunctionButtons(Inventory inventory) {
         // Botão de convidar membro
@@ -136,12 +137,12 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Carregar lista de membros
+     * Carrega lista de membros
      */
     private void loadMembers(Inventory inventory) {
         plugin.getGuildService().getGuildMembersAsync(guild.getId()).thenAccept(members -> {
             if (members == null || members.isEmpty()) {
-                // Exibir informação de sem membros
+                // Mostra informação de sem membros
                 ItemStack noMembers = createItem(
                     Material.BARRIER,
                     ColorUtils.colorize("&cSem membros"),
@@ -151,29 +152,29 @@ public class MemberManagementGUI implements GUI {
                 return;
             }
             
-            // Calcular paginação
+            // Calcula paginação
             int totalPages = (members.size() - 1) / MEMBERS_PER_PAGE;
             if (currentPage > totalPages) {
                 currentPage = totalPages;
             }
             
-            // Configurar botões de paginação
+            // Configura botões de paginação
             setupPaginationButtons(inventory, totalPages);
             
-            // Exibir membros da página atual
+            // Mostra membros da página atual
             int startIndex = currentPage * MEMBERS_PER_PAGE;
             int endIndex = Math.min(startIndex + MEMBERS_PER_PAGE, members.size());
             
-            int slotIndex = 10; // Começa na linha 2, coluna 2
+            int slotIndex = 10; // Começa da linha 2, coluna 2
             for (int i = startIndex; i < endIndex; i++) {
                 GuildMember member = members.get(i);
-                if (slotIndex >= 44) break; // Evitar ultrapassar área de exibição
+                if (slotIndex >= 44) break; // Evita exceder área de exibição
                 
                 ItemStack memberItem = createMemberItem(member);
                 inventory.setItem(slotIndex, memberItem);
                 
                 slotIndex++;
-                if (slotIndex % 9 == 8) { // Pular borda
+                if (slotIndex % 9 == 8) { // Pula borda
                     slotIndex += 2;
                 }
             }
@@ -181,7 +182,7 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Configurar botões de paginação
+     * Configura botões de paginação
      */
     private void setupPaginationButtons(Inventory inventory, int totalPages) {
         // Botão de página anterior
@@ -206,7 +207,7 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Criar item de membro
+     * Cria item de membro
      */
     private ItemStack createMemberItem(GuildMember member) {
         Material material;
@@ -245,7 +246,7 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Obter descrição de permissões do cargo
+     * Obtém descrição de permissões do cargo
      */
     private String getRolePermissions(GuildMember.Role role) {
         switch (role) {
@@ -259,28 +260,28 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Verificar se é botão de função
+     * Verifica se é botão de função
      */
     private boolean isFunctionButton(int slot) {
         return slot == 45 || slot == 47 || slot == 49 || slot == 51 || slot == 53;
     }
     
     /**
-     * Verificar se é botão de paginação
+     * Verifica se é botão de paginação
      */
     private boolean isPaginationButton(int slot) {
         return slot == 18 || slot == 26;
     }
     
     /**
-     * Verificar se é slot de membro
+     * Verifica se é slot de membro
      */
     private boolean isMemberSlot(int slot) {
         return slot >= 10 && slot <= 44 && slot % 9 != 0 && slot % 9 != 8;
     }
     
     /**
-     * Processar clique em botão de função
+     * Processa clique em botão de função
      */
     private void handleFunctionButton(Player player, int slot) {
         switch (slot) {
@@ -303,7 +304,7 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Processar clique em botão de paginação
+     * Processa clique em botão de paginação
      */
     private void handlePaginationButton(Player player, int slot) {
         if (slot == 18) { // Página anterior
@@ -318,12 +319,12 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Processar clique no membro
+     * Processa clique em membro
      */
     private void handleMemberClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
-        // Obter o membro clicado
+        // Obtém membro clicado
         int memberIndex = (currentPage * MEMBERS_PER_PAGE) + (slot - 10);
-        if (memberIndex % 9 == 0 || memberIndex % 9 == 8) return; // Pular bordas
+        if (memberIndex % 9 == 0 || memberIndex % 9 == 8) return; // Pula borda
         
         plugin.getGuildService().getGuildMembersAsync(guild.getId()).thenAccept(members -> {
             if (members != null && memberIndex < members.size()) {
@@ -344,10 +345,10 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Mostrar detalhes do membro
+     * Mostra detalhes do membro
      */
     private void showMemberDetails(Player player, GuildMember member) {
-        // Abrir GUI de detalhes do membro
+        // Abre GUI de detalhes do membro
         plugin.getGuiManager().openGUI(player, new MemberDetailsGUI(plugin, guild, member, player));
     }
     
@@ -355,7 +356,7 @@ public class MemberManagementGUI implements GUI {
      * Expulsar membro diretamente
      */
     private void handleKickMemberDirect(Player player, GuildMember member) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(executor -> {
             if (executor == null || !executor.getRole().canKick()) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
@@ -381,7 +382,7 @@ public class MemberManagementGUI implements GUI {
      * Promover/Rebaixar membro
      */
     private void handlePromoteDemoteMember(Player player, GuildMember member) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(executor -> {
             if (executor == null || executor.getRole() != GuildMember.Role.LEADER) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta ação");
@@ -389,7 +390,7 @@ public class MemberManagementGUI implements GUI {
                 return;
             }
             
-            // Não pode operar o líder
+            // Não pode modificar o líder
             if (member.getRole() == GuildMember.Role.LEADER) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.cannot-modify-leader", "&cNão é possível modificar o cargo do líder da guilda");
                 player.sendMessage(ColorUtils.colorize(message));
@@ -411,10 +412,10 @@ public class MemberManagementGUI implements GUI {
     }
     
     /**
-     * Processar convite de membro
+     * Processa convite de membro
      */
     private void handleInviteMember(Player player) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
             if (member == null || !member.getRole().canInvite()) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
@@ -422,17 +423,17 @@ public class MemberManagementGUI implements GUI {
                 return;
             }
             
-            // Abrir GUI de convidar membro
+            // Abre GUI de convite de membro
             InviteMemberGUI inviteMemberGUI = new InviteMemberGUI(plugin, guild);
             plugin.getGuiManager().openGUI(player, inviteMemberGUI);
         });
     }
     
     /**
-     * Processar expulsão de membro
+     * Processa expulsão de membro
      */
     private void handleKickMember(Player player) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
             if (member == null || !member.getRole().canKick()) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
@@ -440,17 +441,17 @@ public class MemberManagementGUI implements GUI {
                 return;
             }
             
-            // Abrir GUI de expulsar membro
+            // Abre GUI de expulsão de membro
             KickMemberGUI kickMemberGUI = new KickMemberGUI(plugin, guild);
             plugin.getGuiManager().openGUI(player, kickMemberGUI);
         });
     }
     
     /**
-     * Processar promoção de membro
+     * Processa promoção de membro
      */
     private void handlePromoteMember(Player player) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
             if (member == null || member.getRole() != GuildMember.Role.LEADER) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta ação");
@@ -458,17 +459,17 @@ public class MemberManagementGUI implements GUI {
                 return;
             }
             
-            // Abrir GUI de promover membro
+            // Abre GUI de promoção de membro
             PromoteMemberGUI promoteMemberGUI = new PromoteMemberGUI(plugin, guild);
             plugin.getGuiManager().openGUI(player, promoteMemberGUI);
         });
     }
     
     /**
-     * Processar rebaixamento de membro
+     * Processa rebaixamento de membro
      */
     private void handleDemoteMember(Player player) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
             if (member == null || member.getRole() != GuildMember.Role.LEADER) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta ação");
@@ -476,21 +477,21 @@ public class MemberManagementGUI implements GUI {
                 return;
             }
             
-            // Abrir GUI de rebaixar membro
+            // Abre GUI de rebaixamento de membro
             DemoteMemberGUI demoteMemberGUI = new DemoteMemberGUI(plugin, guild);
             plugin.getGuiManager().openGUI(player, demoteMemberGUI);
         });
     }
     
     /**
-     * Atualizar inventário
+     * Atualiza inventário
      */
     private void refreshInventory(Player player) {
         plugin.getGuiManager().refreshGUI(player);
     }
     
     /**
-     * Criar item
+     * Cria item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);

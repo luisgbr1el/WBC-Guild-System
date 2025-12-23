@@ -1,24 +1,22 @@
 package com.guild.commands;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
+import com.guild.GuildPlugin;
+import com.guild.core.utils.ColorUtils;
+import com.guild.gui.MainGuildGUI;
+import com.guild.models.Guild;
+import com.guild.models.GuildMember;
+import com.guild.models.GuildRelation;
+import com.guild.services.GuildService;
+import com.guild.core.utils.CompatibleScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-
-import com.guild.GuildPlugin;
-import com.guild.core.utils.ColorUtils;
-import com.guild.core.utils.CompatibleScheduler;
-import com.guild.gui.MainGuildGUI;
-import com.guild.models.Guild;
-import com.guild.models.GuildMember;
-import com.guild.models.GuildRelation;
-import com.guild.services.GuildService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 public class GuildCommand implements CommandExecutor, TabCompleter {
     private final GuildPlugin plugin;
     public GuildCommand(GuildPlugin plugin) {
@@ -958,7 +956,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     }
     private void handlePlaceholder(Player player, String[] args) {
         if (!player.hasPermission("guild.admin")) {
-            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("general.no-permission", "&cVocê não tem permissão para executar esta ação!")));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("general.no-permission", "&cVocê não tem permissão para realizar esta operação!")));
             return;
         }
         if (args.length < 2) {

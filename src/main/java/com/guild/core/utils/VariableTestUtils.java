@@ -1,11 +1,10 @@
 package com.guild.core.utils;
 
-import java.util.List;
-
-import org.bukkit.entity.Player;
-
 import com.guild.GuildPlugin;
 import com.guild.models.Guild;
+import org.bukkit.entity.Player;
+
+import java.util.List;
 
 /**
  * Utilitários de teste de variáveis - Usado para verificar a substituição de variáveis GUI

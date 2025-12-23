@@ -1,7 +1,10 @@
 package com.guild.gui;
 
-import java.util.Arrays;
-
+import com.guild.GuildPlugin;
+import com.guild.core.gui.GUI;
+import com.guild.core.gui.GUIManager;
+import com.guild.core.utils.ColorUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -9,9 +12,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.guild.GuildPlugin;
-import com.guild.core.gui.GUI;
-import com.guild.core.utils.ColorUtils;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+
 import com.guild.core.utils.CompatibleScheduler;
 
 /**
@@ -94,11 +97,21 @@ public class MainGuildGUI implements GUI {
         );
         inventory.setItem(33, guildRelations);
         
+        // Status da Guilda
+        ItemStack guildStatus = createItem(
+            Material.BEACON,
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-status.name", "&eStatus da Guilda")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-status.lore.1", "&7Ver status da guilda")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-status.lore.2", "&7Nível, membros, etc."))
+        );
+        inventory.setItem(32, guildStatus);
+        
         // Criar Guilda
         ItemStack createGuild = createItem(
             Material.EMERALD_BLOCK,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.create-guild.name", "&aCriar Guilda")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.create-guild.lore.1", "&7Criar uma nova guilda"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.create-guild.lore.1", "&7Criar uma nova guilda")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.create-guild.lore.2", "&7Custa moedas"))
         );
         inventory.setItem(4, createGuild);
     }
@@ -147,7 +160,7 @@ public class MainGuildGUI implements GUI {
                     return;
                 }
                 
-                // Abrir GUI de informações da guilda
+                // Abre GUI de informações da guilda
                 GuildInfoGUI guildInfoGUI = new GuildInfoGUI(plugin, player, guild);
                 plugin.getGuiManager().openGUI(player, guildInfoGUI);
             });
@@ -282,6 +295,27 @@ public class MainGuildGUI implements GUI {
             });
         });
     }
+    
+    /**
+     * Abrir GUI de Status da Guilda
+     */
+    private void openGuildStatusGUI(Player player) {
+        // Verificar se o jogador tem guilda
+        plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
+            // Executar na thread principal
+            CompatibleScheduler.runTask(plugin, () -> {
+                if (guild == null) {
+                    String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
+                    player.sendMessage(ColorUtils.colorize(message));
+                    return;
+                }
+                
+                // Abrir GUI de detalhes
+                GuildDetailGUI guildDetailGUI = new GuildDetailGUI(plugin, guild, player);
+                plugin.getGuiManager().openGUI(player, guildDetailGUI);
+            });
+        });
+    }
 
     /**
      * Abre GUI de criação de guilda
@@ -305,7 +339,7 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Preencher borda
+     * Preenche a borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -320,7 +354,7 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Criar item
+     * Cria item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
