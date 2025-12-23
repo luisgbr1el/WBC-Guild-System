@@ -168,7 +168,6 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(ColorUtils.colorize("&eTag: &f" + (guild.getTag() != null ? guild.getTag() : "Nenhum")));
             sender.sendMessage(ColorUtils.colorize("&eLíder: &f" + guild.getLeaderName()));
             sender.sendMessage(ColorUtils.colorize("&eNível: &f" + guild.getLevel()));
-            sender.sendMessage(ColorUtils.colorize("&eSaldo: &f" + guild.getBalance()));
             sender.sendMessage(ColorUtils.colorize("&eStatus: &f" + (guild.isFrozen() ? "Congelado" : "Normal")));
             plugin.getGuildService().getGuildMemberCountAsync(guild.getId()).thenAccept(count -> {
                 sender.sendMessage(ColorUtils.colorize("&eMembros: &f" + count + "/" + guild.getMaxMembers()));

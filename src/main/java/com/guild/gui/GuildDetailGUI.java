@@ -187,9 +187,6 @@ public class GuildDetailGUI implements GUI {
         } else if (slot == 49 && player.hasPermission("guild.admin")) {
             // Excluir guilda
             deleteGuild(player);
-        } else if (slot == 51 && player.hasPermission("guild.admin")) {
-            // Gerenciamento de fundos
-            openEconomyManagement(player);
         }
     }
     
@@ -213,11 +210,6 @@ public class GuildDetailGUI implements GUI {
         player.sendMessage(ColorUtils.colorize("&cTem certeza que deseja excluir a guilda " + guild.getName() + "?"));
         player.sendMessage(ColorUtils.colorize("&cDigite &f/guildadmin delete " + guild.getName() + " confirm &cpara confirmar exclusão"));
         player.closeInventory();
-    }
-    
-    private void openEconomyManagement(Player player) {
-        // Abrir GUI de gerenciamento de fundos
-        plugin.getGuiManager().openGUI(player, new EconomyManagementGUI(plugin, player));
     }
     
     private String formatTime(java.time.LocalDateTime dateTime) {
