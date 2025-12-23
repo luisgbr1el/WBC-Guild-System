@@ -1,12 +1,12 @@
 package com.guild.core.utils;
 
 /**
- * 测试工具类
+ * Utilitários de teste
  */
 public class TestUtils {
     
     /**
-     * 测试服务器兼容性
+     * Testa a compatibilidade do servidor
      */
     public static void testCompatibility(java.util.logging.Logger logger) {
         if (logger == null) {
@@ -23,7 +23,7 @@ public class TestUtils {
     }
     
     /**
-     * 测试调度器兼容性
+     * Testa a compatibilidade do agendador
      */
     public static void testSchedulerCompatibility(java.util.logging.Logger logger) {
         if (logger == null) {

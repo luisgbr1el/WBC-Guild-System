@@ -25,7 +25,7 @@ public class GuildLogsGUI implements GUI {
     private final Guild guild;
     private final Player player;
     private final int page;
-    private final int itemsPerPage = 28; // 2-8列，2-5行
+    private final int itemsPerPage = 28; // Colunas 2-8, Linhas 2-5
     private List<GuildLog> logs;
     private int totalLogs;
     
@@ -81,7 +81,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 异步加载日志数据
+     * Carregar dados de log assincronamente
      */
     private CompletableFuture<Boolean> loadLogsAsync() {
         return CompletableFuture.supplyAsync(() -> {
@@ -118,7 +118,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 设置日志物品
+     * Configurar itens de log
      */
     private void setupLogItems(Inventory inventory) {
         plugin.getLogger().info("Configurando itens de log, tamanho dos logs: " + (logs != null ? logs.size() : "null"));
@@ -155,7 +155,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 创建日志物品
+     * Criar item de log
      */
     private ItemStack createLogItem(GuildLog log) {
         Material material = getLogMaterial(log.getLogType());
@@ -174,7 +174,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 根据日志类型获取物品材质
+     * Obter material do item com base no tipo de log
      */
     private Material getLogMaterial(GuildLog.LogType logType) {
         switch (logType) {
@@ -220,7 +220,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 获取日志物品的槽位 - 修复后的计算逻辑
+     * Obter slot do item de log - Lógica de cálculo corrigida
      */
     private int getLogSlot(int index) {
         int row = index / 7; // 7 colunas
@@ -229,7 +229,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 设置基本的导航按钮（不依赖日志数据）
+     * Configurar botões de navegação básicos (não dependem de dados de log)
      */
     private void setupBasicNavigationButtons(Inventory inventory) {
         // Botão de voltar - Movido para o slot 49, consistente com outras GUIs
@@ -242,7 +242,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 设置完整的导航按钮（依赖日志数据）
+     * Configurar botões de navegação completos (dependem de dados de log)
      */
     private void setupFullNavigationButtons(Inventory inventory) {
         // Botões de paginação
@@ -338,7 +338,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 处理日志点击
+     * Processar clique no log
      */
     private void handleLogClick(Player player, GuildLog log) {
         // Exibir detalhes do log
@@ -367,7 +367,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 填充边框
+     * Preencher borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -382,7 +382,7 @@ public class GuildLogsGUI implements GUI {
     }
     
     /**
-     * 创建物品
+     * Criar item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);

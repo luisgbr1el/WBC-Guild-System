@@ -16,7 +16,7 @@ import com.guild.models.Guild;
 import com.guild.models.GuildMember;
 
 /**
- * 工会设置GUI
+ * GUI de Configurações da Guilda
  */
 public class GuildSettingsGUI implements GUI {
     
@@ -41,47 +41,50 @@ public class GuildSettingsGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preenche a borda
         fillBorder(inventory);
         
-        // 添加设置按钮
+        // Adiciona botões de configuração
         setupSettingsButtons(inventory);
         
-        // 添加功能按钮
+        // Mostra informações de configuração atuais
+        displayCurrentSettings(inventory);
+        
+        // Adiciona botões de função
         setupFunctionButtons(inventory);
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         switch (slot) {
-            case 11: // Modificar nome
+            case 10: // Alterar nome
                 handleChangeName(player);
                 break;
-            case 12: // Modificar descrição
+            case 11: // Alterar descrição
                 handleChangeDescription(player);
                 break;
-            case 13: // Modificar tag
+            case 12: // Alterar tag
                 handleChangeTag(player);
                 break;
-            case 14: // Configurar permissões
+            case 16: // Configurações de permissão
                 handlePermissions(player);
                 break;
-            case 19: // Convidar membro
+            case 20: // Convidar membro
                 handleInviteMember(player);
                 break;
-            case 21: // Expulsar membro
+            case 22: // Expulsar membro
                 handleKickMember(player);
                 break;
-            case 23: // Promover membro
+            case 24: // Promover membro
                 handlePromoteMember(player);
                 break;
-            case 25: // Rebaixar membro
+            case 26: // Rebaixar membro
                 handleDemoteMember(player);
                 break;
-            case 30: // Gerenciar solicitações
+            case 30: // Processar solicitações
                 handleApplications(player);
                 break;
-            case 31: // Gerenciar relações
+            case 31: // Gerenciar relações da guilda
                 handleRelations(player);
                 break;
             case 32: // Logs da guilda
@@ -90,7 +93,7 @@ public class GuildSettingsGUI implements GUI {
             case 34: // Sair da guilda
                 handleLeaveGuild(player);
                 break;
-            case 28: // Excluir guilda
+            case 36: // Excluir guilda
                 handleDeleteGuild(player);
                 break;
             case 49: // Voltar
@@ -100,7 +103,7 @@ public class GuildSettingsGUI implements GUI {
     }
     
     /**
-     * 填充边框
+     * Preenche a borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -115,10 +118,10 @@ public class GuildSettingsGUI implements GUI {
     }
     
     /**
-     * 设置设置按钮
+     * Configura botões de configuração
      */
     private void setupSettingsButtons(Inventory inventory) {
-        // 修改名称按钮
+        // Botão de alterar nome
         ItemStack changeName = createItem(
             Material.NAME_TAG,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-name.name", "&eAlterar Nome")),
@@ -126,7 +129,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(11, changeName);
         
-        // 修改描述按钮
+        // Botão de alterar descrição
         ItemStack changeDescription = createItem(
             Material.BOOK,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-description.name", "&eAlterar Descrição")),
@@ -134,7 +137,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(12, changeDescription);
         
-        // 修改标签按钮
+        // Botão de alterar tag
         ItemStack changeTag = createItem(
             Material.OAK_SIGN,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-tag.name", "&eAlterar Tag")),
@@ -142,7 +145,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(13, changeTag);
         
-        // 权限设置按钮
+        // Botão de configurações de permissão
         ItemStack permissions = createItem(
             Material.SHIELD,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.permissions.name", "&eConfigurar Permissões")),
@@ -152,10 +155,10 @@ public class GuildSettingsGUI implements GUI {
     }
     
     /**
-     * 设置功能按钮
+     * Configura botões de função
      */
     private void setupFunctionButtons(Inventory inventory) {
-        // 邀请成员按钮
+        // Botão de convidar membro
         ItemStack inviteMember = createItem(
             Material.EMERALD_BLOCK,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.invite-member", "&aConvidar Membro")),
@@ -163,7 +166,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(19, inviteMember);
         
-        // 踢出成员按钮
+        // Botão de expulsar membro
         ItemStack kickMember = createItem(
             Material.REDSTONE,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.kick-member", "&cExpulsar Membro")),
@@ -171,7 +174,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(21, kickMember);
         
-        // 提升成员按钮
+        // Botão de promover membro
         ItemStack promoteMember = createItem(
             Material.GOLD_INGOT,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.promote-member", "&6Promover Membro")),
@@ -179,7 +182,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(23, promoteMember);
         
-        // 降级成员按钮
+        // Botão de rebaixar membro
         ItemStack demoteMember = createItem(
             Material.IRON_INGOT,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.demote-member", "&7Rebaixar Membro")),
@@ -187,7 +190,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(25, demoteMember);
         
-        // 处理申请按钮
+        // Botão de processar solicitações
         ItemStack applications = createItem(
             Material.PAPER,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.application-management", "&eGerenciar Solicitações")),
@@ -195,7 +198,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(30, applications);
         
-        // 工会关系管理按钮
+        // Botão de gerenciar relações da guilda
         ItemStack relations = createItem(
             Material.RED_WOOL,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-relations-management.name", "&eGerenciar Relações")),
@@ -204,7 +207,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(31, relations);
         
-        // 工会日志按钮
+        // Botão de logs da guilda
         ItemStack guildLogs = createItem(
             Material.BOOK,
             ColorUtils.colorize("&6Logs da Guilda"),
@@ -213,7 +216,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(32, guildLogs);
         
-        // 离开工会按钮
+        // Botão de sair da guilda
         ItemStack leaveGuild = createItem(
             Material.BARRIER,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leave-guild", "&cSair da Guilda")),
@@ -221,7 +224,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(34, leaveGuild);
         
-        // 删除工会按钮
+        // Botão de excluir guilda
         ItemStack deleteGuild = createItem(
             Material.TNT,
             ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.delete-guild", "&4Excluir Guilda")),
@@ -230,7 +233,7 @@ public class GuildSettingsGUI implements GUI {
         );
         inventory.setItem(28, deleteGuild);
         
-        // 返回按钮
+        // Botão de voltar
         ItemStack back = createItem(
             Material.ARROW,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.back.name", "&7Voltar")),
@@ -239,13 +242,50 @@ public class GuildSettingsGUI implements GUI {
         inventory.setItem(49, back);
     }
     
-
+    /**
+     * Mostra informações de configuração atuais
+     */
+    private void displayCurrentSettings(Inventory inventory) {
+        // Nome atual
+        ItemStack currentName = createItem(
+            Material.NAME_TAG,
+            ColorUtils.colorize("&eNome Atual"),
+            ColorUtils.colorize("&7" + (guild.getName() != null ? guild.getName() : "Sem Nome"))
+        );
+        inventory.setItem(10, currentName);
+        
+        // Descrição atual
+        ItemStack currentDescription = createItem(
+            Material.BOOK,
+            ColorUtils.colorize("&eDescrição Atual"),
+            ColorUtils.colorize("&7" + (guild.getDescription() != null ? guild.getDescription() : "Sem Descrição"))
+        );
+        inventory.setItem(11, currentDescription);
+        
+        // Tag atual
+        ItemStack currentTag = createItem(
+            Material.OAK_SIGN,
+            ColorUtils.colorize("&eTag Atual"),
+            ColorUtils.colorize("&7" + (guild.getTag() != null ? "[" + guild.getTag() + "]" : "Sem Tag"))
+        );
+        inventory.setItem(13, currentTag);
+        
+        // Configurações de permissão atuais
+        ItemStack currentPermissions = createItem(
+            Material.SHIELD,
+            ColorUtils.colorize("&eConfigurações de Permissão Atuais"),
+            ColorUtils.colorize("&7Líder: Todas as permissões"),
+            ColorUtils.colorize("&7Oficial: Convidar, Expulsar"),
+            ColorUtils.colorize("&7Membro: Permissões básicas")
+        );
+        inventory.setItem(17, currentPermissions);
+    }
     
     /**
-     * 处理修改名称
+     * Processa alteração de nome
      */
     private void handleChangeName(Player player) {
-        // 检查权限（只有会长可以修改名称）
+        // Verifica permissão (apenas o líder pode alterar o nome)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -253,15 +293,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开名称输入GUI
+        // Abre GUI de entrada de nome
         plugin.getGuiManager().openGUI(player, new GuildNameInputGUI(plugin, guild, player));
     }
     
     /**
-     * 处理修改描述
+     * Processa alteração de descrição
      */
     private void handleChangeDescription(Player player) {
-        // 检查权限（只有会长可以修改描述）
+        // Verifica permissão (apenas o líder pode alterar a descrição)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -269,15 +309,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开描述输入GUI
+        // Abre GUI de entrada de descrição
         plugin.getGuiManager().openGUI(player, new GuildDescriptionInputGUI(plugin, guild));
     }
     
     /**
-     * 处理修改标签
+     * Processa alteração de tag
      */
     private void handleChangeTag(Player player) {
-        // 检查权限（只有会长可以修改标签）
+        // Verifica permissão (apenas o líder pode alterar a tag)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -285,15 +325,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开标签输入GUI
+        // Abre GUI de entrada de tag
         plugin.getGuiManager().openGUI(player, new GuildTagInputGUI(plugin, guild));
     }
     
     /**
-     * 处理权限设置
+     * Processa configurações de permissão
      */
     private void handlePermissions(Player player) {
-        // 检查权限（只有会长可以管理权限）
+        // Verifica permissão (apenas o líder pode gerenciar permissões)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -301,15 +341,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开权限设置GUI
+        // Abre GUI de configurações de permissão
         plugin.getGuiManager().openGUI(player, new GuildPermissionsGUI(plugin, guild));
     }
     
     /**
-     * 处理邀请成员
+     * Processa convite de membro
      */
     private void handleInviteMember(Player player) {
-        // 检查权限（官员或会长可以邀请成员）
+        // Verifica permissão (oficial ou líder pode convidar membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior");
@@ -317,15 +357,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开邀请成员GUI
+        // Abre GUI de convite de membro
         plugin.getGuiManager().openGUI(player, new InviteMemberGUI(plugin, guild));
     }
     
     /**
-     * 处理踢出成员
+     * Processa expulsão de membro
      */
     private void handleKickMember(Player player) {
-        // 检查权限（官员或会长可以踢出成员）
+        // Verifica permissão (oficial ou líder pode expulsar membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior");
@@ -333,15 +373,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开踢出成员GUI
+        // Abre GUI de expulsão de membro
         plugin.getGuiManager().openGUI(player, new KickMemberGUI(plugin, guild));
     }
     
     /**
-     * 处理提升成员
+     * Processa promoção de membro
      */
     private void handlePromoteMember(Player player) {
-        // 检查权限（只有会长可以提升成员）
+        // Verifica permissão (apenas o líder pode promover membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -349,15 +389,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开提升成员GUI
+        // Abre GUI de promoção de membro
         plugin.getGuiManager().openGUI(player, new PromoteMemberGUI(plugin, guild));
     }
     
     /**
-     * 处理降级成员
+     * Processa rebaixamento de membro
      */
     private void handleDemoteMember(Player player) {
-        // 检查权限（只有会长可以降级成员）
+        // Verifica permissão (apenas o líder pode rebaixar membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -365,15 +405,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开降级成员GUI
+        // Abre GUI de rebaixamento de membro
         plugin.getGuiManager().openGUI(player, new DemoteMemberGUI(plugin, guild));
     }
     
     /**
-     * 处理申请管理
+     * Processa gerenciamento de solicitações
      */
     private void handleApplications(Player player) {
-        // 检查权限（官员或会长可以处理申请）
+        // Verifica permissão (oficial ou líder pode processar solicitações)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior");
@@ -381,15 +421,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开申请管理GUI
+        // Abre GUI de gerenciamento de solicitações
         plugin.getGuiManager().openGUI(player, new ApplicationManagementGUI(plugin, guild));
     }
     
     /**
-     * 处理工会关系管理
+     * Processa gerenciamento de relações da guilda
      */
     private void handleRelations(Player player) {
-        // 检查权限（只有会长可以管理关系）
+        // Verifica permissão (apenas o líder pode gerenciar relações)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("relation.only-leader", "&cApenas o líder da guilda pode gerenciar relações!");
@@ -397,15 +437,15 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开工会关系管理GUI
+        // Abre GUI de gerenciamento de relações da guilda
         plugin.getGuiManager().openGUI(player, new GuildRelationsGUI(plugin, guild, player));
     }
     
     /**
-     * 处理工会日志查看
+     * Processa visualização de logs da guilda
      */
     private void handleGuildLogs(Player player) {
-        // 检查权限（工会成员可以查看日志）
+        // Verifica permissão (membros da guilda podem ver logs)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cSem permissão");
@@ -413,23 +453,23 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开工会日志GUI
+        // Abre GUI de logs da guilda
         plugin.getGuiManager().openGUI(player, new GuildLogsGUI(plugin, guild, player));
     }
     
     /**
-     * 处理离开工会
+     * Processa saída da guilda
      */
     private void handleLeaveGuild(Player player) {
-        // 打开确认离开GUI
+        // Abre GUI de confirmação de saída
         plugin.getGuiManager().openGUI(player, new ConfirmLeaveGuildGUI(plugin, guild));
     }
     
     /**
-     * 处理删除工会
+     * Processa exclusão da guilda
      */
     private void handleDeleteGuild(Player player) {
-        // 检查权限（只有会长可以删除工会）
+        // Verifica permissão (apenas o líder pode excluir a guilda)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
@@ -437,14 +477,14 @@ public class GuildSettingsGUI implements GUI {
             return;
         }
         
-        // 打开确认删除GUI
+        // Abre GUI de confirmação de exclusão
         plugin.getGuiManager().openGUI(player, new ConfirmDeleteGuildGUI(plugin, guild));
     }
     
 
     
     /**
-     * 创建物品
+     * Cria item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);

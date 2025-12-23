@@ -657,7 +657,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     }
     private void handleDecline(Player player, String[] args) {
         if (args.length < 2) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("invite.decline-command", "&eDigite &c/guild decline {inviter} &epara recusar o convite");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("invite.decline-command", "&eDigite &c/guild decline {inviter} &e para recusar o convite");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }

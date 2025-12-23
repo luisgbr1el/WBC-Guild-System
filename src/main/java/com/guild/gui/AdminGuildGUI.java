@@ -104,7 +104,7 @@ public class AdminGuildGUI implements GUI {
             case 31: // Configurações do sistema
                 openSystemSettings(player);
                 break;
-            case 49: // 返回
+            case 49:
                 plugin.getGuiManager().openGUI(player, new MainGuildGUI(plugin));
                 break;
         }

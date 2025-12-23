@@ -14,10 +14,6 @@ import com.guild.services.GuildService;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
-/**
- * Guild插件 PlaceholderAPI 扩展
- * 提供完整的工会数据变量支持
- */
 public class GuildPlaceholderExpansion extends PlaceholderExpansion {
     
     private final GuildPlugin plugin;
@@ -61,7 +57,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
         
         try {
             switch (args[0].toLowerCase()) {
-                // 基础工会信息
                 case "name":
                     return getGuildName(player);
                 case "tag":
@@ -79,7 +74,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
                 case "frozen":
                     return getGuildFrozenStatus(player);
                 
-                // 玩家在工会中的信息
                 case "role":
                     return getPlayerRoleColored(player);
                 case "roleraw":
@@ -93,7 +87,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
                 case "joined":
                     return getPlayerJoinedTime(player);
                 
-                // 工会状态检查
                 case "hasguild":
                     return hasGuild(player);
                 case "isleader":
@@ -103,7 +96,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
                 case "ismember":
                     return isMember(player);
                 
-                // 工会权限
                 case "caninvite":
                     return canInvite(player);
                 case "cankick":
@@ -121,8 +113,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
             return "";
         }
     }
-    
-    // ==================== 基础工会信息 ====================
     
     private String getGuildName(Player player) {
         try {
@@ -200,8 +190,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
         }
     }
     
-    // ==================== 玩家在工会中的信息 ====================
-    
     private String getPlayerRoleRaw(Player player) {
         try {
             GuildMember member = guildService.getGuildMember(player.getUniqueId());
@@ -252,8 +240,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
     }
     
 
-    // ==================== 工会状态检查 ====================
-    
     private String hasGuild(Player player) {
         try {
             Guild guild = guildService.getPlayerGuild(player.getUniqueId());
@@ -289,8 +275,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
             return "Não";
         }
     }
-    
-    // ==================== 工会权限 ====================
     
     private String canInvite(Player player) {
         try {

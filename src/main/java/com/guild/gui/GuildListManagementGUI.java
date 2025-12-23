@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 工会列表管理GUI
+ * GUI de Gerenciamento da Lista de Guildas
  */
 public class GuildListManagementGUI implements GUI {
     
     private final GuildPlugin plugin;
     private final Player player;
     private int currentPage = 0;
-    private final int itemsPerPage = 28; // 7列 × 4行
+    private final int itemsPerPage = 28; // 7 colunas x 4 linhas
     private List<Guild> allGuilds = new ArrayList<>();
     
     public GuildListManagementGUI(GuildPlugin plugin, Player player) {
@@ -46,16 +46,16 @@ public class GuildListManagementGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 设置工会列表
+        // Configurar lista de guildas
         setupGuildList(inventory);
         
-        // 设置分页按钮
+        // Configurar botões de paginação
         setupPaginationButtons(inventory);
         
-        // 设置操作按钮
+        // Configurar botões de ação
         setupActionButtons(inventory);
     }
     
@@ -67,9 +67,9 @@ public class GuildListManagementGUI implements GUI {
             if (startIndex + i < endIndex) {
                 Guild guild = allGuilds.get(startIndex + i);
                 
-                // 计算在2-8列，2-5行的位置 (slots 10-43)
-                int row = (i / 7) + 1; // 2-5行
-                int col = (i % 7) + 1; // 2-8列
+                // Calcular posição nas colunas 2-8, linhas 2-5 (slots 10-43)
+                int row = (i / 7) + 1; // Linhas 2-5
+                int col = (i % 7) + 1; // Colunas 2-8
                 int slot = row * 9 + col;
                 
                 inventory.setItem(slot, createGuildItem(guild));
@@ -102,16 +102,16 @@ public class GuildListManagementGUI implements GUI {
     private void setupPaginationButtons(Inventory inventory) {
         int totalPages = (int) Math.ceil((double) allGuilds.size() / itemsPerPage);
         
-        // 上一页按钮
+        // Botão de página anterior
         if (currentPage > 0) {
             inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&aPágina Anterior"), 
                 ColorUtils.colorize("&7Pág " + (currentPage) + "")));
         }
         
-        // 页码信息
+        // Informação da página
         inventory.setItem(49, createItem(Material.PAPER, ColorUtils.colorize("&ePág " + (currentPage + 1) + " de " + totalPages + "")));
         
-        // 下一页按钮
+        // Botão de próxima página
         if (currentPage < totalPages - 1) {
             inventory.setItem(53, createItem(Material.ARROW, ColorUtils.colorize("&aPróxima Página"), 
                 ColorUtils.colorize("&7Pág " + (currentPage + 2) + "")));
@@ -119,17 +119,17 @@ public class GuildListManagementGUI implements GUI {
     }
     
     private void setupActionButtons(Inventory inventory) {
-        // 返回按钮
+        // Botão de voltar
         inventory.setItem(46, createItem(Material.BARRIER, ColorUtils.colorize("&cVoltar")));
         
-        // 刷新按钮
+        // Botão de atualizar
         inventory.setItem(52, createItem(Material.EMERALD, ColorUtils.colorize("&aAtualizar Lista")));
     }
     
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
         
-        // 填充边框
+        // Preencher borda
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, border);
             inventory.setItem(i + 45, border);
@@ -155,21 +155,21 @@ public class GuildListManagementGUI implements GUI {
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         if (slot == 46) {
-            // 返回
+            // Voltar
             plugin.getGuiManager().openGUI(player, new AdminGuildGUI(plugin));
         } else if (slot == 52) {
-            // 刷新
+            // Atualizar
             loadGuilds();
         } else if (slot == 45 && currentPage > 0) {
-            // 上一页
+            // Página anterior
             currentPage--;
             refresh(player);
         } else if (slot == 53 && currentPage < (int) Math.ceil((double) allGuilds.size() / itemsPerPage) - 1) {
-            // 下一页
+            // Próxima página
             currentPage++;
             refresh(player);
         } else if (slot >= 10 && slot <= 43) {
-            // 工会项目 - 检查是否在2-8列，2-5行范围内
+            // Item da guilda - verificar se está no intervalo de colunas 2-8, linhas 2-5
             int row = slot / 9;
             int col = slot % 9;
             if (row >= 1 && row <= 4 && col >= 1 && col <= 7) {
@@ -185,24 +185,24 @@ public class GuildListManagementGUI implements GUI {
     
     private void handleGuildClick(Player player, Guild guild, ClickType clickType) {
         if (clickType == ClickType.LEFT) {
-            // 查看详情
+            // Ver detalhes
             openGuildDetailGUI(player, guild);
         } else if (clickType == ClickType.RIGHT) {
-            // 删除工会
+            // Excluir guilda
             deleteGuild(player, guild);
         } else if (clickType == ClickType.MIDDLE) {
-            // 冻结/解冻工会
+            // Congelar/Descongelar guilda
             toggleGuildFreeze(player, guild);
         }
     }
     
     private void openGuildDetailGUI(Player player, Guild guild) {
-        // 打开工会详情GUI
+        // Abrir GUI de detalhes da guilda
         plugin.getGuiManager().openGUI(player, new GuildDetailGUI(plugin, guild, player));
     }
     
     private void deleteGuild(Player player, Guild guild) {
-        // 确认删除
+        // Confirmar exclusão
         player.sendMessage(ColorUtils.colorize("&cTem certeza que deseja excluir a guilda " + guild.getName() + "?"));
         player.sendMessage(ColorUtils.colorize("&cDigite &f/guildadmin delete " + guild.getName() + " confirm &cpara confirmar exclusão"));
     }
@@ -213,7 +213,7 @@ public class GuildListManagementGUI implements GUI {
             if (success) {
                 String message = newStatus ? "&aGuilda " + guild.getName() + " foi congelada!" : "&aGuilda " + guild.getName() + " foi descongelada!";
                 player.sendMessage(ColorUtils.colorize(message));
-                loadGuilds(); // 刷新列表
+                loadGuilds(); // Atualizar lista
             } else {
                 player.sendMessage(ColorUtils.colorize("&cOperação falhou!"));
             }
@@ -241,7 +241,7 @@ public class GuildListManagementGUI implements GUI {
     
     @Override
     public void onClose(Player player) {
-        // 关闭时的处理
+        // Processamento ao fechar
     }
     
     @Override

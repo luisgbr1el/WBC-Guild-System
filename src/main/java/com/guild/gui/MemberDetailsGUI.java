@@ -104,7 +104,7 @@ public class MemberDetailsGUI implements GUI {
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         
         if (meta != null) {
-            // 根据角色设置不同的显示名称
+            // Define nome de exibição baseado no cargo
             String displayName;
             switch (member.getRole()) {
                 case LEADER:
@@ -219,17 +219,17 @@ public class MemberDetailsGUI implements GUI {
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), viewer.getUniqueId()).thenAccept(viewerMember -> {
             if (viewerMember == null) return;
             
-            // 不能操作自己
+            // Não pode modificar a si mesmo
             if (member.getPlayerUuid().equals(viewer.getUniqueId())) {
                 return;
             }
             
-            // 不能操作会长
+            // Não pode modificar o líder
             if (member.getRole() == GuildMember.Role.LEADER) {
                 return;
             }
             
-            // 踢出按钮（需要踢出权限）
+            // Botão de expulsar (requer permissão de expulsar)
             if (viewerMember.getRole().canKick()) {
                 ItemStack kickButton = createItem(
                     Material.REDSTONE_BLOCK,
@@ -240,10 +240,10 @@ public class MemberDetailsGUI implements GUI {
                 inventory.setItem(37, kickButton);
             }
             
-            // 提升/降级按钮（只有会长可以）
+            // Botão de promover/rebaixar (apenas líder)
             if (viewerMember.getRole() == GuildMember.Role.LEADER) {
                 if (member.getRole() == GuildMember.Role.OFFICER) {
-                    // 降级按钮
+                    // Botão de rebaixar
                     ItemStack demoteButton = createItem(
                         Material.IRON_INGOT,
                         ColorUtils.colorize("&7Rebaixar Membro"),
@@ -252,7 +252,7 @@ public class MemberDetailsGUI implements GUI {
                     );
                     inventory.setItem(39, demoteButton);
                 } else {
-                    // 提升按钮
+                    // Botão de promover
                     ItemStack promoteButton = createItem(
                         Material.GOLD_INGOT,
                         ColorUtils.colorize("&6Promover Membro"),
@@ -263,7 +263,7 @@ public class MemberDetailsGUI implements GUI {
                 }
             }
             
-            // 发送消息按钮
+            // Botão de enviar mensagem
             ItemStack messageButton = createItem(
                 Material.PAPER,
                 ColorUtils.colorize("&eEnviar Mensagem"),
@@ -393,7 +393,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * 格式化时间
+     * Formata tempo
      */
     private String formatTime(java.time.LocalDateTime dateTime) {
         if (dateTime == null) return "Desconhecido";
@@ -401,7 +401,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * 获取在工会时长
+     * Obtém tempo na guilda
      */
     private String getGuildDuration(java.time.LocalDateTime joinDateTime) {
         if (joinDateTime == null) return "Desconhecido";

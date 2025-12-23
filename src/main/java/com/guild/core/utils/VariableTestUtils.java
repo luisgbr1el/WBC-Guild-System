@@ -8,20 +8,20 @@ import com.guild.GuildPlugin;
 import com.guild.models.Guild;
 
 /**
- * 变量测试工具类 - 用于验证GUI变量替换
+ * Utilitários de teste de variáveis - Usado para verificar a substituição de variáveis GUI
  */
 public class VariableTestUtils {
     
     /**
-     * 测试GUI变量替换
-     * @param plugin 插件实例
-     * @param guild 工会对象
-     * @param player 玩家对象
+     * Testa a substituição de variáveis GUI
+     * @param plugin Instância do plugin
+     * @param guild Objeto da guilda
+     * @param player Objeto do jogador
      */
     public static void testGUIVariables(GuildPlugin plugin, Guild guild, Player player) {
         player.sendMessage("§6=== Teste de Variáveis GUI ===");
         
-        // 测试基础变量
+        // Testa variáveis básicas
         String[] testTexts = {
             "Nome da Guilda: {guild_name}",
             "Tag da Guilda: {guild_tag}",
@@ -43,7 +43,7 @@ public class VariableTestUtils {
             player.sendMessage("§eOriginal: §f" + testText);
             player.sendMessage("§aProcessado: §f" + processed);
             
-            // Verificar se há variáveis não resolvidas
+            // Verifica se há variáveis não resolvidas
             if (GUIUtils.hasUnresolvedVariables(processed)) {
                 List<String> unresolved = GUIUtils.getUnresolvedVariables(processed);
                 player.sendMessage("§cVariáveis não resolvidas: §f" + unresolved);
@@ -51,39 +51,39 @@ public class VariableTestUtils {
             player.sendMessage("");
         }
         
-        // 测试异步变量
+        // Testa variáveis assíncronas
         plugin.getGuildService().getGuildMemberCountAsync(guild.getId()).thenAccept(memberCount -> {
-            String asyncTest = "Quantidade de membros: {member_count}/{guild_max_members}";
+            String asyncTest = "Quantidade de Membros: {member_count}/{guild_max_members}";
             GUIUtils.processGUIVariablesAsync(asyncTest, guild, player, plugin).thenAccept(processed -> {
-                player.sendMessage("§6Teste assíncrono: §f" + asyncTest);
-                player.sendMessage("§aResultado assíncrono: §f" + processed);
+                player.sendMessage("§6Teste Assíncrono: §f" + asyncTest);
+                player.sendMessage("§aResultado Assíncrono: §f" + processed);
             });
         });
     }
     
     /**
-     * 测试颜色代码
-     * @param player 玩家对象
+     * Testa códigos de cores
+     * @param player Objeto do jogador
      */
     public static void testColorCodes(Player player) {
         player.sendMessage("§6=== Teste de Códigos de Cores ===");
         
         String[] colorTests = {
-            "&aTexto verde",
-            "&cTexto vermelho",
-            "&eTexto amarelo",
-            "&bTexto ciano",
-            "&dTexto rosa",
-            "&fTexto branco",
-            "&7Texto cinza",
-            "&8Texto cinza escuro",
-            "&9Texto azul",
-            "&0Texto preto",
-            "&lTexto negrito",
-            "&nTexto sublinhado",
-            "&oTexto itálico",
-            "&kCaracteres aleatórios",
-            "&rResetar formatação"
+            "&aTexto Verde",
+            "&cTexto Vermelho",
+            "&eTexto Amarelo",
+            "&bTexto Ciano",
+            "&dTexto Rosa",
+            "&fTexto Branco",
+            "&7Texto Cinza",
+            "&8Texto Cinza Escuro",
+            "&9Texto Azul",
+            "&0Texto Preto",
+            "&lTexto Negrito",
+            "&nTexto Sublinhado",
+            "&oTexto Itálico",
+            "&kCaractere Aleatório",
+            "&rResetar Formato"
         };
         
         for (String test : colorTests) {
@@ -95,12 +95,12 @@ public class VariableTestUtils {
     }
     
     /**
-     * 测试PlaceholderUtils
-     * @param guild 工会对象
-     * @param player 玩家对象
+     * Testa PlaceholderUtils
+     * @param guild Objeto da guilda
+     * @param player Objeto do jogador
      */
     public static void testPlaceholderUtils(Guild guild, Player player) {
-        player.sendMessage("§6=== Teste do PlaceholderUtils ===");
+        player.sendMessage("§6=== Teste de PlaceholderUtils ===");
         
         String testText = "Guilda: {guild_name}, Líder: {leader_name}, Nível: {guild_level}, Saldo: {guild_balance_formatted}";
         String processed = PlaceholderUtils.replaceGuildPlaceholders(testText, guild, player);
@@ -108,7 +108,7 @@ public class VariableTestUtils {
         player.sendMessage("§eOriginal: §f" + testText);
         player.sendMessage("§aProcessado: §f" + processed);
         
-        // Verificar se há variáveis não resolvidas
+        // Verifica se há variáveis não resolvidas
         if (GUIUtils.hasUnresolvedVariables(processed)) {
             List<String> unresolved = GUIUtils.getUnresolvedVariables(processed);
             player.sendMessage("§cVariáveis não resolvidas: §f" + unresolved);

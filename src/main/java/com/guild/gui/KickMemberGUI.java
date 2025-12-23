@@ -18,7 +18,7 @@ import com.guild.models.Guild;
 import com.guild.models.GuildMember;
 
 /**
- * GUI de expulsar membro
+ * GUI de Expulsar Membro
  */
 public class KickMemberGUI implements GUI {
     
@@ -30,7 +30,7 @@ public class KickMemberGUI implements GUI {
     public KickMemberGUI(GuildPlugin plugin, Guild guild) {
         this.plugin = plugin;
         this.guild = guild;
-        // Inicializar obtendo lista de membros
+        // Obtém lista de membros na inicialização
         this.members = List.of();
         loadMembers();
     }
@@ -55,20 +55,20 @@ public class KickMemberGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // Preencher borda
+        // Preenche a borda
         fillBorder(inventory);
         
-        // Exibir lista de membros
+        // Mostra lista de membros
         displayMembers(inventory);
         
-        // Adicionar botões de navegação
+        // Adiciona botões de navegação
         setupNavigationButtons(inventory);
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         if (slot >= 9 && slot < 45) {
-            // Área de cabeças de membros
+            // Área de cabeças dos membros
             int memberIndex = slot - 9 + (currentPage * 36);
             if (memberIndex < members.size()) {
                 GuildMember member = members.get(memberIndex);
@@ -94,7 +94,7 @@ public class KickMemberGUI implements GUI {
     }
     
     /**
-     * 填充边框
+     * Preenche a borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -109,7 +109,7 @@ public class KickMemberGUI implements GUI {
     }
     
     /**
-     * 显示成员列表
+     * Mostra lista de membros
      */
     private void displayMembers(Inventory inventory) {
         int startIndex = currentPage * 36;
@@ -125,10 +125,10 @@ public class KickMemberGUI implements GUI {
     }
     
     /**
-     * 设置导航按钮
+     * Configura botões de navegação
      */
     private void setupNavigationButtons(Inventory inventory) {
-        // 上一页按钮
+        // Botão de página anterior
         if (currentPage > 0) {
             ItemStack prevPage = createItem(
                 Material.ARROW,
@@ -138,7 +138,7 @@ public class KickMemberGUI implements GUI {
             inventory.setItem(45, prevPage);
         }
         
-        // 下一页按钮
+        // Botão de próxima página
         int maxPage = (members.size() - 1) / 36;
         if (currentPage < maxPage) {
             ItemStack nextPage = createItem(
@@ -149,7 +149,7 @@ public class KickMemberGUI implements GUI {
             inventory.setItem(53, nextPage);
         }
         
-        // 返回按钮
+        // Botão de voltar
         ItemStack back = createItem(
             Material.BARRIER,
             ColorUtils.colorize("&cVoltar"),
@@ -159,7 +159,7 @@ public class KickMemberGUI implements GUI {
     }
     
     /**
-     * 创建成员头像
+     * Cria cabeça do membro
      */
     private ItemStack createMemberHead(GuildMember member) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
@@ -179,24 +179,24 @@ public class KickMemberGUI implements GUI {
     }
     
     /**
-     * 处理踢出成员
+     * Processa expulsão de membro
      */
     private void handleKickMember(Player kicker, GuildMember member) {
-        // 检查权限
+        // Verifica permissão
         if (!kicker.hasPermission("guild.kick")) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cSem permissão");
             kicker.sendMessage(ColorUtils.colorize(message));
             return;
         }
         
-        // 踢出成员
+        // Expulsar membro
         plugin.getGuildService().removeGuildMemberAsync(member.getPlayerUuid(), kicker.getUniqueId()).thenAccept(success -> {
             if (success) {
                 String kickerMessage = plugin.getConfigManager().getMessagesConfig().getString("kick.success", "&aMembro &e{player} &aexpulso com sucesso!")
                     .replace("{player}", member.getPlayerName());
                 kicker.sendMessage(ColorUtils.colorize(kickerMessage));
                 
-                // 通知被踢出的玩家
+                // Notifica jogador expulso
                 Player kickedPlayer = plugin.getServer().getPlayer(member.getPlayerUuid());
                 if (kickedPlayer != null) {
                     String kickedMessage = plugin.getConfigManager().getMessagesConfig().getString("kick.kicked", "&cVocê foi expulso da guilda &e{guild}&c!")
@@ -204,7 +204,7 @@ public class KickMemberGUI implements GUI {
                     kickedPlayer.sendMessage(ColorUtils.colorize(kickedMessage));
                 }
                 
-                // 刷新GUI
+                // Atualiza GUI
                 plugin.getGuiManager().openGUI(kicker, new KickMemberGUI(plugin, guild));
             } else {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("kick.failed", "&cFalha ao expulsar membro!");
@@ -214,7 +214,7 @@ public class KickMemberGUI implements GUI {
     }
     
     /**
-     * 创建物品
+     * Cria item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);

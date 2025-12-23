@@ -37,7 +37,7 @@ public class MainGuildGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // Preencher borda
+        // Preenche a borda
         fillBorder(inventory);
         
         // Botão de informações da guilda
@@ -121,6 +121,9 @@ public class MainGuildGUI implements GUI {
             case 31: // Lista de guildas
                 openGuildListGUI(player);
                 break;
+            case 32: // Status da Guilda
+                openGuildStatusGUI(player);
+                break;
             case 33: // Relações da guilda
                 openGuildRelationsGUI(player);
                 break;
@@ -131,12 +134,12 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Abrir GUI de informações da guilda
+     * Abre GUI de informações da guilda
      */
     private void openGuildInfoGUI(Player player) {
-        // Verificar se o jogador tem guilda
+        // Verifica se o jogador tem uma guilda
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
-            // Garantir execução de operações GUI na thread principal
+            // Garante execução da GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guild == null) {
                     String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
@@ -152,12 +155,12 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Abrir GUI de gerenciamento de membros
+     * Abre GUI de gerenciamento de membros
      */
     private void openMemberManagementGUI(Player player) {
-        // Verificar se o jogador tem guilda
+        // Verifica se o jogador tem uma guilda
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
-            // Garantir execução de operações GUI na thread principal
+            // Garante execução da GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guild == null) {
                     String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
@@ -165,7 +168,7 @@ public class MainGuildGUI implements GUI {
                     return;
                 }
                 
-                // Abrir GUI de gerenciamento de membros
+                // Abre GUI de gerenciamento de membros
                 MemberManagementGUI memberManagementGUI = new MemberManagementGUI(plugin, guild);
                 plugin.getGuiManager().openGUI(player, memberManagementGUI);
             });
@@ -173,12 +176,12 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Abrir GUI de gerenciamento de inscrições
+     * Abre GUI de gerenciamento de inscrições
      */
     private void openApplicationManagementGUI(Player player) {
-        // Verificar se o jogador tem guilda
+        // Verifica se o jogador tem uma guilda
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
-            // Garantir execução de operações GUI na thread principal
+            // Garante execução da GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guild == null) {
                     String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
@@ -186,9 +189,9 @@ public class MainGuildGUI implements GUI {
                     return;
                 }
                 
-                // Verificar permissões
+                // Verifica permissão
                 plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
-                    // Garantir execução de operações GUI na thread principal
+                    // Garante execução da GUI na thread principal
                     CompatibleScheduler.runTask(plugin, () -> {
                         if (member == null || !member.getRole().canInvite()) {
                             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
@@ -196,7 +199,7 @@ public class MainGuildGUI implements GUI {
                             return;
                         }
                         
-                        // Abrir GUI de gerenciamento de inscrições
+                        // Abre GUI de gerenciamento de inscrições
                         ApplicationManagementGUI applicationManagementGUI = new ApplicationManagementGUI(plugin, guild);
                         plugin.getGuiManager().openGUI(player, applicationManagementGUI);
                     });
@@ -206,12 +209,12 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Abrir GUI de configurações da guilda
+     * Abre GUI de configurações da guilda
      */
     private void openGuildSettingsGUI(Player player) {
-        // Verificar se o jogador tem guilda
+        // Verifica se o jogador tem uma guilda
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
-            // Garantir execução de operações GUI na thread principal
+            // Garante execução da GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guild == null) {
                     String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
@@ -219,9 +222,9 @@ public class MainGuildGUI implements GUI {
                     return;
                 }
                 
-                // Verificar permissões
+                // Verifica permissão
                 plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
-                    // Garantir execução de operações GUI na thread principal
+                    // Garante execução da GUI na thread principal
                     CompatibleScheduler.runTask(plugin, () -> {
                         if (member == null || member.getRole() != com.guild.models.GuildMember.Role.LEADER) {
                             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta ação");
@@ -229,7 +232,7 @@ public class MainGuildGUI implements GUI {
                             return;
                         }
                         
-                        // Abrir GUI de configurações da guilda
+                        // Abre GUI de configurações da guilda
                         GuildSettingsGUI guildSettingsGUI = new GuildSettingsGUI(plugin, guild);
                         plugin.getGuiManager().openGUI(player, guildSettingsGUI);
                     });
@@ -239,21 +242,21 @@ public class MainGuildGUI implements GUI {
     }
     
     /**
-     * Abrir GUI de lista de guildas
+     * Abre GUI de lista de guildas
      */
     private void openGuildListGUI(Player player) {
-        // Abrir GUI de lista de guildas
+        // Abre GUI de lista de guildas
         GuildListGUI guildListGUI = new GuildListGUI(plugin);
         plugin.getGuiManager().openGUI(player, guildListGUI);
     }
     
     /**
-     * Abrir GUI de relações da guilda
+     * Abre GUI de relações da guilda
      */
     private void openGuildRelationsGUI(Player player) {
-        // Verificar se o jogador tem guilda
+        // Verifica se o jogador tem uma guilda
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
-            // Garantir execução de operações GUI na thread principal
+            // Garante execução da GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guild == null) {
                     String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
@@ -261,9 +264,9 @@ public class MainGuildGUI implements GUI {
                     return;
                 }
                 
-                // Verificar permissões
+                // Verifica permissão
                 plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(member -> {
-                    // Garantir execução de operações GUI na thread principal
+                    // Garante execução da GUI na thread principal
                     CompatibleScheduler.runTask(plugin, () -> {
                         if (member == null || member.getRole() != com.guild.models.GuildMember.Role.LEADER) {
                             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode gerenciar relações");
@@ -271,7 +274,7 @@ public class MainGuildGUI implements GUI {
                             return;
                         }
                         
-                        // Abrir GUI de relações da guilda
+                        // Abre GUI de relações da guilda
                         GuildRelationsGUI guildRelationsGUI = new GuildRelationsGUI(plugin, guild, player);
                         plugin.getGuiManager().openGUI(player, guildRelationsGUI);
                     });
@@ -281,12 +284,12 @@ public class MainGuildGUI implements GUI {
     }
 
     /**
-     * Abrir GUI de criar guilda
+     * Abre GUI de criação de guilda
      */
     private void openCreateGuildGUI(Player player) {
-        // Verificar se o jogador já tem guilda
+        // Verifica se o jogador já tem uma guilda
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
-            // Garantir execução de operações GUI na thread principal
+            // Garante execução da GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guild != null) {
                     String message = plugin.getConfigManager().getMessagesConfig().getString("create.already-in-guild", "&cVocê já está em uma guilda!");
@@ -294,7 +297,7 @@ public class MainGuildGUI implements GUI {
                     return;
                 }
                 
-                // Abrir GUI de criar guilda
+                // Abre GUI de criação de guilda
                 CreateGuildGUI createGuildGUI = new CreateGuildGUI(plugin);
                 plugin.getGuiManager().openGUI(player, createGuildGUI);
             });

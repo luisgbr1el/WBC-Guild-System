@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 工会描述输入GUI
+ * GUI de Entrada de Descrição da Guilda
  */
 public class GuildDescriptionInputGUI implements GUI {
     
@@ -41,33 +41,33 @@ public class GuildDescriptionInputGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 显示当前描述
+        // Exibir descrição atual
         displayCurrentDescription(inventory);
         
-        // 添加操作按钮
+        // Adicionar botões de ação
         setupButtons(inventory);
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         switch (slot) {
-            case 11: // 输入描述
+            case 11: // Inserir descrição
                 handleInputDescription(player);
                 break;
-            case 15: // 确认
+            case 15: // Confirmar
                 handleConfirm(player);
                 break;
-            case 13: // 取消
+            case 13: // Cancelar
                 handleCancel(player);
                 break;
         }
     }
     
     /**
-     * 填充边框
+     * Preencher borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -82,7 +82,7 @@ public class GuildDescriptionInputGUI implements GUI {
     }
     
     /**
-     * 显示当前描述
+     * Exibir descrição atual
      */
     private void displayCurrentDescription(Inventory inventory) {
         ItemStack currentDesc = createItem(
@@ -94,10 +94,10 @@ public class GuildDescriptionInputGUI implements GUI {
     }
     
     /**
-     * 设置按钮
+     * Configurar botões
      */
     private void setupButtons(Inventory inventory) {
-        // 确认按钮
+        // Botão de confirmar
         ItemStack confirm = createItem(
             Material.EMERALD_BLOCK,
             ColorUtils.colorize("&aConfirmar Modificação"),
@@ -105,7 +105,7 @@ public class GuildDescriptionInputGUI implements GUI {
         );
         inventory.setItem(15, confirm);
         
-        // 取消按钮
+        // Botão de cancelar
         ItemStack cancel = createItem(
             Material.REDSTONE_BLOCK,
             ColorUtils.colorize("&cCancelar"),
@@ -115,17 +115,17 @@ public class GuildDescriptionInputGUI implements GUI {
     }
     
     /**
-     * 处理输入描述
+     * Tratar entrada de descrição
      */
     private void handleInputDescription(Player player) {
-        // 关闭GUI
+        // Fechar GUI
         player.closeInventory();
         
-        // 发送消息提示输入
+        // Enviar mensagem solicitando entrada
         String message = plugin.getConfigManager().getMessagesConfig().getString("gui.input-description", "&aPor favor, digite a nova descrição da guilda no chat (máx 100 caracteres):");
         player.sendMessage(ColorUtils.colorize(message));
         
-        // 设置玩家为输入模式
+        // Definir jogador para modo de entrada
         plugin.getGuiManager().setInputMode(player, input -> {
             if (input.length() > 100) {
                 String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-too-long", "&cDescrição muito longa, máximo de 100 caracteres!");
@@ -133,16 +133,16 @@ public class GuildDescriptionInputGUI implements GUI {
                 return false;
             }
             
-            // 更新描述
+            // Atualizar descrição
             currentDescription = input;
             
-            // 保存到数据库
+            // Salvar no banco de dados
             plugin.getGuildService().updateGuildDescriptionAsync(guild.getId(), input).thenAccept(success -> {
                 if (success) {
                     String successMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-updated", "&aDescrição da guilda atualizada!");
                     player.sendMessage(ColorUtils.colorize(successMessage));
                     
-                    // 安全刷新GUI
+                    // Atualizar GUI com segurança
                     plugin.getGuiManager().refreshGUI(player);
                 } else {
                     String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-update-failed", "&cFalha ao atualizar descrição da guilda!");
@@ -155,23 +155,23 @@ public class GuildDescriptionInputGUI implements GUI {
     }
     
     /**
-     * 处理确认
+     * Tratar confirmação
      */
     private void handleConfirm(Player player) {
-        // 返回工会设置GUI
+        // Voltar para GUI de configurações da guilda
         plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, guild));
     }
     
     /**
-     * 处理取消
+     * Tratar cancelamento
      */
     private void handleCancel(Player player) {
-        // 返回工会设置GUI
+        // Voltar para GUI de configurações da guilda
         plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, guild));
     }
     
     /**
-     * 创建物品
+     * Criar item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
