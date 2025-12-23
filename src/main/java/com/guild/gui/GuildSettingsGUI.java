@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -24,16 +25,24 @@ public class GuildSettingsGUI implements GUI {
     
     private final GuildPlugin plugin;
     private final Guild guild;
+    private final int page;
     
     public GuildSettingsGUI(GuildPlugin plugin, Guild guild) {
+        this(plugin, guild, 1);
+    }
+
+    public GuildSettingsGUI(GuildPlugin plugin, Guild guild, int page) {
         this.plugin = plugin;
         this.guild = guild;
+        this.page = page;
     }
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.title", "&6Configurações da Guilda - {guild_name}")
-            .replace("{guild_name}", guild.getName() != null ? guild.getName() : "Guilda Desconhecida"));
+        String title = plugin.getConfigManager().getGuiConfig().getString("guild-settings.title", "&6Configurações da Guilda - Página {page}");
+        return ColorUtils.colorize(title
+            .replace("{guild_name}", guild.getName() != null ? guild.getName() : "Guilda Desconhecida")
+            .replace("{page}", String.valueOf(page)));
     }
     
     @Override
@@ -46,61 +55,125 @@ public class GuildSettingsGUI implements GUI {
         // Preenche a borda
         fillBorder(inventory);
         
-        // Adiciona botões de configuração
-        setupSettingsButtons(inventory);
+        if (page == 1) {
+            setupPage1(inventory);
+        } else if (page == 2) {
+            setupPage2(inventory);
+        }
         
-        // Mostra informações de configuração atuais
-        displayCurrentSettings(inventory);
+        setupNavigation(inventory);
+    }
+
+    private void setupPage1(Inventory inventory) {
+        // Alterar Nome
+        setItem(inventory, "change-name", 20, Material.NAME_TAG, "&eAlterar Nome");
         
-        // Adiciona botões de função
-        setupFunctionButtons(inventory);
+        // Alterar Descrição
+        setItem(inventory, "change-description", 21, Material.BOOK, "&eAlterar Descrição");
+        
+        // Alterar Tag
+        setItem(inventory, "change-tag", 22, Material.OAK_SIGN, "&eAlterar Tag");
+        
+        // Logs
+        setItem(inventory, "guild-logs", 24, Material.PAPER, "&eLogs da Guilda");
+    }
+
+    private void setupPage2(Inventory inventory) {
+        // Convidar Membro
+        setItem(inventory, "invite-member", 20, Material.EMERALD_BLOCK, "&aConvidar Membro");
+        
+        // Expulsar Membro
+        setItem(inventory, "kick-member", 21, Material.REDSTONE_BLOCK, "&cExpulsar Membro");
+        
+        // Promover Membro
+        setItem(inventory, "promote-member", 22, Material.GOLD_INGOT, "&6Promover Membro");
+        
+        // Rebaixar Membro
+        setItem(inventory, "demote-member", 23, Material.IRON_INGOT, "&7Rebaixar Membro");
+        
+        // Aplicações
+        setItem(inventory, "applications", 24, Material.BOOK, "&eGerenciar Aplicações");
+        
+        // Relações
+        setItem(inventory, "relations", 29, Material.RED_WOOL, "&eRelações da Guilda");
+        
+        // Sair da Guilda
+        setItem(inventory, "leave-guild", 31, Material.BARRIER, "&cSair da Guilda");
+        
+        // Excluir Guilda
+        setItem(inventory, "delete-guild", 33, Material.TNT, "&4Excluir Guilda");
+    }
+
+    private void setupNavigation(Inventory inventory) {
+        // Voltar ao menu principal
+        setItem(inventory, "back", 49, Material.ARROW, "&7Voltar");
+
+        if (page == 1) {
+            // Próxima Página
+            setItem(inventory, "next-page", 50, Material.PAPER, "&aPróxima Página");
+        } else if (page == 2) {
+            // Página Anterior
+            setItem(inventory, "previous-page", 48, Material.PAPER, "&cPágina Anterior");
+        }
+    }
+
+    private void setItem(Inventory inventory, String key, int defaultSlot, Material defaultMaterial, String defaultName) {
+        String path = "guild-settings.items." + key;
+        int slot = plugin.getConfigManager().getGuiConfig().getInt(path + ".slot", defaultSlot);
+        String name = plugin.getConfigManager().getGuiConfig().getString(path + ".name", defaultName);
+        List<String> lore = plugin.getConfigManager().getGuiConfig().getStringList(path + ".lore");
+        String materialName = plugin.getConfigManager().getGuiConfig().getString(path + ".material", defaultMaterial.name());
+        Material material = Material.getMaterial(materialName);
+        if (material == null) material = defaultMaterial;
+
+        // Process placeholders in name and lore
+        name = replacePlaceholders(name);
+        for (int i = 0; i < lore.size(); i++) {
+            lore.set(i, ColorUtils.colorize(replacePlaceholders(lore.get(i))));
+        }
+
+        ItemStack item = createItem(material, ColorUtils.colorize(name), lore);
+        inventory.setItem(slot, item);
+    }
+
+    private String replacePlaceholders(String text) {
+        return text
+            .replace("{guild_name}", guild.getName() != null ? guild.getName() : "Sem Nome")
+            .replace("{guild_description}", guild.getDescription() != null ? guild.getDescription() : "Sem Descrição")
+            .replace("{guild_tag}", guild.getTag() != null ? guild.getTag() : "Sem Tag");
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
-        switch (slot) {
-            case 10: // Alterar nome
-                handleChangeName(player);
-                break;
-            case 11: // Alterar descrição
-                handleChangeDescription(player);
-                break;
-            case 12: // Alterar tag
-                handleChangeTag(player);
-                break;
-            case 16: // Configurações de permissão
-                handlePermissions(player);
-                break;
-            case 20: // Convidar membro
-                handleInviteMember(player);
-                break;
-            case 22: // Expulsar membro
-                handleKickMember(player);
-                break;
-            case 24: // Promover membro
-                handlePromoteMember(player);
-                break;
-            case 26: // Rebaixar membro
-                handleDemoteMember(player);
-                break;
-            case 30: // Processar solicitações
-                handleApplications(player);
-                break;
-            case 31: // Gerenciar relações da guilda
-                handleRelations(player);
-                break;
-            case 32: // Logs da guilda
-                handleGuildLogs(player);
-                break;
-            case 34: // Sair da guilda
-                handleLeaveGuild(player);
-                break;
-            case 36: // Excluir guilda
-                handleDeleteGuild(player);
-                break;
-            case 49: // Voltar
-                plugin.getGuiManager().openGUI(player, new MainGuildGUI(plugin));
-                break;
+        if (slot == 49) { // Back
+            plugin.getGuiManager().openGUI(player, new MainGuildGUI(plugin));
+            return;
+        }
+
+        if (page == 1) {
+            switch (slot) {
+                case 20: handleChangeName(player); break;
+                case 21: handleChangeDescription(player); break;
+                case 22: handleChangeTag(player); break;
+                case 24: handleGuildLogs(player); break;
+                case 50: // Next Page
+                    plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, guild, 2));
+                    break;
+            }
+        } else if (page == 2) {
+            switch (slot) {
+                case 20: handleInviteMember(player); break;
+                case 21: handleKickMember(player); break;
+                case 22: handlePromoteMember(player); break;
+                case 23: handleDemoteMember(player); break;
+                case 24: handleApplications(player); break;
+                case 29: handleRelations(player); break;
+                case 31: handleLeaveGuild(player); break;
+                case 33: handleDeleteGuild(player); break;
+                case 48: // Previous Page
+                    plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, guild, 1));
+                    break;
+            }
         }
     }
     
@@ -120,384 +193,139 @@ public class GuildSettingsGUI implements GUI {
     }
     
     /**
-     * Configura botões de configuração
-     */
-    private void setupSettingsButtons(Inventory inventory) {
-        // Botão de alterar nome
-        ItemStack changeName = createItem(
-            Material.NAME_TAG,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-name.name", "&eAlterar Nome")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-name.lore.1", "&7Alterar nome da guilda"))
-        );
-        inventory.setItem(10, changeName);
-        
-        // Botão de alterar descrição
-        ItemStack changeDescription = createItem(
-            Material.BOOK,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-description.name", "&eAlterar Descrição")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-description.lore.1", "&7Alterar descrição da guilda"))
-        );
-        inventory.setItem(11, changeDescription);
-        
-        // Botão de alterar tag
-        ItemStack changeTag = createItem(
-            Material.OAK_SIGN,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-tag.name", "&eAlterar Tag")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.change-tag.lore.1", "&7Alterar tag da guilda"))
-        );
-        inventory.setItem(12, changeTag);
-        
-        // Botão de configurações de permissão
-        ItemStack permissions = createItem(
-            Material.SHIELD,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.permissions.name", "&eConfigurar Permissões")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.permissions.lore.1", "&7Gerenciar permissões de membros"))
-        );
-        inventory.setItem(16, permissions);
-    }
-    
-    /**
-     * Configura botões de função
-     */
-    private void setupFunctionButtons(Inventory inventory) {
-        // Botão de convidar membro
-        ItemStack inviteMember = createItem(
-            Material.EMERALD_BLOCK,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.invite-member", "&aConvidar Membro")),
-            ColorUtils.colorize("&7Convidar novos membros para a guilda")
-        );
-        inventory.setItem(20, inviteMember);
-        
-        // Botão de expulsar membro
-        ItemStack kickMember = createItem(
-            Material.REDSTONE,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.kick-member", "&cExpulsar Membro")),
-            ColorUtils.colorize("&7Expulsar membro da guilda")
-        );
-        inventory.setItem(22, kickMember);
-        
-        // Botão de promover membro
-        ItemStack promoteMember = createItem(
-            Material.GOLD_INGOT,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.promote-member", "&6Promover Membro")),
-            ColorUtils.colorize("&7Promover cargo do membro")
-        );
-        inventory.setItem(24, promoteMember);
-        
-        // Botão de rebaixar membro
-        ItemStack demoteMember = createItem(
-            Material.IRON_INGOT,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.demote-member", "&7Rebaixar Membro")),
-            ColorUtils.colorize("&7Rebaixar cargo do membro")
-        );
-        inventory.setItem(26, demoteMember);
-        
-        // Botão de processar solicitações
-        ItemStack applications = createItem(
-            Material.PAPER,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.application-management", "&eGerenciar Solicitações")),
-            ColorUtils.colorize("&7Processar solicitações de entrada")
-        );
-        inventory.setItem(30, applications);
-        
-        // Botão de gerenciar relações da guilda
-        ItemStack relations = createItem(
-            Material.RED_WOOL,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-relations-management.name", "&eGerenciar Relações")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-relations-management.lore.1", "&7Gerenciar relações da guilda")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-relations-management.lore.2", "&7Aliados, Inimigos, etc."))
-        );
-        inventory.setItem(31, relations);
-        
-        // Botão de logs da guilda
-        ItemStack guildLogs = createItem(
-            Material.BOOK,
-            ColorUtils.colorize("&6Logs da Guilda"),
-            ColorUtils.colorize("&7Ver histórico de operações da guilda"),
-            ColorUtils.colorize("&7Registrar todas as operações importantes")
-        );
-        inventory.setItem(32, guildLogs);
-        
-        // Botão de sair da guilda
-        ItemStack leaveGuild = createItem(
-            Material.BARRIER,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leave-guild", "&cSair da Guilda")),
-            ColorUtils.colorize("&7Sair da guilda atual")
-        );
-        inventory.setItem(34, leaveGuild);
-        
-        // Botão de excluir guilda
-        ItemStack deleteGuild = createItem(
-            Material.TNT,
-            ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.delete-guild", "&4Excluir Guilda")),
-            ColorUtils.colorize("&7Excluir a guilda inteira"),
-            ColorUtils.colorize("&cEsta operação é irreversível!")
-        );
-        inventory.setItem(36, deleteGuild);
-        
-        // Botão de voltar
-        ItemStack back = createItem(
-            Material.ARROW,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.back.name", "&7Voltar")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-settings.items.back.lore.1", "&7Voltar ao menu principal"))
-        );
-        inventory.setItem(49, back);
-    }
-    
-    /**
-     * Mostra informações de configuração atuais
-     */
-    private void displayCurrentSettings(Inventory inventory) {
-        // Nome atual
-        ItemStack currentName = createItem(
-            Material.NAME_TAG,
-            ColorUtils.colorize("&eNome Atual"),
-            ColorUtils.colorize("&7" + (guild.getName() != null ? guild.getName() : "Sem Nome"))
-        );
-        inventory.setItem(10, currentName);
-        
-        // Descrição atual
-        ItemStack currentDescription = createItem(
-            Material.BOOK,
-            ColorUtils.colorize("&eDescrição Atual"),
-            ColorUtils.colorize("&7" + (guild.getDescription() != null ? guild.getDescription() : "Sem Descrição"))
-        );
-        inventory.setItem(11, currentDescription);
-        
-        // Tag atual
-        ItemStack currentTag = createItem(
-            Material.OAK_SIGN,
-            ColorUtils.colorize("&eTag Atual"),
-            ColorUtils.colorize("&7" + (guild.getTag() != null ? "[" + guild.getTag() + "]" : "Sem Tag"))
-        );
-        inventory.setItem(13, currentTag);
-        
-        // Configurações de permissão atuais
-        ItemStack currentPermissions = createItem(
-            Material.SHIELD,
-            ColorUtils.colorize("&eConfigurações de Permissão Atuais"),
-            ColorUtils.colorize("&7Líder: Todas as permissões"),
-            ColorUtils.colorize("&7Oficial: Convidar, Expulsar"),
-            ColorUtils.colorize("&7Membro: Permissões básicas")
-        );
-        inventory.setItem(17, currentPermissions);
-    }
-    
-    /**
      * Processa alteração de nome
      */
     private void handleChangeName(Player player) {
-        // Verifica permissão (apenas o líder pode alterar o nome)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de entrada de nome
         plugin.getGuiManager().openGUI(player, new GuildNameInputGUI(plugin, guild, player));
     }
     
-    /**
-     * Processa alteração de descrição
-     */
     private void handleChangeDescription(Player player) {
-        // Verifica permissão (apenas o líder pode alterar a descrição)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de entrada de descrição
         plugin.getGuiManager().openGUI(player, new GuildDescriptionInputGUI(plugin, guild));
     }
     
-    /**
-     * Processa alteração de tag
-     */
     private void handleChangeTag(Player player) {
-        // Verifica permissão (apenas o líder pode alterar a tag)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de entrada de tag
         plugin.getGuiManager().openGUI(player, new GuildTagInputGUI(plugin, guild));
     }
     
-    /**
-     * Processa configurações de permissão
-     */
     private void handlePermissions(Player player) {
-        // Verifica permissão (apenas o líder pode gerenciar permissões)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de configurações de permissão
         plugin.getGuiManager().openGUI(player, new GuildPermissionsGUI(plugin, guild));
     }
     
-    /**
-     * Processa convite de membro
-     */
     private void handleInviteMember(Player player) {
-        // Verifica permissão (oficial ou líder pode convidar membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior")));
             return;
         }
-        
-        // Abre GUI de convite de membro
         plugin.getGuiManager().openGUI(player, new InviteMemberGUI(plugin, guild));
     }
     
-    /**
-     * Processa expulsão de membro
-     */
     private void handleKickMember(Player player) {
-        // Verifica permissão (oficial ou líder pode expulsar membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior")));
             return;
         }
-        
-        // Abre GUI de expulsão de membro
         plugin.getGuiManager().openGUI(player, new KickMemberGUI(plugin, guild));
     }
     
-    /**
-     * Processa promoção de membro
-     */
     private void handlePromoteMember(Player player) {
-        // Verifica permissão (apenas o líder pode promover membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de promoção de membro
         plugin.getGuiManager().openGUI(player, new PromoteMemberGUI(plugin, guild));
     }
     
-    /**
-     * Processa rebaixamento de membro
-     */
     private void handleDemoteMember(Player player) {
-        // Verifica permissão (apenas o líder pode rebaixar membros)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de rebaixamento de membro
         plugin.getGuiManager().openGUI(player, new DemoteMemberGUI(plugin, guild));
     }
     
-    /**
-     * Processa gerenciamento de solicitações
-     */
     private void handleApplications(Player player) {
-        // Verifica permissão (oficial ou líder pode processar solicitações)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.officer-or-higher", "&cRequer cargo de Oficial ou superior")));
             return;
         }
-        
-        // Abre GUI de gerenciamento de solicitações
         plugin.getGuiManager().openGUI(player, new ApplicationManagementGUI(plugin, guild));
     }
     
-    /**
-     * Processa gerenciamento de relações da guilda
-     */
     private void handleRelations(Player player) {
-        // Verifica permissão (apenas o líder pode gerenciar relações)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("relation.only-leader", "&cApenas o líder da guilda pode gerenciar relações!");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("relation.only-leader", "&cApenas o líder da guilda pode gerenciar relações!")));
             return;
         }
-        
-        // Abre GUI de gerenciamento de relações da guilda
         plugin.getGuiManager().openGUI(player, new GuildRelationsGUI(plugin, guild, player));
     }
     
-    /**
-     * Processa visualização de logs da guilda
-     */
     private void handleGuildLogs(Player player) {
-        // Verifica permissão (membros da guilda podem ver logs)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cSem permissão");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cSem permissão")));
             return;
         }
-        
-        // Abre GUI de logs da guilda
         plugin.getGuiManager().openGUI(player, new GuildLogsGUI(plugin, guild, player));
     }
     
-    /**
-     * Processa saída da guilda
-     */
     private void handleLeaveGuild(Player player) {
-        // Abre GUI de confirmação de saída
         plugin.getGuiManager().openGUI(player, new ConfirmLeaveGuildGUI(plugin, guild));
     }
     
-    /**
-     * Processa exclusão da guilda
-     */
     private void handleDeleteGuild(Player player) {
-        // Verifica permissão (apenas o líder pode excluir a guilda)
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
-            player.sendMessage(ColorUtils.colorize(message));
+            player.sendMessage(ColorUtils.colorize(plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação")));
             return;
         }
-        
-        // Abre GUI de confirmação de exclusão
         plugin.getGuiManager().openGUI(player, new ConfirmDeleteGuildGUI(plugin, guild));
     }
     
     /**
      * Cria item
      */
-    private ItemStack createItem(Material material, String name, String... lore) {
+    private ItemStack createItem(Material material, String name, List<String> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         
         if (meta != null) {
             meta.setDisplayName(name);
-            if (lore.length > 0) {
-                meta.setLore(Arrays.asList(lore));
+            if (lore != null && !lore.isEmpty()) {
+                meta.setLore(lore);
             }
             item.setItemMeta(meta);
         }
         
         return item;
+    }
+
+    private ItemStack createItem(Material material, String name, String... lore) {
+        return createItem(material, name, Arrays.asList(lore));
     }
 }

@@ -246,11 +246,22 @@ application-management:
 
 # Interface de configurações da guilda
 guild-settings:
-  title: "&6Configurações da Guilda"
+  title: "&6Configurações da Guilda - Página {page}"
   size: 54
   items:
-    change-description:
+    # Página 1 - Configurações Básicas
+    change-name:
       slot: 20
+      page: 1
+      material: NAME_TAG
+      name: "&eAlterar Nome"
+      lore:
+        - "&7Alterar nome da guilda"
+        - "&7Atual: {guild_name}"
+    
+    change-description:
+      slot: 21
+      page: 1
       material: BOOK
       name: "&eAlterar Descrição"
       lore:
@@ -259,19 +270,101 @@ guild-settings:
     
     change-tag:
       slot: 22
+      page: 1
       material: OAK_SIGN
       name: "&eAlterar Tag"
       lore:
         - "&7Alterar tag da guilda"
         - "&7Atual: {guild_tag}"
     
-    permissions:
+    guild-logs:
       slot: 24
-      material: SHIELD
-      name: "&eConfigurações de Permissão"
+      page: 1
+      material: PAPER
+      name: "&eLogs da Guilda"
       lore:
-        - "&7Gerenciar permissões de membros"
-        - "&7Gerenciamento de permissões de cargo"
+        - "&7Ver logs de atividades da guilda"
+    
+    # Página 2 - Gerenciamento e Ações
+    invite-member:
+      slot: 20
+      page: 2
+      material: EMERALD_BLOCK
+      name: "&aConvidar Membro"
+      lore:
+        - "&7Convidar novos membros"
+    
+    kick-member:
+      slot: 21
+      page: 2
+      material: REDSTONE_BLOCK
+      name: "&cExpulsar Membro"
+      lore:
+        - "&7Expulsar membro da guilda"
+    
+    promote-member:
+      slot: 22
+      page: 2
+      material: GOLD_INGOT
+      name: "&6Promover Membro"
+      lore:
+        - "&7Promover cargo do membro"
+    
+    demote-member:
+      slot: 23
+      page: 2
+      material: IRON_INGOT
+      name: "&7Rebaixar Membro"
+      lore:
+        - "&7Rebaixar cargo do membro"
+    
+    applications:
+      slot: 24
+      page: 2
+      material: BOOK
+      name: "&eGerenciar Aplicações"
+      lore:
+        - "&7Processar pedidos de entrada"
+    
+    relations:
+      slot: 29
+      page: 2
+      material: RED_WOOL
+      name: "&eRelações da Guilda"
+      lore:
+        - "&7Gerenciar aliados e inimigos"
+    
+    leave-guild:
+      slot: 31
+      page: 2
+      material: BARRIER
+      name: "&cSair da Guilda"
+      lore:
+        - "&7Sair da guilda atual"
+    
+    delete-guild:
+      slot: 33
+      page: 2
+      material: TNT
+      name: "&4Excluir Guilda"
+      lore:
+        - "&7Excluir a guilda permanentemente"
+        - "&cCuidado: Esta ação é irreversível"
+
+    # Navegação
+    next-page:
+      slot: 50
+      material: PAPER
+      name: "&aPróxima Página"
+      lore:
+        - "&7Ir para a próxima página"
+    
+    previous-page:
+      slot: 48
+      material: PAPER
+      name: "&cPágina Anterior"
+      lore:
+        - "&7Voltar para a página anterior"
     
     back:
       slot: 49
