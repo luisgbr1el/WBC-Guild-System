@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
 /**
- * 服务器类型检测工具
+ * Utilitário de detecção de tipo de servidor
  */
 public class ServerUtils {
     
@@ -17,7 +17,7 @@ public class ServerUtils {
     private static ServerType serverType = null;
     
     /**
-     * 检测服务器类型
+     * Detecta o tipo de servidor
      */
     public static ServerType getServerType() {
         if (serverType == null) {
@@ -27,36 +27,36 @@ public class ServerUtils {
     }
     
     /**
-     * 检测是否为Folia服务器
+     * Verifica se é um servidor Folia
      */
     public static boolean isFolia() {
         return getServerType() == ServerType.FOLIA;
     }
     
     /**
-     * 检测是否为Spigot服务器
+     * Verifica se é um servidor Spigot
      */
     public static boolean isSpigot() {
         return getServerType() == ServerType.SPIGOT;
     }
     
     /**
-     * 获取服务器版本
+     * Obtém a versão do servidor
      */
     public static String getServerVersion() {
         return Bukkit.getServer().getBukkitVersion();
     }
     
     /**
-     * 检测服务器类型的具体实现
+     * Implementação específica da detecção do tipo de servidor
      */
     private static ServerType detectServerType() {
         try {
-            // 尝试加载Folia特有的类
+            // Tenta carregar classes específicas do Folia
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
             return ServerType.FOLIA;
         } catch (ClassNotFoundException e) {
-            // 检查是否为Spigot
+            // Verifica se é Spigot
             try {
                 Class.forName("org.spigotmc.SpigotConfig");
                 return ServerType.SPIGOT;
@@ -67,7 +67,7 @@ public class ServerUtils {
     }
     
     /**
-     * 检查是否支持指定的API版本
+     * Verifica se suporta a versão da API especificada
      */
     public static boolean supportsApiVersion(String requiredVersion) {
         String serverVersion = getServerVersion();
@@ -75,7 +75,7 @@ public class ServerUtils {
     }
     
     /**
-     * 版本比较工具
+     * Utilitário de comparação de versões
      */
     private static int compareVersions(String version1, String version2) {
         String[] v1Parts = version1.split("-")[0].split("\\.");
