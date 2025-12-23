@@ -41,63 +41,63 @@ public class GuildPlugin extends JavaPlugin {
         logger.info("Tipo de servidor detectado: " + ServerUtils.getServerType());
         logger.info("Versão do servidor: " + ServerUtils.getServerVersion());
         
-        // 检查API版本兼容性
+        // Verificar compatibilidade da versão da API
         if (!ServerUtils.supportsApiVersion("1.21")) {
             logger.severe("Este plugin requer a versão 1.21 ou superior! Versão atual: " + ServerUtils.getServerVersion());
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         
-        // 运行兼容性测试（使用插件日志器）
+        // Executar testes de compatibilidade (usando o logger do plugin)
         TestUtils.testCompatibility(logger);
         TestUtils.testSchedulerCompatibility(logger);
         
         try {
-            // 初始化服务容器
+            // Inicializar o contêiner de serviços
             serviceContainer = new ServiceContainer();
             
-            // 初始化配置管理器
+            // Inicializar o gerenciador de configurações
             configManager = new ConfigManager(this);
             serviceContainer.register(ConfigManager.class, configManager);
             
-            // 初始化数据库管理器
+            // Inicializar o gerenciador de banco de dados
             databaseManager = new DatabaseManager(this);
             serviceContainer.register(DatabaseManager.class, databaseManager);
             
-            // 初始化事件总线
+            // Inicializar o barramento de eventos
             eventBus = new EventBus();
             serviceContainer.register(EventBus.class, eventBus);
             
-            // 初始化GUI管理器
+            // Inicializar o gerenciador de GUI
             guiManager = new GUIManager(this);
             serviceContainer.register(GUIManager.class, guiManager);
             
-            // 初始化占位符管理器
+            // Inicializar o gerenciador de placeholders
             placeholderManager = new PlaceholderManager(this);
             serviceContainer.register(PlaceholderManager.class, placeholderManager);
             
-            // 初始化权限管理器
+            // Inicializar o gerenciador de permissões
             permissionManager = new PermissionManager(this);
             serviceContainer.register(PermissionManager.class, permissionManager);
             
-            // 初始化经济管理器
+            // Inicializar o gerenciador de economia
             economyManager = new EconomyManager(this);
             serviceContainer.register(EconomyManager.class, economyManager);
             
-            // 注册工会服务
+            // Registrar o serviço da guilda
             guildService = new GuildService(this);
             serviceContainer.register(GuildService.class, guildService);
             
-            // 设置PlaceholderManager的GuildService引用
+            // Definir a referência do GuildService no PlaceholderManager
             placeholderManager.setGuildService(guildService);
             
-            // 注册命令
+            // Registrar comandos
             registerCommands();
             
-            // 注册监听器
+            // Registrar ouvintes
             registerListeners();
             
-            // 启动服务
+            // Iniciar serviços
             startServices();
             
             logger.info("Plugin de guilda iniciado com sucesso!");
@@ -116,12 +116,12 @@ public class GuildPlugin extends JavaPlugin {
         logger.info("Desligando plugin de guilda...");
         
         try {
-            // 关闭所有GUI
+            // Fechar todas as GUIs
             if (guiManager != null) {
                 guiManager.closeAllGUIs();
             }
             
-            // 关闭服务
+            // Desligar serviços
             if (serviceContainer != null) {
                 serviceContainer.shutdown();
             }
@@ -150,13 +150,13 @@ public class GuildPlugin extends JavaPlugin {
     }
     
     private void startServices() {
-        // 启动数据库连接
+        // Iniciar conexão com o banco de dados
         databaseManager.initialize();
         
-        // 注册占位符
+        // Registrar placeholders
         placeholderManager.registerPlaceholders();
         
-        // 初始化GUI系统
+        // Inicializar o sistema de GUI
         guiManager.initialize();
     }
     

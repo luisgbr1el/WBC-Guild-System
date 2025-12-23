@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 工会邀请数据模型
+ * Modelo de dados de convite da guilda
  */
 public class GuildInvitation {
     
@@ -27,7 +27,7 @@ public class GuildInvitation {
         this.targetUuid = targetUuid;
         this.targetName = targetName;
         this.invitedAt = LocalDateTime.now();
-        this.expiresAt = LocalDateTime.now().plusMinutes(30); // 30分钟过期
+        this.expiresAt = LocalDateTime.now().plusMinutes(30); // Expira em 30 minutos
         this.status = InvitationStatus.PENDING;
     }
     
@@ -109,7 +109,7 @@ public class GuildInvitation {
     }
     
     /**
-     * 邀请状态枚举
+     * Enumeração de status de convite
      */
     public enum InvitationStatus {
         PENDING("Pendente"),

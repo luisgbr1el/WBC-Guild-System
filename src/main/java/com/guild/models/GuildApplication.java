@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 工会申请数据模型
+ * Modelo de dados de solicitação da guilda
  */
 public class GuildApplication {
     
@@ -85,7 +85,7 @@ public class GuildApplication {
     }
     
     /**
-     * 申请状态枚举
+     * Enumeração de status de solicitação
      */
     public enum ApplicationStatus {
         PENDING("Pendente"),

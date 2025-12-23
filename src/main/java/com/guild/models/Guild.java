@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.bukkit.Location;
 
 /**
- * 工会数据模型
+ * Modelo de dados da guilda
  */
 public class Guild {
     
