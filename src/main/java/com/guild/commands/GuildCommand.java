@@ -728,10 +728,6 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ColorUtils.colorize(leave));
         String delete = plugin.getConfigManager().getMessagesConfig().getString("help.delete", "&e/guild delete &7- Deletar guilda");
         player.sendMessage(ColorUtils.colorize(delete));
-        String sethome = plugin.getConfigManager().getMessagesConfig().getString("help.sethome", "&e/guild sethome &7- Definir home da guilda");
-        player.sendMessage(ColorUtils.colorize(sethome));
-        String home = plugin.getConfigManager().getMessagesConfig().getString("help.home", "&e/guild home &7- Teleportar para home da guilda");
-        player.sendMessage(ColorUtils.colorize(home));
         String help = plugin.getConfigManager().getMessagesConfig().getString("help.help", "&e/guild help &7- Mostrar esta mensagem de ajuda");
         player.sendMessage(ColorUtils.colorize(help));
         String relation = "&e/guild relation &7- Gerenciar relações da guilda";

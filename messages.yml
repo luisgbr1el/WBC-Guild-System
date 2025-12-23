@@ -108,18 +108,6 @@ delete:
   confirm-command: "&cSe você tem certeza, digite novamente: /guild delete confirm"
   cancel-command: "&cOu digite: /guild delete cancel para cancelar"
 
-# Mensagens de home da guilda
-sethome:
-  success: "&aHome da guilda definida com sucesso!"
-  failed: "&cFalha ao definir home da guilda!"
-  only-leader: "&cApenas o líder da guilda pode definir a home!"
-  no-permission: "&cVocê não tem permissão para definir a home da guilda!"
-home:
-  success: "&aTeleportado para a home da guilda!"
-  not-set: "&cHome da guilda ainda não definida!"
-  no-permission: "&cVocê não tem permissão para teleportar para a home da guilda!"
-  teleport-failed: "&cFalha ao teleportar para a home da guilda!"
-
 # Mensagens de aplicação
 application:
   sent: "&aSua aplicação foi enviada para {guild}!"
@@ -307,7 +295,6 @@ gui:
   # Configurações da guilda
   change-description: "&eAlterar Descrição"
   change-tag: "&eAlterar Tag"
-  set-home: "&eDefinir Home"
   permissions: "&ePermissões"
   
   # Lista de guildas
@@ -384,8 +371,6 @@ help:
   demote: "&e/guild demote <Jogador> &7- Rebaixar membro"
   accept: "&e/guild accept <Invocador> &7- Aceitar convite"
   decline: "&e/guild decline <Invocador> &7- Recusar convite"
-  sethome: "&e/guild sethome &7- Definir home da guilda"
-  home: "&e/guild home &7- Teleportar para home da guilda"
   logs: "&e/guild logs &7- Ver logs da guilda"
   help: "&e/guild help &7- Mostrar esta ajuda"
 
@@ -496,7 +481,6 @@ system-settings:
   level-system: "&eSistema de Níveis"
   application-system: "&eSistema de Aplicações"
   invite-system: "&eSistema de Convites"
-  guild-home-system: "&eSistema de Home"
   reload-configs: "&aRecarregar Configurações"
   database-maintenance: "&bManutenção do Banco de Dados"
   backup-data: "&6Backup de Dados"
@@ -524,7 +508,7 @@ system-settings:
   level-description: "&7Ativa sistema de níveis com upgrades e limites de membros"
   application-description: "&7Ativa sistema de aplicações para entrar na guilda"
   invite-description: "&7Ativa sistema de convites para o líder convidar jogadores"
-  home-description: "&7Ativa sistema de home para definir e teleportar para base"
+
   
   # Funções de manutenção
   maintenance-dev: "&eManutenção de banco de dados em desenvolvimento..."

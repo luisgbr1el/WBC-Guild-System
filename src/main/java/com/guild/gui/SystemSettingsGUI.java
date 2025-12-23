@@ -160,22 +160,6 @@ public class SystemSettingsGUI implements GUI {
             ColorUtils.colorize("&eClique para alternar o status")
         );
         inventory.setItem(32, inviteToggle);
-        
-        // Alternar sistema de casa da guilda
-        boolean homeEnabled = plugin.getConfigManager().getMainConfig().getBoolean("guild-home.enabled", true);
-        Material homeMaterial = homeEnabled ? Material.LIME_WOOL : Material.RED_WOOL;
-        String homeStatus = homeEnabled ? "&aAtivado" : "&cDesativado";
-        
-        ItemStack homeToggle = createItem(
-            homeMaterial,
-            ColorUtils.colorize("&eSistema de Casa da Guilda"),
-            ColorUtils.colorize("&7Status atual: " + homeStatus),
-            ColorUtils.colorize("&7Alternar função de casa da guilda"),
-            ColorUtils.colorize("&7Inclui definir e teleportar para a casa da guilda"),
-            "",
-            ColorUtils.colorize("&eClique para alternar o status")
-        );
-        inventory.setItem(34, homeToggle);
     }
     
     private void setupActionButtons(Inventory inventory) {
@@ -271,9 +255,6 @@ public class SystemSettingsGUI implements GUI {
             case 32: // Alternar sistema de convites
                 toggleInvites(player);
                 break;
-            case 34: // Alternar sistema de casa da guilda
-                toggleGuildHome(player);
-                break;
             case 37: // Recarregar configurações
                 reloadConfigs(player);
                 break;
@@ -365,17 +346,6 @@ public class SystemSettingsGUI implements GUI {
         plugin.getConfigManager().saveMainConfig();
         
         String message = newValue ? "&aSistema de convite ativado!" : "&cSistema de convite desativado!";
-        player.sendMessage(ColorUtils.colorize(message));
-        refresh(player);
-    }
-    
-    private void toggleGuildHome(Player player) {
-        boolean current = plugin.getConfigManager().getMainConfig().getBoolean("guild-home.enabled", true);
-        boolean newValue = !current;
-        plugin.getConfigManager().getMainConfig().set("guild-home.enabled", newValue);
-        plugin.getConfigManager().saveMainConfig();
-        
-        String message = newValue ? "&aSistema de casa da guilda ativado!" : "&cSistema de casa da guilda desativado!";
         player.sendMessage(ColorUtils.colorize(message));
         refresh(player);
     }

@@ -105,14 +105,6 @@ guild-info:
         - "&f{leader_name}"
         - "&7O líder tem todas as permissões"
     
-    guild-home:
-      slot: 19
-      material: COMPASS
-      name: "&eHome da Guilda"
-      lore:
-        - "&f{guild_home_location}"
-        - "&7Membros podem teleportar para cá"
-    
     member-count:
       slot: 28
       material: PLAYER_HEAD
@@ -287,14 +279,6 @@ guild-settings:
       lore:
         - "&7Alterar tag da guilda"
         - "&7Atual: {guild_tag}"
-    
-    set-home:
-      slot: 24
-      material: COMPASS
-      name: "&eDefinir Home da Guilda"
-      lore:
-        - "&7Definir ponto de teleporte da guilda"
-        - "&7Atual: {guild_home_location}"
     
     permissions:
       slot: 30

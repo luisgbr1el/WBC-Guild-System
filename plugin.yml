@@ -50,12 +50,6 @@ permissions:
   guild.delete:
     description: Permite deletar guilda
     default: op
-  guild.sethome:
-    description: Permite definir home da guilda
-    default: true
-  guild.home:
-    description: Permite teleportar para home da guilda
-    default: true
   guild.relation:
     description: Permite gerenciar relações da guilda
     default: true

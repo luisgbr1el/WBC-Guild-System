@@ -459,7 +459,6 @@ system-settings:
   level-system: "&eSistema de Níveis"
   application-system: "&eSistema de Aplicações"
   invite-system: "&eSistema de Convites"
-  guild-home-system: "&eSistema de Home"
   reload-configs: "&aRecarregar Configurações"
   database-maintenance: "&bManutenção do Banco de Dados"
   backup-data: "&6Backup de Dados"
@@ -487,7 +486,6 @@ system-settings:
   level-description: "&7Ativa sistema de níveis com upgrades e limites de membros"
   application-description: "&7Ativa sistema de aplicações para entrar na guilda"
   invite-description: "&7Ativa sistema de convites para o líder convidar jogadores"
-  home-description: "&7Ativa sistema de home para definir e teleportar para base"
   
   # Funções de manutenção
   maintenance-dev: "&eManutenção de banco de dados em desenvolvimento..."
