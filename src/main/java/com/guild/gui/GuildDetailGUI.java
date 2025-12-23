@@ -196,7 +196,7 @@ public class GuildDetailGUI implements GUI {
             if (success) {
                 String message = newStatus ? "&aGuilda " + guild.getName() + " foi congelada!" : "&aGuilda " + guild.getName() + " foi descongelada!";
                 player.sendMessage(ColorUtils.colorize(message));
-                // 更新本地guild对象
+                // Atualizar objeto guild local
                 guild.setFrozen(newStatus);
                 refresh(player);
             } else {

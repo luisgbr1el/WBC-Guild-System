@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 工会名称输入GUI
+ * GUI de Entrada de Nome da Guilda
  */
 public class GuildNameInputGUI implements GUI {
     
@@ -44,33 +44,33 @@ public class GuildNameInputGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 显示当前名称
+        // Exibir nome atual
         displayCurrentName(inventory);
         
-        // 添加操作按钮
+        // Adicionar botões de ação
         setupButtons(inventory);
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         switch (slot) {
-            case 11: // 输入名称
+            case 11: // Inserir nome
                 handleInputName(player);
                 break;
-            case 15: // 确认
+            case 15: // Confirmar
                 handleConfirm(player);
                 break;
-            case 13: // 取消
+            case 13: // Cancelar
                 handleCancel(player);
                 break;
         }
     }
     
     /**
-     * 填充边框
+     * Preencher borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -85,7 +85,7 @@ public class GuildNameInputGUI implements GUI {
     }
     
     /**
-     * 显示当前名称
+     * Exibir nome atual
      */
     private void displayCurrentName(Inventory inventory) {
         ItemStack currentNameItem = createItem(
@@ -97,10 +97,10 @@ public class GuildNameInputGUI implements GUI {
     }
     
     /**
-     * 设置按钮
+     * Configurar botões
      */
     private void setupButtons(Inventory inventory) {
-        // 确认按钮
+        // Botão de confirmar
         ItemStack confirmButton = createItem(
             Material.EMERALD,
             ColorUtils.colorize("&aConfirmar Modificação"),
@@ -109,7 +109,7 @@ public class GuildNameInputGUI implements GUI {
         );
         inventory.setItem(15, confirmButton);
         
-        // 取消按钮
+        // Botão de cancelar
         ItemStack cancelButton = createItem(
             Material.REDSTONE,
             ColorUtils.colorize("&cCancelar"),
@@ -119,14 +119,14 @@ public class GuildNameInputGUI implements GUI {
     }
     
     /**
-     * 处理输入名称
+     * Processar entrada de nome
      */
     private void handleInputName(Player player) {
-        // 关闭GUI并进入输入模式
+        // Fechar GUI e entrar no modo de entrada
         plugin.getGuiManager().closeGUI(player);
         plugin.getGuiManager().setInputMode(player, "guild_name_input", this);
         
-        // 发送输入提示
+        // Enviar dica de entrada
         player.sendMessage(ColorUtils.colorize("&6Por favor, digite o novo nome da guilda:"));
         player.sendMessage(ColorUtils.colorize("&7Nome Atual: &f" + currentName));
         player.sendMessage(ColorUtils.colorize("&7Digite &cCancelar &7para cancelar"));
@@ -135,36 +135,36 @@ public class GuildNameInputGUI implements GUI {
     }
     
     /**
-     * 处理确认
+     * Processar confirmação
      */
     private void handleConfirm(Player player) {
-        // 检查权限（只有会长可以修改工会名称）
+        // Verificar permissões (apenas o líder pode modificar o nome da guilda)
         if (!plugin.getGuildService().isGuildLeader(player.getUniqueId(), guild.getId())) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode fazer isso");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
         
-        // 如果当前名称为空，提示输入
+        // Se o nome atual estiver vazio, solicitar entrada
         if (currentName.isEmpty()) {
             handleInputName(player);
             return;
         }
         
-        // 执行改名操作
+        // Executar operação de renomeação
         executeNameChange(player, currentName);
     }
     
     /**
-     * 处理取消
+     * Processar cancelamento
      */
     public void handleCancel(Player player) {
-        // 返回到工会设置GUI
+        // Voltar para a GUI de configurações da guilda
         plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, guild));
     }
     
     /**
-     * 处理输入完成
+     * Processar conclusão da entrada
      */
     public void handleInputComplete(Player player, String input) {
         if (input == null || input.trim().isEmpty()) {
@@ -175,7 +175,7 @@ public class GuildNameInputGUI implements GUI {
         
         String newName = input.trim();
         
-        // 检查名称长度（基于清理后的名称，不包括颜色字符）
+        // Verificar comprimento do nome (baseado no nome limpo, sem códigos de cor)
         String cleanName = newName.replaceAll("§[0-9a-fk-or]", "").replaceAll("&[0-9a-fk-or]", "");
         if (cleanName.length() < 2) {
             player.sendMessage(ColorUtils.colorize("&cO nome da guilda deve ter pelo menos 2 caracteres (sem cores)!"));
@@ -189,32 +189,32 @@ public class GuildNameInputGUI implements GUI {
             return;
         }
         
-        // 检查是否与当前名称相同
+        // Verificar se é igual ao nome atual
         if (newName.equalsIgnoreCase(currentName)) {
             player.sendMessage(ColorUtils.colorize("&cO novo nome é igual ao atual!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
         
-        // 检查名称格式（允许中文、英文、数字和颜色字符）
+        // Verificar formato do nome (permite letras, números e códigos de cor)
         if (!cleanName.matches("^[\\u4e00-\\u9fa5a-zA-Z0-9]+$")) {
             player.sendMessage(ColorUtils.colorize("&cO nome da guilda deve conter apenas letras e números!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
         
-        // 执行改名操作
+        // Executar operação de renomeação
         executeNameChange(player, newName);
     }
     
     /**
-     * 执行改名操作
+     * Executar operação de renomeação
      */
     private void executeNameChange(Player player, String newName) {
-        // 异步检查名称是否可用
+        // Verificar assincronamente se o nome está disponível
         plugin.getGuildService().getGuildByNameAsync(newName).thenAccept(existingGuild -> {
             if (existingGuild != null) {
-                // 名称已存在
+                // Nome já existe
                 CompatibleScheduler.runTask(plugin, () -> {
                     player.sendMessage(ColorUtils.colorize("&cNome da guilda &f" + newName + " &cjá está em uso!"));
                     plugin.getGuiManager().openGUI(player, this);
@@ -222,16 +222,16 @@ public class GuildNameInputGUI implements GUI {
                 return;
             }
             
-            // 名称可用，执行更新
+            // Nome disponível, executar atualização
             plugin.getGuildService().updateGuildAsync(guild.getId(), newName, guild.getTag(), guild.getDescription(), player.getUniqueId())
                 .thenAccept(success -> {
                     CompatibleScheduler.runTask(plugin, () -> {
                         if (success) {
-                            // 更新成功
+                            // Atualização bem-sucedida
                             player.sendMessage(ColorUtils.colorize("&aNome da guilda modificado com sucesso!"));
                             player.sendMessage(ColorUtils.colorize("&7Novo Nome: &f" + newName));
                             
-                            // 记录日志
+                            // Registrar log
                             plugin.getGuildService().logGuildActionAsync(
                                 guild.getId(),
                                 guild.getName(),
@@ -242,19 +242,19 @@ public class GuildNameInputGUI implements GUI {
                                 "Nome original: " + currentName + ", Novo nome: " + newName
                             );
                             
-                            // 重新获取最新的工会信息
+                            // Obter novamente as informações mais recentes da guilda
                             plugin.getGuildService().getGuildByIdAsync(guild.getId()).thenAccept(updatedGuild -> {
                                 if (updatedGuild != null) {
-                                    // 返回到工会设置GUI（使用最新的工会信息）
+                                    // Voltar para a GUI de configurações da guilda (usando informações atualizadas)
                                     plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, updatedGuild));
                                 } else {
-                                    // 如果获取失败，使用本地更新的对象
+                                    // Se falhar ao obter, usar objeto atualizado localmente
                                     guild.setName(newName);
                                     plugin.getGuiManager().openGUI(player, new GuildSettingsGUI(plugin, guild));
                                 }
                             });
                         } else {
-                            // 更新失败
+                            // Falha na atualização
                             player.sendMessage(ColorUtils.colorize("&cFalha ao modificar nome da guilda! Tente novamente"));
                             plugin.getGuiManager().openGUI(player, this);
                         }
@@ -264,7 +264,7 @@ public class GuildNameInputGUI implements GUI {
     }
     
     /**
-     * 创建物品
+     * Criar item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
@@ -283,12 +283,12 @@ public class GuildNameInputGUI implements GUI {
     
     @Override
     public void onClose(Player player) {
-        // 关闭时的处理
+        // Processamento ao fechar
     }
     
     @Override
     public void refresh(Player player) {
-        // 刷新GUI
+        // Atualizar GUI
         plugin.getGuiManager().openGUI(player, this);
     }
 }

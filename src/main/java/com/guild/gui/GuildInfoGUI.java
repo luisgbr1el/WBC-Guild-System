@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 工会信息GUI
+ * GUI de Informações da Guilda
  */
 public class GuildInfoGUI implements GUI {
     
@@ -52,14 +52,14 @@ public class GuildInfoGUI implements GUI {
     public void setupInventory(Inventory inventory) {
         this.inventory = inventory;
         
-        // 获取GUI配置
+        // Obter configuração da GUI
         ConfigurationSection config = plugin.getConfigManager().getGuiConfig().getConfigurationSection("guild-info.items");
         if (config == null) {
             setupDefaultItems();
             return;
         }
         
-        // 设置配置的物品
+        // Configurar itens da configuração
         for (String key : config.getKeys(false)) {
             ConfigurationSection itemConfig = config.getConfigurationSection(key);
             if (itemConfig != null) {
@@ -77,15 +77,15 @@ public class GuildInfoGUI implements GUI {
         ItemMeta meta = item.getItemMeta();
         
         if (meta != null) {
-            // 设置名称
+            // Definir nome
             String name = itemConfig.getString("name", "");
             if (!name.isEmpty()) {
-                // 使用GUIUtils处理变量
+                // Usar GUIUtils para processar variáveis
                 GUIUtils.processGUIVariablesAsync(name, guild, player, plugin).thenAccept(processedName -> {
                     CompatibleScheduler.runTask(plugin, () -> {
                         meta.setDisplayName(processedName);
                         
-                        // 设置描述
+                        // Definir descrição
                         List<String> lore = itemConfig.getStringList("lore");
                         if (!lore.isEmpty()) {
                             GUIUtils.processGUILoreAsync(lore, guild, player, plugin).thenAccept(processedLore -> {
@@ -102,7 +102,7 @@ public class GuildInfoGUI implements GUI {
                     });
                 });
             } else {
-                // 如果没有名称，直接设置描述
+                // Se não houver nome, definir descrição diretamente
                 List<String> lore = itemConfig.getStringList("lore");
                 if (!lore.isEmpty()) {
                                     GUIUtils.processGUILoreAsync(lore, guild, player, plugin).thenAccept(processedLore -> {
@@ -123,31 +123,31 @@ public class GuildInfoGUI implements GUI {
     }
     
     private void setupDefaultItems() {
-        // 工会名称
+        // Nome da guilda
         ItemStack nameItem = createItem(Material.NAME_TAG, "§6Nome da Guilda", 
             "§e" + guild.getName());
         inventory.setItem(10, nameItem);
         
-        // 工会标签
+        // Tag da guilda
         if (guild.getTag() != null && !guild.getTag().isEmpty()) {
             ItemStack tagItem = createItem(Material.OAK_SIGN, "§6Tag da Guilda", 
                 "§e[" + guild.getTag() + "]");
             inventory.setItem(12, tagItem);
         }
         
-        // 工会描述
+        // Descrição da guilda
         if (guild.getDescription() != null && !guild.getDescription().isEmpty()) {
             ItemStack descItem = createItem(Material.BOOK, "§6Descrição da Guilda", 
                 "§e" + guild.getDescription());
             inventory.setItem(14, descItem);
         }
         
-        // 会长信息
+        // Informações do líder
         ItemStack leaderItem = createItem(Material.GOLDEN_HELMET, "§6Líder", 
             "§e" + guild.getLeaderName());
         inventory.setItem(16, leaderItem);
         
-        // 成员数量 - 使用异步方法
+        // Quantidade de membros - Usar método assíncrono
         plugin.getGuildService().getGuildMemberCountAsync(guild.getId()).thenAccept(memberCount -> {
             CompatibleScheduler.runTask(plugin, () -> {
                 ItemStack memberItem = createItem(Material.PLAYER_HEAD, "§6Membros", 
@@ -156,27 +156,27 @@ public class GuildInfoGUI implements GUI {
             });
         });
         
-        // 工会等级
+        // Nível da guilda
         ItemStack levelItem = createItem(Material.EXPERIENCE_BOTTLE, "§6Nível da Guilda", 
             "§eNível " + guild.getLevel(),
             "§7Máx Membros: " + guild.getMaxMembers() + " pessoas");
         inventory.setItem(30, levelItem);
         
 
-        // 创建时间（使用现实时间格式）
+        // Data de criação (usar formato de tempo real)
         String createdTime = guild.getCreatedAt() != null
             ? guild.getCreatedAt().format(com.guild.core.time.TimeProvider.FULL_FORMATTER)
             : "Desconhecido";
         ItemStack timeItem = createItem(Material.CLOCK, "§6Criada em", "§e" + createdTime);
         inventory.setItem(34, timeItem);
         
-        // 工会状态
+        // Status da guilda
         String status = guild.isFrozen() ? "§cCongelada" : "§aNormal";
         ItemStack statusItem = createItem(Material.BEACON, "§6Status da Guilda", 
             status);
         inventory.setItem(36, statusItem);
         
-        // 返回按钮
+        // Botão de voltar
         ItemStack backItem = createItem(Material.ARROW, "§cVoltar", 
             "§eClique para voltar ao menu principal");
         inventory.setItem(49, backItem);
@@ -206,26 +206,26 @@ public class GuildInfoGUI implements GUI {
     }
 
     private String replacePlaceholdersAsync(String text, int memberCount) {
-        // 先使用PlaceholderUtils处理基础变量
+        // Primeiro usar PlaceholderUtils para processar variáveis básicas
         String result = PlaceholderUtils.replaceGuildPlaceholders(text, guild, player);
         
-        // 然后处理动态变量
+        // Depois processar variáveis dinâmicas
         return result
             .replace("{member_count}", String.valueOf(memberCount))
-            .replace("{online_member_count}", String.valueOf(memberCount)); // 暂时使用总成员数
+            .replace("{online_member_count}", String.valueOf(memberCount)); // Usar temporariamente o número total de membros
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         if (slot == 49) {
-            // 返回主菜单
+            // Voltar ao menu principal
             plugin.getGuiManager().openGUI(player, new MainGuildGUI(plugin));
         }
     }
     
     @Override
     public void onClose(Player player) {
-        // 关闭时的处理
+        // Processamento ao fechar
     }
     
     @Override
