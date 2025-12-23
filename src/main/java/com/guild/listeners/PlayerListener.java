@@ -1,17 +1,18 @@
 package com.guild.listeners;
 
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-
 import com.guild.GuildPlugin;
 import com.guild.core.gui.GUIManager;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+
 import com.guild.core.utils.CompatibleScheduler;
 
 /**
- * Listener de eventos do jogador
+ * Listener de Eventos de Jogador
  */
 public class PlayerListener implements Listener {
     
@@ -22,24 +23,24 @@ public class PlayerListener implements Listener {
     }
     
     /**
-     * Evento de jogador entrando no servidor
+     * Evento de entrada de jogador no servidor
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        // Verificar status de guerra da guilda
+        // Verifica o status de guerra da guilda
         checkWarStatus(event.getPlayer());
     }
     
     /**
-     * Verificar status de guerra da guilda e enviar notificações
+     * Verifica o status de guerra da guilda e envia notificação
      */
     private void checkWarStatus(org.bukkit.entity.Player player) {
-        // Verificar guilda do jogador de forma assíncrona
+        // Verifica a guilda do jogador assincronamente
         plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
             if (guild != null) {
-                // Verificar todas as relações da guilda
+                // Verifica todas as relações da guilda
                 plugin.getGuildService().getGuildRelationsAsync(guild.getId()).thenAccept(relations -> {
-                    // Garantir execução na thread principal
+                    // Garante execução na thread principal
                     CompatibleScheduler.runTask(plugin, () -> {
                         for (com.guild.models.GuildRelation relation : relations) {
                             if (relation.isWar()) {
@@ -55,11 +56,11 @@ public class PlayerListener implements Listener {
     }
     
     /**
-     * Evento de jogador saindo do servidor
+     * Evento de saída de jogador do servidor
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        // Limpar estado da GUI do jogador
+        // Limpa o estado da GUI do jogador
         GUIManager guiManager = plugin.getGuiManager();
         if (guiManager != null) {
             guiManager.closeGUI(event.getPlayer());
@@ -67,17 +68,17 @@ public class PlayerListener implements Listener {
     }
     
     /**
-     * Processar evento de entrada de chat (usado para modo de entrada da GUI)
+     * Processa evento de chat (usado para modo de entrada da GUI)
      */
     @EventHandler
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event) {
         GUIManager guiManager = plugin.getGuiManager();
         
         if (guiManager != null && guiManager.isInInputMode(event.getPlayer())) {
-            // Cancelar evento para impedir que a mensagem seja enviada no chat
+            // Cancela o evento para evitar envio da mensagem no chat
             event.setCancelled(true);
             
-            // Processar entrada - executar na thread principal
+            // Processa a entrada - executa na thread principal
             String input = event.getMessage();
             CompatibleScheduler.runTask(plugin, () -> {
                 try {
@@ -85,7 +86,7 @@ public class PlayerListener implements Listener {
                 } catch (Exception e) {
                     plugin.getLogger().severe("Erro ao processar entrada da GUI: " + e.getMessage());
                     e.printStackTrace();
-                    // Limpar modo de entrada quando ocorrer erro
+                    // Limpa o modo de entrada em caso de erro
                     guiManager.clearInputMode(event.getPlayer());
                 }
             });

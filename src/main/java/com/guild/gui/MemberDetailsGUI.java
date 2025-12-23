@@ -1,9 +1,11 @@
 package com.guild.gui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.guild.GuildPlugin;
+import com.guild.core.gui.GUI;
+import com.guild.core.utils.ColorUtils;
+import com.guild.core.utils.PlaceholderUtils;
+import com.guild.models.Guild;
+import com.guild.models.GuildMember;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -12,11 +14,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import com.guild.GuildPlugin;
-import com.guild.core.gui.GUI;
-import com.guild.core.utils.ColorUtils;
-import com.guild.models.Guild;
-import com.guild.models.GuildMember;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * GUI de Detalhes do Membro
@@ -48,41 +50,41 @@ public class MemberDetailsGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // Preencher borda
+        // Preenche a borda
         fillBorder(inventory);
         
-        // Configurar cabeça do membro
+        // Configura cabeça do membro
         setupMemberHead(inventory);
         
-        // Configurar informações básicas
+        // Configura informações básicas
         setupBasicInfo(inventory);
         
-        // Configurar informações de permissões
+        // Configura informações de permissão
         setupPermissionInfo(inventory);
         
-        // Configurar botões de ação
+        // Configura botões de ação
         setupActionButtons(inventory);
         
-        // Configurar botão de voltar
+        // Configura botão de voltar
         setupBackButton(inventory);
     }
     
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
-        // Verificar se é botão de ação
+        // Verifica se é botão de ação
         if (isActionButton(slot)) {
             handleActionButton(player, slot);
             return;
         }
         
-        // Verificar se é botão de voltar
+        // Verifica se é botão de voltar
         if (slot == 49) {
             plugin.getGuiManager().openGUI(player, new MemberManagementGUI(plugin, guild));
         }
     }
     
     /**
-     * Preencher borda
+     * Preenche a borda
      */
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
@@ -97,7 +99,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Configurar avatar de membro
+     * Configura cabeça do membro
      */
     private void setupMemberHead(Inventory inventory) {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
@@ -124,7 +126,7 @@ public class MemberDetailsGUI implements GUI {
             lore.add(ColorUtils.colorize("&7UUID: &f" + member.getPlayerUuid()));
             lore.add(ColorUtils.colorize("&7Cargo: &f" + member.getRole().getDisplayName()));
             
-            // Formatar tempo de ingresso
+            // Formata data de entrada
             if (member.getJoinedAt() != null) {
                 String joinTime = member.getJoinedAt().format(com.guild.core.time.TimeProvider.FULL_FORMATTER);
                 lore.add(ColorUtils.colorize("&7Entrou em: &f" + joinTime));
@@ -140,7 +142,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Configurar informações básicas
+     * Configura informações básicas
      */
     private void setupBasicInfo(Inventory inventory) {
         // Título de informações básicas
@@ -151,7 +153,7 @@ public class MemberDetailsGUI implements GUI {
         );
         inventory.setItem(20, infoTitle);
         
-        // Informações de cargo
+        // Informações do cargo
         ItemStack roleInfo = createItem(
             Material.GOLDEN_HELMET,
             ColorUtils.colorize("&eInformações do Cargo"),
@@ -181,7 +183,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Configurar informações de permissão
+     * Configura informações de permissão
      */
     private void setupPermissionInfo(Inventory inventory) {
         // Título de informações de permissão
@@ -212,10 +214,10 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Configurar botões de ação
+     * Configura botões de ação
      */
     private void setupActionButtons(Inventory inventory) {
-        // Verificar se o jogador atual tem permissão para executar operações
+        // Verifica se o jogador atual tem permissão para executar ação
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), viewer.getUniqueId()).thenAccept(viewerMember -> {
             if (viewerMember == null) return;
             
@@ -275,7 +277,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Configurar botão de voltar
+     * Configura botão de voltar
      */
     private void setupBackButton(Inventory inventory) {
         ItemStack back = createItem(
@@ -287,14 +289,14 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Verificar se é botão de ação
+     * Verifica se é botão de ação
      */
     private boolean isActionButton(int slot) {
         return slot == 37 || slot == 39 || slot == 41;
     }
     
     /**
-     * Processar clique em botão de ação
+     * Processa clique em botão de ação
      */
     private void handleActionButton(Player player, int slot) {
         switch (slot) {
@@ -311,10 +313,10 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Processar expulsão de membro
+     * Processa expulsão de membro
      */
     private void handleKickMember(Player player) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(executor -> {
             if (executor == null || !executor.getRole().canKick()) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
@@ -331,10 +333,10 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Processar promoção/rebaixamento de membro
+     * Processa promoção/rebaixamento de membro
      */
     private void handlePromoteDemoteMember(Player player) {
-        // Verificar permissões
+        // Verifica permissão
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(executor -> {
             if (executor == null || executor.getRole() != GuildMember.Role.LEADER) {
                 String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta ação");
@@ -358,7 +360,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Processar envio de mensagem
+     * Processa envio de mensagem
      */
     private void handleSendMessage(Player player) {
         String message = plugin.getConfigManager().getMessagesConfig().getString("gui.open-chat", "&eDigite a mensagem para enviar para {member}:")
@@ -366,12 +368,12 @@ public class MemberDetailsGUI implements GUI {
         player.sendMessage(ColorUtils.colorize(message));
         player.closeInventory();
         
-        // Aqui pode integrar sistema de chat, por enquanto apenas aviso
-        // TODO: Implementar sistema de mensagens privadas
+        // Aqui pode ser integrado o sistema de chat, por enquanto é apenas um aviso
+        // TODO: Implementar sistema de mensagem privada
     }
     
     /**
-     * Obter nível do cargo
+     * Obtém nível do cargo
      */
     private String getRoleLevel(GuildMember.Role role) {
         switch (role) {
@@ -385,7 +387,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Verificar se o jogador está online
+     * Verifica se jogador está online
      */
     private boolean isPlayerOnline(java.util.UUID playerUuid) {
         Player player = plugin.getServer().getPlayer(playerUuid);
@@ -423,7 +425,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Obter contribuição do membro
+     * Obtém contribuição do membro
      */
     private String getMemberContribution() {
         // TODO: Implementar sistema de estatísticas de contribuição
@@ -431,7 +433,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Obter atividade do membro
+     * Obtém atividade do membro
      */
     private String getMemberActivity() {
         // TODO: Implementar sistema de estatísticas de atividade
@@ -439,7 +441,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Obter lista de permissões do cargo
+     * Obtém lista de permissões do cargo
      */
     private List<String> getRolePermissions(GuildMember.Role role) {
         List<String> permissions = new ArrayList<>();
@@ -473,7 +475,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Obter nível de permissão
+     * Obtém nível de permissão
      */
     private String getPermissionLevel(GuildMember.Role role) {
         switch (role) {
@@ -487,7 +489,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Obter ações executáveis
+     * Obtém ações executáveis
      */
     private String getExecutableActions(GuildMember.Role role) {
         switch (role) {
@@ -501,7 +503,7 @@ public class MemberDetailsGUI implements GUI {
     }
     
     /**
-     * Criar item
+     * Cria item
      */
     private ItemStack createItem(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);

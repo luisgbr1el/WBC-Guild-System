@@ -1,13 +1,12 @@
 package com.guild.listeners;
 
+import com.guild.GuildPlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 
-import com.guild.GuildPlugin;
-
 /**
- * Listener de eventos da guilda
+ * Listener de Eventos da Guilda
  */
 public class GuildListener implements Listener {
     
@@ -22,7 +21,7 @@ public class GuildListener implements Listener {
      */
     @EventHandler
     public void onPlayerChat(PlayerChatEvent event) {
-        // Aqui pode adicionar funcionalidade de chat da guilda
-        // Por exemplo, detectar prefixo da guilda, processar chat da guilda, etc.
+        // Aqui pode ser adicionada a funcionalidade de chat da guilda
+        // Como detectar prefixo da guilda, processar chat da guilda, etc.
     }
 }
