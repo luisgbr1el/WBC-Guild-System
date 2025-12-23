@@ -9,7 +9,7 @@
     <version>1.2.1</version>
     <packaging>jar</packaging>
 
-    <name>Guild Plugin</name>
+    <name>WBC Guild System</name>
     <description>一个功能完整的我的世界工会插件</description>
 
     <properties>
@@ -59,13 +59,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Vault API -->
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-            <scope>provided</scope>
-        </dependency>
+
 
         <!-- MySQL Connector -->
         <dependency>

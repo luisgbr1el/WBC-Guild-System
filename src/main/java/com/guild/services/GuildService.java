@@ -7,8 +7,6 @@ import com.guild.models.GuildMember;
 import com.guild.models.GuildApplication;
 import com.guild.models.GuildInvitation;
 import com.guild.models.GuildRelation;
-import com.guild.models.GuildEconomy;
-import com.guild.models.GuildContribution;
 import com.guild.models.GuildLog;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -36,13 +34,13 @@ public class GuildService {
         this.logger = plugin.getLogger();
     }
     
-    // 时间工具：统一使用操作系统本地时间字符串（yyyy-MM-dd HH:mm:ss）
+    // Ferramenta de tempo: use uniformemente a string de hora local do sistema operacional (yyyy-MM-dd HH:mm:ss)
     private String nowString() { return TimeProvider.nowString(); }
     private String plusMinutesString(int minutes) { return TimeProvider.plusMinutesString(minutes); }
     private String plusDaysString(int days) { return TimeProvider.plusDaysString(days); }
     
     /**
-     * 创建工会 (异步)
+     * Criar guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> createGuildAsync(String name, String tag, String description, UUID leaderUuid, String leaderName) {
         return getGuildByNameAsync(name).thenCompose(existingGuildByName -> {
@@ -57,7 +55,7 @@ public class GuildService {
                 
                 return CompletableFuture.supplyAsync(() -> {
                     try {
-                        String sql = "INSERT INTO guilds (name, tag, description, leader_uuid, leader_name, balance, level, max_members, frozen, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0.0, 1, 6, 0, ?, ?)";
+                        String sql = "INSERT INTO guilds (name, tag, description, leader_uuid, leader_name, level, max_members, frozen, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 1, 6, 0, ?, ?)";
                         
                         try (Connection conn = databaseManager.getConnection();
                              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -75,25 +73,25 @@ public class GuildService {
                                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                                     if (rs.next()) {
                                         int guildId = rs.getInt(1);
-                                        logger.info("工会创建成功: " + name + " (ID: " + guildId + ")");
+                                        logger.info("Guilda criada com sucesso: " + name + " (ID: " + guildId + ")");
                                         return guildId;
                                     }
                                 }
                             }
                         }
                     } catch (SQLException e) {
-                        logger.severe("创建工会时发生错误: " + e.getMessage());
+                        logger.severe("Erro ao criar guilda: " + e.getMessage());
                     }
                     return -1;
                 }).thenCompose(guildId -> {
                     if ((Integer) guildId > 0) {
-                        // 添加会长为工会成员（避免重复查询）
+                        // Adicionar o líder como membro da guilda (evitar consultas repetidas)
                         return addGuildMemberDirectAsync((Integer) guildId, leaderUuid, leaderName, GuildMember.Role.LEADER)
                             .thenCompose(success -> {
                                 if (success) {
-                                    // 记录工会创建日志
+                                    // Registrar log de criação da guilda
                                     return logGuildActionAsync((Integer) guildId, name, leaderUuid.toString(), leaderName,
-                                        GuildLog.LogType.GUILD_CREATED, "创建工会", "工会名称: " + name + ", 标签: " + tag)
+                                        GuildLog.LogType.GUILD_CREATED, "Criar Guilda", "Nome da Guilda: " + name + ", Tag: " + tag)
                                         .thenApply(logSuccess -> success);
                                 }
                                 return CompletableFuture.completedFuture(success);
@@ -106,19 +104,19 @@ public class GuildService {
     }
     
     /**
-     * 创建工会 (同步包装器)
+     * Criar guilda (Wrapper Síncrono)
      */
     public boolean createGuild(String name, String tag, String description, UUID leaderUuid, String leaderName) {
         try {
             return createGuildAsync(name, tag, description, leaderUuid, leaderName).get();
         } catch (Exception e) {
-            logger.severe("创建工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao criar guilda: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 删除工会 (异步)
+     * Deletar guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> deleteGuildAsync(int guildId, UUID requesterUuid) {
         return getGuildByIdAsync(guildId).thenCompose(guild -> {
@@ -127,17 +125,14 @@ public class GuildService {
             }
             
             return getGuildMemberAsync(requesterUuid).thenCompose(member -> {
-                // 检查权限
+                // Verificar permissões
                 if (member == null || member.getGuildId() != guildId || member.getRole() != GuildMember.Role.LEADER) {
                     return CompletableFuture.completedFuture(false);
                 }
                 
                 return CompletableFuture.supplyAsync(() -> {
                     try {
-                        // 获取工会余额用于退款
-                        double guildBalance = guild.getBalance();
-                        
-                        // 删除所有工会成员
+                        // Deletar todos os membros da guilda
                         String deleteMembersSql = "DELETE FROM guild_members WHERE guild_id = ?";
                         try (Connection conn = databaseManager.getConnection();
                              PreparedStatement stmt = conn.prepareStatement(deleteMembersSql)) {
@@ -145,39 +140,24 @@ public class GuildService {
                             stmt.executeUpdate();
                         }
                         
-                        // 删除工会
+                        // Deletar guilda
                         String deleteGuildSql = "DELETE FROM guilds WHERE id = ?";
                         try (Connection conn = databaseManager.getConnection();
                              PreparedStatement stmt = conn.prepareStatement(deleteGuildSql)) {
                             stmt.setInt(1, guildId);
                             int affectedRows = stmt.executeUpdate();
                             if (affectedRows > 0) {
-                                logger.info("工会删除成功: " + guild.getName() + " (ID: " + guildId + ")");
+                                logger.info("Guilda deletada com sucesso: " + guild.getName() + " (ID: " + guildId + ")");
                                 
-                                // 退款给会长（如果经济系统可用）
-                                if (guildBalance > 0 && plugin.getEconomyManager().isVaultAvailable()) {
-                                    try {
-                                        org.bukkit.entity.Player leaderPlayer = org.bukkit.Bukkit.getPlayer(guild.getLeaderUuid());
-                                        if (leaderPlayer != null && leaderPlayer.isOnline()) {
-                                            plugin.getEconomyManager().deposit(leaderPlayer, guildBalance);
-                                            String message = plugin.getConfigManager().getMessagesConfig().getString("economy.disband-compensation", "&a工会解散，您获得了 {amount} 金币补偿！")
-                                                .replace("{amount}", plugin.getEconomyManager().format(guildBalance));
-                                            leaderPlayer.sendMessage(com.guild.core.utils.ColorUtils.colorize(message));
-                                        }
-                                    } catch (Exception e) {
-                                        logger.warning("退款给会长时发生错误: " + e.getMessage());
-                                    }
-                                }
-                                
-                                // 记录工会解散日志
+                                // Registrar log de dissolução da guilda
                                 logGuildActionAsync(guildId, guild.getName(), guild.getLeaderUuid().toString(), guild.getLeaderName(),
-                                    GuildLog.LogType.GUILD_DISSOLVED, "工会解散", "工会余额: " + guildBalance + " 金币");
+                                    GuildLog.LogType.GUILD_DISSOLVED, "Dissolução da Guilda", "Guilda dissolvida");
                                 
                                 return true;
                             }
                         }
                     } catch (SQLException e) {
-                        logger.severe("删除工会时发生错误: " + e.getMessage());
+                        logger.severe("Erro ao deletar guilda: " + e.getMessage());
                     }
                     return false;
                 });
@@ -186,19 +166,19 @@ public class GuildService {
     }
     
     /**
-     * 删除工会 (同步包装器)
+     * Deletar guilda (Wrapper Síncrono)
      */
     public boolean deleteGuild(int guildId, UUID requesterUuid) {
         try {
             return deleteGuildAsync(guildId, requesterUuid).get();
         } catch (Exception e) {
-            logger.severe("删除工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao deletar guilda: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 更新工会信息 (异步)
+     * Atualizar informações da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> updateGuildAsync(int guildId, String name, String tag, String description, UUID requesterUuid) {
         return getGuildByIdAsync(guildId).thenCompose(guild -> {
@@ -207,13 +187,13 @@ public class GuildService {
             }
             
             return getGuildMemberAsync(requesterUuid).thenCompose(member -> {
-                // 检查权限
+                // Verificar permissões
                 if (member == null || member.getGuildId() != guildId || 
                     (member.getRole() != GuildMember.Role.LEADER && member.getRole() != GuildMember.Role.OFFICER)) {
                     return CompletableFuture.completedFuture(false);
                 }
                 
-                // 检查名称和标签是否与其他工会冲突
+                // Verificar se o nome e a tag conflitam com outras guildas
                 CompletableFuture<Boolean> nameCheck = CompletableFuture.completedFuture(true);
                 if (name != null && !name.equals(guild.getName())) {
                     nameCheck = getGuildByNameAsync(name).thenApply(existingGuild -> existingGuild == null);
@@ -245,12 +225,12 @@ public class GuildService {
                                     
                                     int affectedRows = stmt.executeUpdate();
                                     if (affectedRows > 0) {
-                                        logger.info("工会信息更新成功: " + guild.getName() + " (ID: " + guildId + ")");
+                                        logger.info("Informações da guilda atualizadas com sucesso: " + guild.getName() + " (ID: " + guildId + ")");
                                         return true;
                                     }
                                 }
                             } catch (SQLException e) {
-                                logger.severe("更新工会信息时发生错误: " + e.getMessage());
+                                logger.severe("Erro ao atualizar informações da guilda: " + e.getMessage());
                             }
                             return false;
                         });
@@ -260,19 +240,19 @@ public class GuildService {
     }
     
     /**
-     * 更新工会信息 (同步包装器)
+     * Atualizar informações da guilda (Wrapper Síncrono)
      */
     public boolean updateGuild(int guildId, String name, String tag, String description, UUID requesterUuid) {
         try {
             return updateGuildAsync(guildId, name, tag, description, requesterUuid).get();
         } catch (Exception e) {
-            logger.severe("更新工会信息时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao atualizar informações da guilda: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 添加工会成员 (异步)
+     * Adicionar membro da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> addGuildMemberAsync(int guildId, UUID playerUuid, String playerName, GuildMember.Role role) {
         return getPlayerGuildAsync(playerUuid).thenCompose(existingGuild -> {
@@ -296,15 +276,15 @@ public class GuildService {
                     
                     int affectedRows = stmt.executeUpdate();
                     if (affectedRows > 0) {
-                        logger.info("玩家 " + playerName + " 加入工会 (ID: " + guildId + ")");
-                        // 更新内置权限缓存
+                        logger.info("Jogador " + playerName + " entrou na guilda (ID: " + guildId + ")");
+                        // Atualizar cache de permissões interno
                         try { plugin.getPermissionManager().updatePlayerPermissions(playerUuid); } catch (Exception ignored) {}
                         
-                        // 记录成员加入日志
+                        // Registrar log de entrada de membro
                         getGuildByIdAsync(guildId).thenAccept(guild -> {
                             if (guild != null) {
                                 logGuildActionAsync(guildId, guild.getName(), playerUuid.toString(), playerName,
-                                    GuildLog.LogType.MEMBER_JOINED, "成员加入", "玩家: " + playerName + ", 职位: " + role.getDisplayName());
+                                    GuildLog.LogType.MEMBER_JOINED, "Membro Entrou", "Jogador: " + playerName + ", Cargo: " + role.getDisplayName());
                             }
                         });
                         
@@ -312,7 +292,7 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("添加工会成员时发生错误: " + e.getMessage());
+                logger.severe("Erro ao adicionar membro da guilda: " + e.getMessage());
             }
             return false;
         });
@@ -320,19 +300,19 @@ public class GuildService {
     }
     
     /**
-     * 添加工会成员 (同步包装器)
+     * Adicionar membro da guilda (Wrapper Síncrono)
      */
     public boolean addGuildMember(int guildId, UUID playerUuid, String playerName, GuildMember.Role role) {
         try {
             return addGuildMemberAsync(guildId, playerUuid, playerName, role).get();
         } catch (Exception e) {
-            logger.severe("添加工会成员时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao adicionar membro da guilda: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 移除工会成员 (异步)
+     * Remover membro da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> removeGuildMemberAsync(UUID playerUuid, UUID requesterUuid) {
         return getGuildMemberAsync(playerUuid).thenCompose(member -> {
@@ -341,17 +321,17 @@ public class GuildService {
             }
             
             return getGuildMemberAsync(requesterUuid).thenCompose(requester -> {
-                // 检查权限
+                // Verificar permissões
                 if (requester == null || requester.getGuildId() != member.getGuildId()) {
                     return CompletableFuture.completedFuture(false);
                 }
                 
-                // 会长不能被踢出，除非是自我离开
+                // O líder não pode ser expulso, a menos que saia por conta própria
                 if (member.getRole() == GuildMember.Role.LEADER && !playerUuid.equals(requesterUuid)) {
                     return CompletableFuture.completedFuture(false);
                 }
                 
-                // 只有会长和官员可以踢出成员
+                // Apenas o líder e oficiais podem expulsar membros
                 if (!playerUuid.equals(requesterUuid) && 
                     requester.getRole() != GuildMember.Role.LEADER && 
                     requester.getRole() != GuildMember.Role.OFFICER) {
@@ -369,18 +349,18 @@ public class GuildService {
                             
                             int affectedRows = stmt.executeUpdate();
                             if (affectedRows > 0) {
-                                logger.info("玩家 " + member.getPlayerName() + " 离开工会 (ID: " + member.getGuildId() + ")");
-                                // 更新内置权限缓存
+                                logger.info("Jogador " + member.getPlayerName() + " saiu da guilda (ID: " + member.getGuildId() + ")");
+                                // Atualizar cache de permissões interno
                                 try { plugin.getPermissionManager().updatePlayerPermissions(playerUuid); } catch (Exception ignored) {}
                                 
-                                // 记录成员离开日志
+                                // Registrar log de saída de membro
                                 getGuildByIdAsync(member.getGuildId()).thenAccept(guild -> {
                                     if (guild != null) {
                                         GuildLog.LogType logType = playerUuid.equals(requesterUuid) ? 
                                             GuildLog.LogType.MEMBER_LEFT : GuildLog.LogType.MEMBER_KICKED;
-                                        String description = playerUuid.equals(requesterUuid) ? "成员主动离开" : "成员被踢出";
-                                        String details = "玩家: " + member.getPlayerName() + 
-                                            (playerUuid.equals(requesterUuid) ? "" : ", 操作者: " + requester.getPlayerName());
+                                        String description = playerUuid.equals(requesterUuid) ? "Membro saiu" : "Membro expulso";
+                                        String details = "Jogador: " + member.getPlayerName() + 
+                                            (playerUuid.equals(requesterUuid) ? "" : ", Operador: " + requester.getPlayerName());
                                         
                                         logGuildActionAsync(member.getGuildId(), guild.getName(), 
                                             requesterUuid.toString(), requester.getPlayerName(),
@@ -392,7 +372,7 @@ public class GuildService {
                             }
                         }
                     } catch (SQLException e) {
-                        logger.severe("移除工会成员时发生错误: " + e.getMessage());
+                        logger.severe("Erro ao remover membro da guilda: " + e.getMessage());
                     }
                     return false;
                 });
@@ -401,19 +381,19 @@ public class GuildService {
     }
     
     /**
-     * 移除工会成员 (同步包装器)
+     * Remover membro da guilda (Wrapper Síncrono)
      */
     public boolean removeGuildMember(UUID playerUuid, UUID requesterUuid) {
         try {
             return removeGuildMemberAsync(playerUuid, requesterUuid).get();
         } catch (Exception e) {
-            logger.severe("移除工会成员时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao remover membro da guilda: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 更新成员角色 (异步)
+     * Atualizar cargo de membro (Assíncrono)
      */
     public CompletableFuture<Boolean> updateMemberRoleAsync(UUID playerUuid, GuildMember.Role newRole, UUID requesterUuid) {
         return getGuildMemberAsync(playerUuid).thenCompose(member -> {
@@ -422,7 +402,7 @@ public class GuildService {
             }
             
             return getGuildMemberAsync(requesterUuid).thenCompose(requester -> {
-                // 检查权限 - 只有会长可以更改角色
+                // Verificar permissões - Apenas o líder pode alterar cargos
                 if (requester == null || requester.getGuildId() != member.getGuildId() || 
                     requester.getRole() != GuildMember.Role.LEADER) {
                     return CompletableFuture.completedFuture(false);
@@ -440,20 +420,20 @@ public class GuildService {
                             
                             int affectedRows = stmt.executeUpdate();
                             if (affectedRows > 0) {
-                                logger.info("玩家 " + member.getPlayerName() + " 角色更新为: " + newRole.name());
-                                // 更新内置权限缓存
+                                logger.info("Jogador " + member.getPlayerName() + " cargo atualizado para: " + newRole.name());
+                                // Atualizar cache de permissões interno
                                 try { plugin.getPermissionManager().updatePlayerPermissions(playerUuid); } catch (Exception ignored) {}
                                 
-                                // 记录角色变更日志
+                                // Registrar log de alteração de cargo
                                 getGuildByIdAsync(member.getGuildId()).thenAccept(guild -> {
                                     if (guild != null) {
                                         GuildLog.LogType logType = newRole == GuildMember.Role.LEADER ? 
                                             GuildLog.LogType.LEADER_TRANSFERRED : 
                                             (newRole == GuildMember.Role.OFFICER ? GuildLog.LogType.MEMBER_PROMOTED : GuildLog.LogType.MEMBER_DEMOTED);
-                                        String description = newRole == GuildMember.Role.LEADER ? "会长转让" : 
-                                            (newRole == GuildMember.Role.OFFICER ? "成员升职" : "成员降职");
-                                        String details = "玩家: " + member.getPlayerName() + ", 新职位: " + newRole.getDisplayName() + 
-                                            ", 操作者: " + requester.getPlayerName();
+                                        String description = newRole == GuildMember.Role.LEADER ? "Transferência de Líder" : 
+                                            (newRole == GuildMember.Role.OFFICER ? "Promoção de Membro" : "Rebaixamento de Membro");
+                                        String details = "Jogador: " + member.getPlayerName() + ", Novo Cargo: " + newRole.getDisplayName() + 
+                                            ", Operador: " + requester.getPlayerName();
                                         
                                         logGuildActionAsync(member.getGuildId(), guild.getName(), 
                                             requesterUuid.toString(), requester.getPlayerName(),
@@ -465,7 +445,7 @@ public class GuildService {
                             }
                         }
                     } catch (SQLException e) {
-                        logger.severe("更新成员角色时发生错误: " + e.getMessage());
+                        logger.severe("Erro ao atualizar cargo do membro: " + e.getMessage());
                     }
                     return false;
                 });
@@ -474,19 +454,19 @@ public class GuildService {
     }
     
     /**
-     * 更新成员角色 (同步包装器)
+     * Atualizar cargo de membro (Wrapper Síncrono)
      */
     public boolean updateMemberRole(UUID playerUuid, GuildMember.Role newRole, UUID requesterUuid) {
         try {
             return updateMemberRoleAsync(playerUuid, newRole, requesterUuid).get();
         } catch (Exception e) {
-            logger.severe("更新成员角色时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao atualizar cargo do membro: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 获取玩家工会 (异步)
+     * Obter guilda do jogador (Assíncrono)
      */
     public CompletableFuture<Guild> getPlayerGuildAsync(UUID playerUuid) {
         return CompletableFuture.supplyAsync(() -> {
@@ -507,26 +487,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取玩家工会时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter guilda do jogador: " + e.getMessage());
             }
             return null;
         });
     }
     
     /**
-     * 获取玩家工会 (同步包装器)
+     * Obter guilda do jogador (Wrapper Síncrono)
      */
     public Guild getPlayerGuild(UUID playerUuid) {
         try {
             return getPlayerGuildAsync(playerUuid).get();
         } catch (Exception e) {
-            logger.severe("获取玩家工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter guilda do jogador: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * 获取工会成员 (异步)
+     * Obter membro da guilda (Assíncrono)
      */
     public CompletableFuture<GuildMember> getGuildMemberAsync(UUID playerUuid) {
         return CompletableFuture.supplyAsync(() -> {
@@ -545,26 +525,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取工会成员时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter membro da guilda: " + e.getMessage());
             }
             return null;
         });
     }
     
     /**
-     * 获取工会成员 (同步包装器)
+     * Obter membro da guilda (Wrapper Síncrono)
      */
     public GuildMember getGuildMember(UUID playerUuid) {
         try {
             return getGuildMemberAsync(playerUuid).get();
         } catch (Exception e) {
-            logger.severe("获取工会成员时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter membro da guilda: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * 获取工会成员数量 (异步)
+     * Obter contagem de membros da guilda (Assíncrono)
      */
     public CompletableFuture<Integer> getGuildMemberCountAsync(int guildId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -583,26 +563,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取工会成员数量时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter contagem de membros da guilda: " + e.getMessage());
             }
             return 0;
         });
     }
     
     /**
-     * 获取工会成员数量 (同步包装器)
+     * Obter contagem de membros da guilda (Wrapper Síncrono)
      */
     public int getGuildMemberCount(int guildId) {
         try {
             return getGuildMemberCountAsync(guildId).get();
         } catch (Exception e) {
-            logger.severe("获取工会成员数量时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter contagem de membros da guilda: " + e.getMessage());
             return 0;
         }
     }
     
     /**
-     * 获取工会所有成员 (异步)
+     * Obter todos os membros da guilda (Assíncrono)
      */
     public CompletableFuture<List<GuildMember>> getGuildMembersAsync(int guildId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -622,26 +602,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取工会成员列表时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter lista de membros da guilda: " + e.getMessage());
             }
             return members;
         });
     }
     
     /**
-     * 获取工会所有成员 (同步包装器)
+     * Obter todos os membros da guilda (Wrapper Síncrono)
      */
     public List<GuildMember> getGuildMembers(int guildId) {
         try {
             return getGuildMembersAsync(guildId).get();
         } catch (Exception e) {
-            logger.severe("获取工会成员列表时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter lista de membros da guilda: " + e.getMessage());
             return new ArrayList<>();
         }
     }
     
     /**
-     * 根据ID获取工会 (异步)
+     * Obter guilda por ID (Assíncrono)
      */
     public CompletableFuture<Guild> getGuildByIdAsync(int guildId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -660,26 +640,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("根据ID获取工会时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter guilda por ID: " + e.getMessage());
             }
             return null;
         });
     }
     
     /**
-     * 根据ID获取工会 (同步包装器)
+     * Obter guilda por ID (Wrapper Síncrono)
      */
     public Guild getGuildById(int guildId) {
         try {
             return getGuildByIdAsync(guildId).get();
         } catch (Exception e) {
-            logger.severe("根据ID获取工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter guilda por ID: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * 根据名称获取工会 (异步)
+     * Obter guilda por nome (Assíncrono)
      */
     public CompletableFuture<Guild> getGuildByNameAsync(String name) {
         return CompletableFuture.supplyAsync(() -> {
@@ -698,26 +678,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("根据名称获取工会时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter guilda por nome: " + e.getMessage());
             }
             return null;
         });
     }
     
     /**
-     * 根据名称获取工会 (同步包装器)
+     * Obter guilda por nome (Wrapper Síncrono)
      */
     public Guild getGuildByName(String name) {
         try {
             return getGuildByNameAsync(name).get();
         } catch (Exception e) {
-            logger.severe("根据名称获取工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter guilda por nome: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * 根据标签获取工会 (异步)
+     * Obter guilda por tag (Assíncrono)
      */
     public CompletableFuture<Guild> getGuildByTagAsync(String tag) {
         return CompletableFuture.supplyAsync(() -> {
@@ -736,26 +716,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("根据标签获取工会时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter guilda por tag: " + e.getMessage());
             }
             return null;
         });
     }
     
     /**
-     * 根据标签获取工会 (同步包装器)
+     * Obter guilda por tag (Wrapper Síncrono)
      */
     public Guild getGuildByTag(String tag) {
         try {
             return getGuildByTagAsync(tag).get();
         } catch (Exception e) {
-            logger.severe("根据标签获取工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter guilda por tag: " + e.getMessage());
             return null;
         }
     }
     
     /**
-     * 获取所有工会 (异步)
+     * Obter todas as guildas (Assíncrono)
      */
     public CompletableFuture<List<Guild>> getAllGuildsAsync() {
         return CompletableFuture.supplyAsync(() -> {
@@ -772,26 +752,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取所有工会时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter todas as guildas: " + e.getMessage());
             }
             return guilds;
         });
     }
     
     /**
-     * 获取所有工会 (同步包装器)
+     * Obter todas as guildas (Wrapper Síncrono)
      */
     public List<Guild> getAllGuilds() {
         try {
             return getAllGuildsAsync().get();
         } catch (Exception e) {
-            logger.severe("获取所有工会时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter todas as guildas: " + e.getMessage());
             return new ArrayList<>();
         }
     }
     
     /**
-     * 检查是否为工会会长
+     * Verificar se é líder da guilda
      */
     public boolean isGuildLeader(UUID playerUuid) {
         GuildMember member = getGuildMember(playerUuid);
@@ -799,7 +779,7 @@ public class GuildService {
     }
     
     /**
-     * 检查是否为指定工会的会长
+     * Verificar se é líder da guilda especificada
      */
     public boolean isGuildLeader(UUID playerUuid, int guildId) {
         GuildMember member = getGuildMember(playerUuid);
@@ -807,7 +787,7 @@ public class GuildService {
     }
     
     /**
-     * 检查是否为工会官员
+     * Verificar se é oficial da guilda
      */
     public boolean isGuildOfficer(UUID playerUuid) {
         GuildMember member = getGuildMember(playerUuid);
@@ -815,7 +795,7 @@ public class GuildService {
     }
     
     /**
-     * 检查是否有工会权限
+     * Verificar se tem permissões de guilda
      */
     public boolean hasGuildPermission(UUID playerUuid) {
         GuildMember member = getGuildMember(playerUuid);
@@ -823,7 +803,7 @@ public class GuildService {
     }
     
     /**
-     * 从ResultSet创建Guild对象
+     * Criar objeto Guild a partir do ResultSet
      */
     private Guild createGuildFromResultSet(ResultSet rs) throws SQLException {
         Guild guild = new Guild();
@@ -834,34 +814,8 @@ public class GuildService {
         guild.setLeaderUuid(UUID.fromString(rs.getString("leader_uuid")));
         guild.setLeaderName(rs.getString("leader_name"));
         
-        // 家的位置信息（安全处理空值）
-        String homeWorld = rs.getString("home_world");
-        guild.setHomeWorld(homeWorld);
-        
-        if (homeWorld != null) {
-            guild.setHomeX(rs.getDouble("home_x"));
-            guild.setHomeY(rs.getDouble("home_y"));
-            guild.setHomeZ(rs.getDouble("home_z"));
-            guild.setHomeYaw(rs.getFloat("home_yaw"));
-            guild.setHomePitch(rs.getFloat("home_pitch"));
-        } else {
-            // 如果home_world为null，设置默认值
-            guild.setHomeX(0.0);
-            guild.setHomeY(0.0);
-            guild.setHomeZ(0.0);
-            guild.setHomeYaw(0.0f);
-            guild.setHomePitch(0.0f);
-        }
-        
         guild.setCreatedAt(parseTimestamp(rs, "created_at"));
         guild.setUpdatedAt(parseTimestamp(rs, "updated_at"));
-        
-        // 读取economy相关列（安全处理，如果列不存在则使用默认值）
-        try {
-            guild.setBalance(rs.getDouble("balance"));
-        } catch (SQLException e) {
-            guild.setBalance(0.0);
-        }
         
         try {
             guild.setLevel(rs.getInt("level"));
@@ -885,7 +839,7 @@ public class GuildService {
     }
     
     /**
-     * 从ResultSet创建GuildMember对象
+     * Criar objeto GuildMember a partir do ResultSet
      */
     private GuildMember createGuildMemberFromResultSet(ResultSet rs) throws SQLException {
         GuildMember member = new GuildMember();
@@ -899,10 +853,10 @@ public class GuildService {
     }
     
     /**
-     * 解析时间戳
+     * Analisar timestamp
      */
     private java.time.LocalDateTime parseTimestamp(ResultSet rs, String columnName) throws SQLException {
-        // 优先以字符串按统一格式解析，避免驱动按时区转换导致偏差
+        // Analisar preferencialmente como string no formato unificado, para evitar desvios de conversão de fuso horário pelo driver
         String s = rs.getString(columnName);
         if (s != null && !s.isEmpty()) {
             try {
@@ -911,11 +865,11 @@ public class GuildService {
                 try {
                     return LocalDateTime.parse(s.replace(" ", "T"));
                 } catch (Exception ex) {
-                    logger.warning("无法解析时间戳: " + s);
+                    logger.warning("Não foi possível analisar o timestamp: " + s);
                 }
             }
         }
-        // 回退：使用驱动时间戳
+        // Fallback: usar timestamp do driver
         try {
             Timestamp ts = rs.getTimestamp(columnName);
             if (ts != null) return ts.toLocalDateTime();
@@ -926,12 +880,12 @@ public class GuildService {
     
     
     /**
-     * 提交申请 (异步)
+     * Enviar aplicação (Assíncrono)
      */
     public CompletableFuture<Boolean> submitApplicationAsync(int guildId, UUID playerUuid, String playerName, String message) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                // 检查是否已有待处理的申请
+                // Verificar se já existe uma aplicação pendente
                 if (hasPendingApplication(playerUuid, guildId)) {
                     return false;
                 }
@@ -950,13 +904,13 @@ public class GuildService {
                     
                     int affectedRows = stmt.executeUpdate();
                     if (affectedRows > 0) {
-                        logger.info("玩家 " + playerName + " 提交了加入工会申请 (工会ID: " + guildId + ")");
+                        logger.info("Jogador " + playerName + " enviou aplicação para guilda (ID: " + guildId + ")");
                         
-                        // 记录申请提交日志
+                        // Registrar log de envio de aplicação
                         getGuildByIdAsync(guildId).thenAccept(guild -> {
                             if (guild != null) {
                                 logGuildActionAsync(guildId, guild.getName(), playerUuid.toString(), playerName,
-                                    GuildLog.LogType.APPLICATION_SUBMITTED, "申请提交", "申请消息: " + message);
+                                    GuildLog.LogType.APPLICATION_SUBMITTED, "Aplicação Enviada", "Mensagem: " + message);
                             }
                         });
                         
@@ -964,26 +918,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("提交申请时发生错误: " + e.getMessage());
+                logger.severe("Erro ao enviar aplicação: " + e.getMessage());
             }
             return false;
         });
     }
     
     /**
-     * 提交申请 (同步包装器)
+     * Enviar aplicação (Wrapper Síncrono)
      */
     public boolean submitApplication(int guildId, UUID playerUuid, String playerName, String message) {
         try {
             return submitApplicationAsync(guildId, playerUuid, playerName, message).get();
         } catch (Exception e) {
-            logger.severe("提交申请时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao enviar aplicação: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 处理申请 (异步)
+     * Processar aplicação (Assíncrono)
      */
     public CompletableFuture<Boolean> processApplicationAsync(int applicationId, GuildApplication.ApplicationStatus status, UUID processorUuid) {
         return getApplicationByIdAsync(applicationId).thenCompose(application -> {
@@ -992,7 +946,7 @@ public class GuildService {
             }
             
             return getGuildMemberAsync(processorUuid).thenCompose(processor -> {
-                // 检查处理者权限
+                // Verificar permissões do processador
                 if (processor == null || processor.getGuildId() != application.getGuildId() || 
                     (processor.getRole() != GuildMember.Role.LEADER && processor.getRole() != GuildMember.Role.OFFICER)) {
                     return CompletableFuture.completedFuture(false);
@@ -1010,15 +964,15 @@ public class GuildService {
                             
                             int affectedRows = stmt.executeUpdate();
                             if (affectedRows > 0) {
-                                logger.info("申请处理完成: " + application.getPlayerName() + " -> " + status.name());
+                                logger.info("Aplicação processada: " + application.getPlayerName() + " -> " + status.name());
                                 
-                                // 记录申请处理日志
+                                // Registrar log de processamento de aplicação
                                 getGuildByIdAsync(application.getGuildId()).thenAccept(guild -> {
                                     if (guild != null) {
                                         GuildLog.LogType logType = status == GuildApplication.ApplicationStatus.APPROVED ? 
                                             GuildLog.LogType.APPLICATION_ACCEPTED : GuildLog.LogType.APPLICATION_REJECTED;
-                                        String description = status == GuildApplication.ApplicationStatus.APPROVED ? "申请接受" : "申请拒绝";
-                                        String details = "申请人: " + application.getPlayerName() + ", 处理者: " + processor.getPlayerName();
+                                        String description = status == GuildApplication.ApplicationStatus.APPROVED ? "Aplicação Aceita" : "Aplicação Recusada";
+                                        String details = "Candidato: " + application.getPlayerName() + ", Processador: " + processor.getPlayerName();
                                         
                                         logGuildActionAsync(application.getGuildId(), guild.getName(), 
                                             processorUuid.toString(), processor.getPlayerName(),
@@ -1030,12 +984,12 @@ public class GuildService {
                             }
                         }
                     } catch (SQLException e) {
-                        logger.severe("处理申请时发生错误: " + e.getMessage());
+                        logger.severe("Erro ao processar aplicação: " + e.getMessage());
                     }
                     return false;
                 }).thenCompose(success -> {
                     if (success && status == GuildApplication.ApplicationStatus.APPROVED) {
-                        // 如果申请被通过，自动添加成员
+                        // Se a aplicação for aprovada, adicionar membro automaticamente
                         return addGuildMemberAsync(application.getGuildId(), application.getPlayerUuid(), 
                                                   application.getPlayerName(), GuildMember.Role.MEMBER);
                     }
@@ -1046,19 +1000,19 @@ public class GuildService {
     }
     
     /**
-     * 处理申请 (同步包装器)
+     * Processar aplicação (Wrapper Síncrono)
      */
     public boolean processApplication(int applicationId, GuildApplication.ApplicationStatus status, UUID processorUuid) {
         try {
             return processApplicationAsync(applicationId, status, processorUuid).get();
         } catch (Exception e) {
-            logger.severe("处理申请时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao processar aplicação: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 检查是否有待处理的申请 (异步)
+     * Verificar se há aplicações pendentes (Assíncrono)
      */
     public CompletableFuture<Boolean> hasPendingApplicationAsync(UUID playerUuid, int guildId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -1079,26 +1033,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("检查待处理申请时发生错误: " + e.getMessage());
+                logger.severe("Erro ao verificar aplicações pendentes: " + e.getMessage());
             }
             return false;
         });
     }
     
     /**
-     * 检查是否有待处理的申请 (同步包装器)
+     * Verificar se há aplicações pendentes (Wrapper Síncrono)
      */
     public boolean hasPendingApplication(UUID playerUuid, int guildId) {
         try {
             return hasPendingApplicationAsync(playerUuid, guildId).get();
         } catch (Exception e) {
-            logger.severe("检查待处理申请时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao verificar aplicações pendentes: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 获取工会申请列表 (异步)
+     * Obter lista de aplicações da guilda (Assíncrono)
      */
     public CompletableFuture<List<GuildApplication>> getGuildApplicationsAsync(int guildId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -1118,26 +1072,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取工会申请列表时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter lista de aplicações da guilda: " + e.getMessage());
             }
             return applications;
         });
     }
     
     /**
-     * 获取工会申请列表 (同步包装器)
+     * Obter lista de aplicações da guilda (Wrapper Síncrono)
      */
     public List<GuildApplication> getGuildApplications(int guildId) {
         try {
             return getGuildApplicationsAsync(guildId).get();
         } catch (Exception e) {
-            logger.severe("获取工会申请列表时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter lista de aplicações da guilda: " + e.getMessage());
             return new ArrayList<>();
         }
     }
     
     /**
-     * 获取玩家申请列表 (异步)
+     * Obter lista de aplicações do jogador (Assíncrono)
      */
     public CompletableFuture<List<GuildApplication>> getPlayerApplicationsAsync(UUID playerUuid) {
         return CompletableFuture.supplyAsync(() -> {
@@ -1157,26 +1111,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取玩家申请列表时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter lista de aplicações do jogador: " + e.getMessage());
             }
             return applications;
         });
     }
     
     /**
-     * 获取玩家申请列表 (同步包装器)
+     * Obter lista de aplicações do jogador (Wrapper Síncrono)
      */
     public List<GuildApplication> getPlayerApplications(UUID playerUuid) {
         try {
             return getPlayerApplicationsAsync(playerUuid).get();
         } catch (Exception e) {
-            logger.severe("获取玩家申请列表时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter lista de aplicações do jogador: " + e.getMessage());
             return new ArrayList<>();
         }
     }
     
     /**
-     * 根据ID获取申请 (异步)
+     * Obter aplicação por ID (Assíncrono)
      */
     public CompletableFuture<GuildApplication> getApplicationByIdAsync(int applicationId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -1195,26 +1149,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("根据ID获取申请时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter aplicação por ID: " + e.getMessage());
             }
             return null;
         });
     }
     
     /**
-     * 根据ID获取申请 (同步包装器)
+     * Obter aplicação por ID (Wrapper Síncrono)
      */
     public GuildApplication getApplicationById(int applicationId) {
         try {
             return getApplicationByIdAsync(applicationId).get();
         } catch (Exception e) {
-            logger.severe("根据ID获取申请时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter aplicação por ID: " + e.getMessage());
             return null;
         }
     }
     
         /**
-     * 从ResultSet创建GuildApplication对象
+     * Criar objeto GuildApplication a partir do ResultSet
      */
     private GuildApplication createGuildApplicationFromResultSet(ResultSet rs) throws SQLException {
         GuildApplication application = new GuildApplication();
@@ -1229,99 +1183,11 @@ public class GuildService {
          return application;
      }
      
-     /**
-      * 设置工会家 (异步)
-      */
-     public CompletableFuture<Boolean> setGuildHomeAsync(int guildId, org.bukkit.Location location, UUID requesterUuid) {
-         return getGuildByIdAsync(guildId).thenCompose(guild -> {
-             if (guild == null) {
-                 return CompletableFuture.completedFuture(false);
-             }
-             
-             return getGuildMemberAsync(requesterUuid).thenCompose(member -> {
-                 // 检查权限 - 只有会长可以设置家
-                 if (member == null || member.getGuildId() != guildId || member.getRole() != GuildMember.Role.LEADER) {
-                     return CompletableFuture.completedFuture(false);
-                 }
-                 
-                 return CompletableFuture.supplyAsync(() -> {
-                     try {
-                         String sql = "UPDATE guilds SET home_world = ?, home_x = ?, home_y = ?, home_z = ?, home_yaw = ?, home_pitch = ?, updated_at = ? WHERE id = ?";
-                         
-                         try (Connection conn = databaseManager.getConnection();
-                              PreparedStatement stmt = conn.prepareStatement(sql)) {
-                             
-                             stmt.setString(1, location.getWorld().getName());
-                             stmt.setDouble(2, location.getX());
-                             stmt.setDouble(3, location.getY());
-                             stmt.setDouble(4, location.getZ());
-                             stmt.setFloat(5, location.getYaw());
-                             stmt.setFloat(6, location.getPitch());
-                             stmt.setString(7, nowString());
-                             stmt.setInt(8, guildId);
-                             
-                             int affectedRows = stmt.executeUpdate();
-                             if (affectedRows > 0) {
-                                 logger.info("工会家设置成功: " + guild.getName() + " (ID: " + guildId + ")");
-                                 return true;
-                             }
-                         }
-                     } catch (SQLException e) {
-                         logger.severe("设置工会家时发生错误: " + e.getMessage());
-                     }
-                     return false;
-                 });
-             });
-         });
-     }
+
+     // ==================== Sistema de Convites ====================
      
      /**
-      * 设置工会家 (同步包装器)
-      */
-     public boolean setGuildHome(int guildId, org.bukkit.Location location, UUID requesterUuid) {
-         try {
-             return setGuildHomeAsync(guildId, location, requesterUuid).get();
-         } catch (Exception e) {
-             logger.severe("设置工会家时发生异常: " + e.getMessage());
-             return false;
-         }
-     }
-     
-     /**
-      * 获取工会家位置 (异步)
-      */
-     public CompletableFuture<org.bukkit.Location> getGuildHomeAsync(int guildId) {
-         return getGuildByIdAsync(guildId).thenApply(guild -> {
-             if (guild == null || !guild.hasHome()) {
-                 return null;
-             }
-             
-             org.bukkit.World world = plugin.getServer().getWorld(guild.getHomeWorld());
-             if (world == null) {
-                 logger.warning("工会家所在世界不存在: " + guild.getHomeWorld());
-                 return null;
-             }
-             
-             return guild.getHomeLocation(world);
-         });
-     }
-     
-     /**
-      * 获取工会家位置 (同步包装器)
-      */
-     public org.bukkit.Location getGuildHome(int guildId) {
-         try {
-             return getGuildHomeAsync(guildId).get();
-         } catch (Exception e) {
-             logger.severe("获取工会家时发生异常: " + e.getMessage());
-             return null;
-         }
-     }
-     
-     // ==================== 邀请系统 ====================
-     
-     /**
-      * 发送邀请 (异步)
+      * Enviar convite (Assíncrono)
       */
      public CompletableFuture<Boolean> sendInvitationAsync(int guildId, UUID inviterUuid, String inviterName, UUID targetUuid, String targetName) {
          return getPlayerGuildAsync(targetUuid).thenCompose(existingGuild -> {
@@ -1352,12 +1218,12 @@ public class GuildService {
                          
                              int affectedRows = stmt.executeUpdate();
                              if (affectedRows > 0) {
-                                 logger.info("邀请发送成功: " + inviterName + " -> " + targetName + " (工会ID: " + guildId + ")");
+                                 logger.info("Convite enviado com sucesso: " + inviterName + " -> " + targetName + " (ID da Guilda: " + guildId + ")");
                                  return true;
                              }
                          }
                      } catch (SQLException e) {
-                         logger.severe("发送邀请时发生错误: " + e.getMessage());
+                         logger.severe("Erro ao enviar convite: " + e.getMessage());
                      }
                      return false;
                  });
@@ -1366,19 +1232,19 @@ public class GuildService {
      }
      
      /**
-      * 发送邀请 (同步包装器)
+      * Enviar convite (Wrapper Síncrono)
       */
      public boolean sendInvitation(int guildId, UUID inviterUuid, String inviterName, UUID targetUuid, String targetName) {
          try {
              return sendInvitationAsync(guildId, inviterUuid, inviterName, targetUuid, targetName).get();
          } catch (Exception e) {
-             logger.severe("发送邀请时发生异常: " + e.getMessage());
+             logger.severe("Exceção ao enviar convite: " + e.getMessage());
              return false;
          }
      }
      
      /**
-      * 处理邀请 (异步)
+      * Processar convite (Assíncrono)
       */
      public CompletableFuture<Boolean> processInvitationAsync(UUID targetUuid, UUID inviterUuid, boolean accept) {
          return getPendingInvitationAsync(targetUuid, inviterUuid).thenCompose(invitation -> {
@@ -1400,18 +1266,18 @@ public class GuildService {
                          
                          int affectedRows = stmt.executeUpdate();
                          if (affectedRows > 0) {
-                             logger.info("邀请处理成功: " + targetUuid + " -> " + status);
+                             logger.info("Convite processado com sucesso: " + targetUuid + " -> " + status);
                              return true;
                          }
                          return false;
                      }
                  } catch (SQLException e) {
-                     logger.severe("处理邀请时发生错误: " + e.getMessage());
+                     logger.severe("Erro ao processar convite: " + e.getMessage());
                  }
                  return false;
              }).thenCompose(success -> {
                  if (success && accept) {
-                     // 如果接受邀请，添加玩家到工会
+                     // Se o convite for aceito, adicionar jogador à guilda
                      return addGuildMemberAsync(invitation.getGuildId(), targetUuid, invitation.getTargetName(), GuildMember.Role.MEMBER);
                  }
                  return CompletableFuture.completedFuture(success);
@@ -1420,19 +1286,19 @@ public class GuildService {
      }
      
      /**
-      * 处理邀请 (同步包装器)
+      * Processar convite (Wrapper Síncrono)
       */
      public boolean processInvitation(UUID targetUuid, UUID inviterUuid, boolean accept) {
          try {
              return processInvitationAsync(targetUuid, inviterUuid, accept).get();
          } catch (Exception e) {
-             logger.severe("处理邀请时发生异常: " + e.getMessage());
+             logger.severe("Exceção ao processar convite: " + e.getMessage());
              return false;
          }
      }
      
      /**
-      * 获取待处理邀请 (异步)
+      * Obter convite pendente (Assíncrono)
       */
      public CompletableFuture<GuildInvitation> getPendingInvitationAsync(UUID targetUuid, UUID inviterUuid) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1453,26 +1319,26 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取待处理邀请时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter convites pendentes: " + e.getMessage());
              }
              return null;
          });
      }
      
      /**
-      * 获取待处理邀请 (同步包装器)
+      * Obter convite pendente (Wrapper Síncrono)
       */
      public GuildInvitation getPendingInvitation(UUID targetUuid, UUID inviterUuid) {
          try {
              return getPendingInvitationAsync(targetUuid, inviterUuid).get();
          } catch (Exception e) {
-             logger.severe("获取邀请时发生异常: " + e.getMessage());
+             logger.severe("Exceção ao obter convite: " + e.getMessage());
              return null;
          }
      }
      
      /**
-      * 获取玩家的待处理邀请 (异步)
+      * Obter convite pendente do jogador (Assíncrono)
       */
      public CompletableFuture<GuildInvitation> getPendingInvitationAsync(UUID targetUuid, int guildId) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1493,26 +1359,26 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取邀请时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter convite: " + e.getMessage());
              }
              return null;
          });
      }
      
      /**
-      * 获取玩家的待处理邀请 (同步包装器)
+      * Obter convite pendente do jogador (Wrapper Síncrono)
       */
      public GuildInvitation getPendingInvitation(UUID targetUuid, int guildId) {
          try {
              return getPendingInvitationAsync(targetUuid, guildId).get();
          } catch (Exception e) {
-             logger.severe("获取邀请时发生异常: " + e.getMessage());
+             logger.severe("Exceção ao obter convite: " + e.getMessage());
              return null;
          }
      }
      
      /**
-      * 从ResultSet创建GuildInvitation对象
+      * Criar objeto GuildInvitation a partir do ResultSet
       */
      private GuildInvitation createGuildInvitationFromResultSet(ResultSet rs) throws SQLException {
          GuildInvitation invitation = new GuildInvitation();
@@ -1529,7 +1395,7 @@ public class GuildService {
      }
      
      /**
-      * 获取待处理申请 (异步)
+      * Obter aplicações pendentes (Assíncrono)
       */
      public CompletableFuture<List<GuildApplication>> getPendingApplicationsAsync(int guildId) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1549,14 +1415,14 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取待处理申请时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter solicitações pendentes: " + e.getMessage());
              }
              return applications;
          });
      }
      
      /**
-      * 获取申请历史 (异步)
+      * Obter histórico de aplicações (Assíncrono)
       */
      public CompletableFuture<List<GuildApplication>> getApplicationHistoryAsync(int guildId) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1576,14 +1442,14 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取申请历史时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter histórico de solicitações: " + e.getMessage());
              }
              return applications;
          });
      }
      
      /**
-      * 获取工会成员 (异步) - 重载方法，接受guildId参数
+      * Obter membro da guilda (Assíncrono) - Método sobrecarregado, aceita parâmetro guildId
       */
      public CompletableFuture<GuildMember> getGuildMemberAsync(int guildId, UUID playerUuid) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1603,14 +1469,14 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取工会成员时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter membro da guilda: " + e.getMessage());
              }
              return null;
          });
      }
      
      /**
-      * 更新工会描述 (异步)
+      * Atualizar descrição da guilda (Assíncrono)
       */
      public CompletableFuture<Boolean> updateGuildDescriptionAsync(int guildId, String description) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1627,16 +1493,16 @@ public class GuildService {
                      return rowsAffected > 0;
                  }
              } catch (SQLException e) {
-                 logger.severe("更新工会描述时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao atualizar descrição da guilda: " + e.getMessage());
                  return false;
              }
          });
      }
      
-     // ==================== 工会关系系统 ====================
+     // ==================== Sistema de Relações de Guilda ====================
      
      /**
-      * 创建工会关系 (异步)
+      * Criar relação de guilda (Assíncrono)
       */
      public CompletableFuture<Boolean> createGuildRelationAsync(int guild1Id, int guild2Id, String guild1Name, String guild2Name,
                                                               GuildRelation.RelationType type, UUID initiatorUuid, String initiatorName) {
@@ -1660,14 +1526,14 @@ public class GuildService {
                      return rowsAffected > 0;
                  }
              } catch (SQLException e) {
-                 logger.severe("创建工会关系时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao criar relação de guilda: " + e.getMessage());
                  return false;
              }
          });
      }
      
      /**
-      * 更新工会关系状态 (异步)
+      * Atualizar status da relação de guilda (Assíncrono)
       */
      public CompletableFuture<Boolean> updateGuildRelationStatusAsync(int relationId, GuildRelation.RelationStatus status) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1685,14 +1551,14 @@ public class GuildService {
                      return rowsAffected > 0;
                  }
              } catch (SQLException e) {
-                 logger.severe("更新工会关系状态时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao atualizar status da relação de guilda: " + e.getMessage());
                  return false;
              }
          });
      }
      
      /**
-      * 获取工会关系 (异步)
+      * Obter relação de guilda (Assíncrono)
       */
      public CompletableFuture<GuildRelation> getGuildRelationAsync(int guild1Id, int guild2Id) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1714,14 +1580,14 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取工会关系时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter relação de guilda: " + e.getMessage());
              }
              return null;
          });
      }
      
      /**
-      * 获取工会的所有关系 (异步)
+      * Obter todas as relações da guilda (Assíncrono)
       */
      public CompletableFuture<List<GuildRelation>> getGuildRelationsAsync(int guildId) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1742,14 +1608,14 @@ public class GuildService {
                      }
                  }
              } catch (SQLException e) {
-                 logger.severe("获取工会关系列表时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao obter lista de relações de guilda: " + e.getMessage());
              }
              return relations;
          });
      }
      
      /**
-      * 删除工会关系 (异步)
+      * Deletar relação de guilda (Assíncrono)
       */
      public CompletableFuture<Boolean> deleteGuildRelationAsync(int relationId) {
          return CompletableFuture.supplyAsync(() -> {
@@ -1765,178 +1631,14 @@ public class GuildService {
                      return rowsAffected > 0;
                  }
              } catch (SQLException e) {
-                 logger.severe("删除工会关系时发生错误: " + e.getMessage());
+                 logger.severe("Erro ao excluir relação de guilda: " + e.getMessage());
                  return false;
              }
          });
      }
      
-     // ==================== 工会经济系统 ====================
-     
-     /**
-      * 初始化工会经济 (异步)
-      */
-     public CompletableFuture<Boolean> initializeGuildEconomyAsync(int guildId) {
-         return CompletableFuture.supplyAsync(() -> {
-             try {
-                 String sql = "INSERT INTO guild_economy (guild_id, balance, level, experience, max_experience, max_members) " +
-                             "VALUES (?, 0.0, 1, 0.0, 5000.0, 6)";
-                 
-                 try (Connection conn = databaseManager.getConnection();
-                      PreparedStatement stmt = conn.prepareStatement(sql)) {
-                     
-                     stmt.setInt(1, guildId);
-                     
-                     int rowsAffected = stmt.executeUpdate();
-                     return rowsAffected > 0;
-                 }
-             } catch (SQLException e) {
-                 logger.severe("初始化工会经济时发生错误: " + e.getMessage());
-                 return false;
-             }
-         });
-     }
-     
-     /**
-      * 获取工会经济信息 (异步)
-      */
-     public CompletableFuture<GuildEconomy> getGuildEconomyAsync(int guildId) {
-         return CompletableFuture.supplyAsync(() -> {
-             try {
-                 String sql = "SELECT * FROM guild_economy WHERE guild_id = ?";
-                 
-                 try (Connection conn = databaseManager.getConnection();
-                      PreparedStatement stmt = conn.prepareStatement(sql)) {
-                     
-                     stmt.setInt(1, guildId);
-                     
-                     try (ResultSet rs = stmt.executeQuery()) {
-                         if (rs.next()) {
-                             return createGuildEconomyFromResultSet(rs);
-                         }
-                     }
-                 }
-             } catch (SQLException e) {
-                 logger.severe("获取工会经济信息时发生错误: " + e.getMessage());
-             }
-             return null;
-         });
-     }
-     
-     /**
-      * 更新工会经济 (异步)
-      */
-     public CompletableFuture<Boolean> updateGuildEconomyAsync(int guildId, double balance, int level, double experience, double maxExperience, int maxMembers) {
-         return CompletableFuture.supplyAsync(() -> {
-             try {
-                 String sql = "UPDATE guild_economy SET balance = ?, level = ?, experience = ?, max_experience = ?, max_members = ?, last_updated = ? WHERE guild_id = ?";
-                 
-                 try (Connection conn = databaseManager.getConnection();
-                      PreparedStatement stmt = conn.prepareStatement(sql)) {
-                 
-                     stmt.setDouble(1, balance);
-                     stmt.setInt(2, level);
-                     stmt.setDouble(3, experience);
-                     stmt.setDouble(4, maxExperience);
-                     stmt.setInt(5, maxMembers);
-                     stmt.setString(6, nowString());
-                     stmt.setInt(7, guildId);
-                 
-                     int rowsAffected = stmt.executeUpdate();
-                     return rowsAffected > 0;
-                 }
-             } catch (SQLException e) {
-                 logger.severe("更新工会经济时发生错误: " + e.getMessage());
-                 return false;
-             }
-         });
-     }
-     
-     /**
-      * 添加工会贡献记录 (异步)
-      */
-     public CompletableFuture<Boolean> addGuildContributionAsync(int guildId, UUID playerUuid, String playerName,
-                                                               double amount, GuildContribution.ContributionType type, String description) {
-         return CompletableFuture.supplyAsync(() -> {
-             try {
-                 String sql = "INSERT INTO guild_contributions (guild_id, player_uuid, player_name, amount, contribution_type, description) " +
-                             "VALUES (?, ?, ?, ?, ?, ?)";
-                 
-                 try (Connection conn = databaseManager.getConnection();
-                      PreparedStatement stmt = conn.prepareStatement(sql)) {
-                     
-                     stmt.setInt(1, guildId);
-                     stmt.setString(2, playerUuid.toString());
-                     stmt.setString(3, playerName);
-                     stmt.setDouble(4, amount);
-                     stmt.setString(5, type.name());
-                     stmt.setString(6, description);
-                     
-                     int rowsAffected = stmt.executeUpdate();
-                     return rowsAffected > 0;
-                 }
-             } catch (SQLException e) {
-                 logger.severe("添加工会贡献记录时发生错误: " + e.getMessage());
-                 return false;
-             }
-         });
-     }
-     
-     /**
-      * 获取工会贡献记录 (异步)
-      */
-     public CompletableFuture<List<GuildContribution>> getGuildContributionsAsync(int guildId) {
-         return CompletableFuture.supplyAsync(() -> {
-             List<GuildContribution> contributions = new ArrayList<>();
-             try {
-                 String sql = "SELECT * FROM guild_contributions WHERE guild_id = ? ORDER BY created_at DESC";
-                 
-                 try (Connection conn = databaseManager.getConnection();
-                      PreparedStatement stmt = conn.prepareStatement(sql)) {
-                     
-                     stmt.setInt(1, guildId);
-                     
-                     try (ResultSet rs = stmt.executeQuery()) {
-                         while (rs.next()) {
-                             contributions.add(createGuildContributionFromResultSet(rs));
-                         }
-                     }
-                 }
-             } catch (SQLException e) {
-                 logger.severe("获取工会贡献记录时发生错误: " + e.getMessage());
-             }
-             return contributions;
-         });
-     }
-     
-     /**
-      * 获取玩家贡献记录 (异步)
-      */
-     public CompletableFuture<List<GuildContribution>> getPlayerContributionsAsync(UUID playerUuid) {
-         return CompletableFuture.supplyAsync(() -> {
-             List<GuildContribution> contributions = new ArrayList<>();
-             try {
-                 String sql = "SELECT * FROM guild_contributions WHERE player_uuid = ? ORDER BY created_at DESC";
-                 
-                 try (Connection conn = databaseManager.getConnection();
-                      PreparedStatement stmt = conn.prepareStatement(sql)) {
-                     
-                     stmt.setString(1, playerUuid.toString());
-                     
-                     try (ResultSet rs = stmt.executeQuery()) {
-                         while (rs.next()) {
-                             contributions.add(createGuildContributionFromResultSet(rs));
-                         }
-                     }
-                 }
-             } catch (SQLException e) {
-                 logger.severe("获取玩家贡献记录时发生错误: " + e.getMessage());
-             }
-             return contributions;
-         });
-     }
-     
-     // ==================== 辅助方法 ====================
+
+     // ==================== Métodos Auxiliares ====================
      
      private GuildRelation createGuildRelationFromResultSet(ResultSet rs) throws SQLException {
          GuildRelation relation = new GuildRelation();
@@ -1960,89 +1662,10 @@ public class GuildService {
          return relation;
      }
      
-     private GuildEconomy createGuildEconomyFromResultSet(ResultSet rs) throws SQLException {
-         GuildEconomy economy = new GuildEconomy();
-         economy.setId(rs.getInt("id"));
-         economy.setGuildId(rs.getInt("guild_id"));
-         economy.setBalance(rs.getDouble("balance"));
-         economy.setLevel(rs.getInt("level"));
-         economy.setExperience(rs.getDouble("experience"));
-         economy.setMaxExperience(rs.getDouble("max_experience"));
-         economy.setMaxMembers(rs.getInt("max_members"));
-         economy.setLastUpdated(parseTimestamp(rs, "last_updated"));
-         return economy;
-     }
-     
-     private GuildContribution createGuildContributionFromResultSet(ResultSet rs) throws SQLException {
-         GuildContribution contribution = new GuildContribution();
-         contribution.setId(rs.getInt("id"));
-         contribution.setGuildId(rs.getInt("guild_id"));
-         contribution.setPlayerUuid(UUID.fromString(rs.getString("player_uuid")));
-         contribution.setPlayerName(rs.getString("player_name"));
-         contribution.setAmount(rs.getDouble("amount"));
-         contribution.setType(GuildContribution.ContributionType.valueOf(rs.getString("contribution_type")));
-         contribution.setDescription(rs.getString("description"));
-         contribution.setCreatedAt(parseTimestamp(rs, "created_at"));
-         return contribution;
-     }
-     
-     // ==================== 工会经济管理方法 ====================
-     
-     /**
-      * 更新工会余额 (异步)
-      */
-     public CompletableFuture<Boolean> updateGuildBalanceAsync(int guildId, double balance) {
-         return getGuildByIdAsync(guildId).thenCompose(guild -> {
-             if (guild == null) {
-                 return CompletableFuture.completedFuture(false);
-             }
-             
-             return CompletableFuture.supplyAsync(() -> {
-                 try {
-                     String sql = "UPDATE guilds SET balance = ?, updated_at = ? WHERE id = ?";
-                     
-                     try (Connection conn = databaseManager.getConnection();
-                          PreparedStatement stmt = conn.prepareStatement(sql)) {
-                     
-                         stmt.setDouble(1, balance);
-                         stmt.setString(2, nowString());
-                         stmt.setInt(3, guildId);
-                     
-                         int affectedRows = stmt.executeUpdate();
-                         if (affectedRows > 0) {
-                             logger.info("工会余额更新成功: " + guild.getName() + " (ID: " + guildId + ") 新余额: " + balance);
-                             
-                             // 异步检查是否需要自动升级，不阻塞当前操作
-                             CompletableFuture.runAsync(() -> {
-                                 checkAndUpgradeGuildLevel(guildId, balance);
-                             });
-                             
-                             // 记录资金变更日志
-                             double oldBalance = guild.getBalance();
-                             double change = balance - oldBalance;
-                             if (change != 0) {
-                                 GuildLog.LogType logType = change > 0 ? GuildLog.LogType.FUND_DEPOSITED : GuildLog.LogType.FUND_WITHDRAWN;
-                                 String description = change > 0 ? "资金存入" : "资金取出";
-                                 String details = "变更金额: " + (change > 0 ? "+" : "") + change + " 金币, 新余额: " + balance + " 金币";
-                                 
-                                 // 这里需要获取操作者信息，暂时使用系统记录
-                                 logGuildActionAsync(guildId, guild.getName(), "SYSTEM", "系统",
-                                     logType, description, details);
-                             }
-                             
-                             return true;
-                         }
-                     }
-                 } catch (SQLException e) {
-                     logger.severe("更新工会余额时发生错误: " + e.getMessage());
-                 }
-                 return false;
-             });
-         });
-     }
-    
+
+
     /**
-     * 更新工会等级 (异步)
+     * Atualizar nível da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> updateGuildLevelAsync(int guildId, int level) {
         return CompletableFuture.supplyAsync(() -> {
@@ -2059,14 +1682,14 @@ public class GuildService {
                     return affectedRows > 0;
                 }
             } catch (SQLException e) {
-                logger.severe("更新工会等级时发生错误: " + e.getMessage());
+                logger.severe("Erro ao atualizar nível da guilda: " + e.getMessage());
                 return false;
             }
         });
     }
     
     /**
-     * 更新工会最大成员数 (异步)
+     * Atualizar número máximo de membros da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> updateGuildMaxMembersAsync(int guildId, int maxMembers) {
         return CompletableFuture.supplyAsync(() -> {
@@ -2083,14 +1706,14 @@ public class GuildService {
                     return affectedRows > 0;
                 }
             } catch (SQLException e) {
-                logger.severe("更新工会最大成员数时发生错误: " + e.getMessage());
+                logger.severe("Erro ao atualizar número máximo de membros da guilda: " + e.getMessage());
                 return false;
             }
         });
     }
     
     /**
-     * 更新工会冻结状态 (异步)
+     * Atualizar status de congelamento da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> updateGuildFrozenStatusAsync(int guildId, boolean frozen) {
         return getGuildByIdAsync(guildId).thenCompose(guild -> {
@@ -2110,18 +1733,18 @@ public class GuildService {
                         
                         int affectedRows = stmt.executeUpdate();
                         if (affectedRows > 0) {
-                            // 记录冻结状态变更日志
+                            // Registrar log de alteração de status de congelamento
                             GuildLog.LogType logType = frozen ? GuildLog.LogType.GUILD_FROZEN : GuildLog.LogType.GUILD_UNFROZEN;
-                            String description = frozen ? "工会冻结" : "工会解冻";
+                            String description = frozen ? "Guilda congelada" : "Guilda descongelada";
                             
-                            logGuildActionAsync(guildId, guild.getName(), "SYSTEM", "系统",
-                                logType, description, "操作: " + (frozen ? "冻结" : "解冻"));
+                            logGuildActionAsync(guildId, guild.getName(), "SYSTEM", "Sistema",
+                                logType, description, "Ação: " + (frozen ? "Congelar" : "Descongelar"));
                             
                             return true;
                         }
                     }
                 } catch (SQLException e) {
-                    logger.severe("更新工会冻结状态时发生错误: " + e.getMessage());
+                    logger.severe("Erro ao atualizar status de congelamento da guilda: " + e.getMessage());
                 }
                 return false;
             });
@@ -2129,8 +1752,8 @@ public class GuildService {
     }
 
     /**
-     * 直接插入工会成员（不做已有工会检查）。
-     * 仅用于建会后插入会长，以避免额外读库造成的连接争用。
+     * Inserir membro da guilda diretamente (sem verificação de guilda existente).
+     * Usado apenas para inserir o líder após a criação da guilda, para evitar contenção de conexão extra.
      */
     private CompletableFuture<Boolean> addGuildMemberDirectAsync(int guildId, UUID playerUuid, String playerName, GuildMember.Role role) {
         return CompletableFuture.supplyAsync(() -> {
@@ -2150,111 +1773,24 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("直接添加工会成员时发生错误: " + e.getMessage());
+                logger.severe("Erro ao adicionar membro da guilda diretamente: " + e.getMessage());
             }
             return false;
         });
     }
 
-    /**
-     * 检查并自动升级工会等级
-     */
-    private void checkAndUpgradeGuildLevel(int guildId, double currentBalance) {
-        getGuildByIdAsync(guildId).thenAccept(guild -> {
-            if (guild == null) return;
-            
-            int currentLevel = guild.getLevel();
-            if (currentLevel >= 10) return; // 已达到最高等级
-            
-            // 检查是否满足升级条件
-            double requiredBalance = getRequiredBalanceForLevel(currentLevel);
-            if (currentBalance >= requiredBalance) {
-                // 自动升级
-                int newLevel = currentLevel + 1;
-                int newMaxMembers = getMaxMembersForLevel(newLevel);
-                
-                CompletableFuture.supplyAsync(() -> {
-                    try {
-                        String sql = "UPDATE guilds SET level = ?, max_members = ?, updated_at = ? WHERE id = ?";
-                        
-                        try (Connection conn = databaseManager.getConnection();
-                             PreparedStatement stmt = conn.prepareStatement(sql)) {
-                            
-                            stmt.setInt(1, newLevel);
-                            stmt.setInt(2, newMaxMembers);
-                            stmt.setString(3, nowString());
-                            stmt.setInt(4, guildId);
-                            
-                            int affectedRows = stmt.executeUpdate();
-                            if (affectedRows > 0) {
-                                logger.info("工会自动升级成功: " + guild.getName() + " (ID: " + guildId + ") 等级: " + currentLevel + " -> " + newLevel);
-                                
-                                // 记录升级日志
-                                logGuildActionAsync(guildId, guild.getName(), "SYSTEM", "系统",
-                                    GuildLog.LogType.GUILD_LEVEL_UP, "工会升级", "新等级: " + newLevel + ", 新最大成员数: " + newMaxMembers);
-                                
-                                return true;
-                            }
-                        }
-                    } catch (SQLException e) {
-                        logger.severe("自动升级工会时发生错误: " + e.getMessage());
-                    }
-                    return false;
-                });
-            }
-        }).exceptionally(throwable -> {
-            logger.severe("检查工会升级时发生错误: " + throwable.getMessage());
-            return null;
-        });
-    }
+
     
     /**
-     * 获取指定等级所需的资金
-     */
-    private double getRequiredBalanceForLevel(int level) {
-        switch (level) {
-            case 1: return 5000;
-            case 2: return 10000;
-            case 3: return 20000;
-            case 4: return 35000;
-            case 5: return 50000;
-            case 6: return 75000;
-            case 7: return 100000;
-            case 8: return 150000;
-            case 9: return 200000;
-            default: return Double.MAX_VALUE;
-        }
-    }
-    
-    /**
-     * 获取指定等级的最大成员数
-     */
-    private int getMaxMembersForLevel(int level) {
-        switch (level) {
-            case 1: return 6;
-            case 2: return 12;
-            case 3: return 18;
-            case 4: return 25;
-            case 5: return 35;
-            case 6: return 45;
-            case 7: return 60;
-            case 8: return 75;
-            case 9: return 90;
-            case 10: return 100;
-            default: return 100;
-        }
-    }
-    
-    /**
-     * 通知工会成员升级成功
+     * Notificar membros da guilda sobre atualização bem-sucedida
      */
     private void notifyGuildMembersOfUpgrade(int guildId, int newLevel, int newMaxMembers) {
         getGuildMembersAsync(guildId).thenAccept(members -> {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("economy.level-up", "&a工会升级成功！当前等级：{level}")
+            String message = plugin.getConfigManager().getMessagesConfig().getString("economy.level-up", "&aGuilda atualizada com sucesso! Nível atual: {level}")
                 .replace("{level}", String.valueOf(newLevel))
                 .replace("{max_members}", String.valueOf(newMaxMembers));
             
-            // 在主线程中发送消息
+            // Enviar mensagem na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
                 for (GuildMember member : members) {
                     Player player = Bukkit.getPlayer(member.getPlayerUuid());
@@ -2264,15 +1800,15 @@ public class GuildService {
                 }
             });
         }).exceptionally(throwable -> {
-            logger.warning("通知工会成员升级时发生错误: " + throwable.getMessage());
+            logger.warning("Erro ao notificar membros da guilda sobre a atualização: " + throwable.getMessage());
             return null;
         });
     }
     
-    // ==================== 工会日志系统 ====================
+    // ==================== Sistema de Logs da Guilda ====================
     
     /**
-     * 记录工会日志 (异步)
+     * Registrar ação da guilda (Assíncrono)
      */
     public CompletableFuture<Boolean> logGuildActionAsync(int guildId, String guildName, String playerUuid, 
                                                         String playerName, GuildLog.LogType logType, 
@@ -2297,27 +1833,27 @@ public class GuildService {
                      return affectedRows > 0;
                  }
             } catch (SQLException e) {
-                logger.severe("记录工会日志时发生错误: " + e.getMessage());
+                logger.severe("Erro ao registrar log da guilda: " + e.getMessage());
                 return false;
             }
         });
     }
     
     /**
-     * 记录工会日志 (同步包装器)
+     * Registrar ação da guilda (Wrapper Síncrono)
      */
     public boolean logGuildAction(int guildId, String guildName, String playerUuid, String playerName, 
                                 GuildLog.LogType logType, String description, String details) {
         try {
             return logGuildActionAsync(guildId, guildName, playerUuid, playerName, logType, description, details).get();
         } catch (Exception e) {
-            logger.severe("记录工会日志时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao registrar log da guilda: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * 获取工会日志列表 (异步)
+     * Obter lista de logs da guilda (Assíncrono)
      */
     public CompletableFuture<List<GuildLog>> getGuildLogsAsync(int guildId, int limit, int offset) {
         return CompletableFuture.supplyAsync(() -> {
@@ -2340,26 +1876,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取工会日志时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter logs da guilda: " + e.getMessage());
             }
             return logs;
         });
     }
     
     /**
-     * 获取工会日志列表 (同步包装器)
+     * Obter lista de logs da guilda (Wrapper Síncrono)
      */
     public List<GuildLog> getGuildLogs(int guildId, int limit, int offset) {
         try {
             return getGuildLogsAsync(guildId, limit, offset).get();
         } catch (Exception e) {
-            logger.severe("获取工会日志时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter logs da guilda: " + e.getMessage());
             return new ArrayList<>();
         }
     }
     
     /**
-     * 获取工会日志总数 (异步)
+     * Obter contagem total de logs da guilda (Assíncrono)
      */
     public CompletableFuture<Integer> getGuildLogsCountAsync(int guildId) {
         return CompletableFuture.supplyAsync(() -> {
@@ -2378,26 +1914,26 @@ public class GuildService {
                     }
                 }
             } catch (SQLException e) {
-                logger.severe("获取工会日志总数时发生错误: " + e.getMessage());
+                logger.severe("Erro ao obter contagem total de logs da guilda: " + e.getMessage());
             }
             return 0;
         });
     }
     
     /**
-     * 获取工会日志总数 (同步包装器)
+     * Obter contagem total de logs da guilda (Wrapper Síncrono)
      */
     public int getGuildLogsCount(int guildId) {
         try {
             return getGuildLogsCountAsync(guildId).get();
         } catch (Exception e) {
-            logger.severe("获取工会日志总数时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao obter contagem total de logs da guilda: " + e.getMessage());
             return 0;
         }
     }
     
     /**
-     * 从ResultSet创建GuildLog对象
+     * Criar objeto GuildLog a partir do ResultSet
      */
     private GuildLog createGuildLogFromResultSet(ResultSet rs) throws SQLException {
         GuildLog log = new GuildLog();
@@ -2419,7 +1955,7 @@ public class GuildService {
                     log.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 }
             } catch (Exception e) {
-                logger.warning("解析日志创建时间时发生错误: " + e.getMessage());
+                logger.warning("Erro ao analisar data de criação do log: " + e.getMessage());
             }
         }
         
@@ -2427,40 +1963,40 @@ public class GuildService {
     }
     
     /**
-     * 清理旧日志 (异步)
+     * Limpar logs antigos (Assíncrono)
      */
     public CompletableFuture<Integer> cleanOldLogsAsync(int daysToKeep) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                // 统一使用参数绑定的阈值时间（字符串），避免数据库侧时区差异
+                // Usar parâmetro de tempo limite unificado (string) para evitar diferenças de fuso horário no banco de dados
                 String sql = "DELETE FROM guild_logs WHERE created_at < ?";
                 
                 try (Connection conn = databaseManager.getConnection();
                      PreparedStatement stmt = conn.prepareStatement(sql)) {
                     
-                    // 计算阈值字符串：当前系统时间减去 daysToKeep 天，格式 yyyy-MM-dd HH:mm:ss
+                    // Calcular string de limite: hora atual do sistema menos daysToKeep dias, formato yyyy-MM-dd HH:mm:ss
                     String threshold = com.guild.core.time.TimeProvider.nowLocalDateTime().minusDays(daysToKeep)
                         .format(com.guild.core.time.TimeProvider.FULL_FORMATTER);
                     stmt.setString(1, threshold);
                     int affectedRows = stmt.executeUpdate();
-                    logger.info("清理了 " + affectedRows + " 条旧日志记录");
+                    logger.info("Limpos " + affectedRows + " registros de log antigos");
                     return affectedRows;
                 }
             } catch (SQLException e) {
-                logger.severe("清理旧日志时发生错误: " + e.getMessage());
+                logger.severe("Erro ao limpar logs antigos: " + e.getMessage());
                 return 0;
             }
         });
     }
     
     /**
-     * 清理旧日志 (同步包装器)
+     * Limpar logs antigos (Wrapper Síncrono)
      */
     public int cleanOldLogs(int daysToKeep) {
         try {
             return cleanOldLogsAsync(daysToKeep).get();
         } catch (Exception e) {
-            logger.severe("清理旧日志时发生异常: " + e.getMessage());
+            logger.severe("Exceção ao limpar logs antigos: " + e.getMessage());
             return 0;
         }
     }

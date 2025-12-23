@@ -28,7 +28,7 @@ public class GuildPermissionsGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6工会权限设置");
+        return ColorUtils.colorize("&6Configurações de Permissão da Guilda");
     }
     
     @Override
@@ -78,53 +78,51 @@ public class GuildPermissionsGUI implements GUI {
         // 会长权限
         ItemStack leaderPerms = createItem(
             Material.GOLDEN_HELMET,
-            ColorUtils.colorize("&6会长权限"),
-            ColorUtils.colorize("&7• 所有权限"),
-            ColorUtils.colorize("&7• 管理成员"),
-            ColorUtils.colorize("&7• 修改设置"),
-            ColorUtils.colorize("&7• 删除工会")
+            ColorUtils.colorize("&6Permissões do Líder"),
+            ColorUtils.colorize("&7• Todas as permissões"),
+            ColorUtils.colorize("&7• Gerenciar membros"),
+            ColorUtils.colorize("&7• Modificar configurações"),
+            ColorUtils.colorize("&7• Excluir guilda")
         );
         inventory.setItem(10, leaderPerms);
         
         // 官员权限
         ItemStack officerPerms = createItem(
             Material.IRON_HELMET,
-            ColorUtils.colorize("&e官员权限"),
-            ColorUtils.colorize("&7• 邀请成员"),
-            ColorUtils.colorize("&7• 踢出成员"),
-            ColorUtils.colorize("&7• 处理申请"),
-            ColorUtils.colorize("&7• 设置工会家")
+            ColorUtils.colorize("&ePermissões de Oficial"),
+            ColorUtils.colorize("&7• Convidar membros"),
+            ColorUtils.colorize("&7• Expulsar membros"),
+            ColorUtils.colorize("&7• Processar solicitações")
         );
         inventory.setItem(12, officerPerms);
         
         // 成员权限
         ItemStack memberPerms = createItem(
             Material.LEATHER_HELMET,
-            ColorUtils.colorize("&7成员权限"),
-            ColorUtils.colorize("&7• 查看工会信息"),
-            ColorUtils.colorize("&7• 传送到工会家"),
-            ColorUtils.colorize("&7• 申请加入其他工会")
+            ColorUtils.colorize("&7Permissões de Membro"),
+            ColorUtils.colorize("&7• Ver informações da guilda"),
+            ColorUtils.colorize("&7• Solicitar entrada em outras guildas")
         );
         inventory.setItem(14, memberPerms);
         
         // 权限说明
         ItemStack info = createItem(
             Material.BOOK,
-            ColorUtils.colorize("&e权限说明"),
-            ColorUtils.colorize("&7权限系统基于角色分配"),
-            ColorUtils.colorize("&7会长可以提升/降级成员"),
-            ColorUtils.colorize("&7官员可以管理普通成员"),
-            ColorUtils.colorize("&7成员拥有基础权限")
+            ColorUtils.colorize("&eInformações de Permissão"),
+            ColorUtils.colorize("&7Sistema de permissão baseado em cargos"),
+            ColorUtils.colorize("&7Líder pode promover/rebaixar membros"),
+            ColorUtils.colorize("&7Oficiais podem gerenciar membros"),
+            ColorUtils.colorize("&7Membros têm permissões básicas")
         );
         inventory.setItem(16, info);
         
         // 当前权限状态
         ItemStack currentStatus = createItem(
             Material.SHIELD,
-            ColorUtils.colorize("&a当前权限状态"),
-            ColorUtils.colorize("&7工会: &e" + guild.getName()),
-            ColorUtils.colorize("&7权限系统: &a正常运行"),
-            ColorUtils.colorize("&7权限检查: &a已启用")
+            ColorUtils.colorize("&aStatus Atual de Permissão"),
+            ColorUtils.colorize("&7Guilda: &e" + guild.getName()),
+            ColorUtils.colorize("&7Sistema de Permissão: &aFuncionando"),
+            ColorUtils.colorize("&7Verificação de Permissão: &aAtivada")
         );
         inventory.setItem(22, currentStatus);
     }
@@ -136,8 +134,8 @@ public class GuildPermissionsGUI implements GUI {
         // 返回按钮
         ItemStack back = createItem(
             Material.ARROW,
-            ColorUtils.colorize("&7返回"),
-            ColorUtils.colorize("&7返回工会设置")
+            ColorUtils.colorize("&7Voltar"),
+            ColorUtils.colorize("&7Voltar para Configurações da Guilda")
         );
         inventory.setItem(49, back);
     }

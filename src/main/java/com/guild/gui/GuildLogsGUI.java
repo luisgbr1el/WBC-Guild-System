@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 工会日志查看GUI
+ * GUI de Visualização de Logs da Guilda
  */
 public class GuildLogsGUI implements GUI {
     
@@ -42,7 +42,7 @@ public class GuildLogsGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-logs.title", "&6工会日志 - {guild_name}")
+        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-logs.title", "&6Logs da Guilda - {guild_name}")
             .replace("{guild_name}", guild.getName()));
     }
     
@@ -53,25 +53,25 @@ public class GuildLogsGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 异步加载日志数据
+        // Carregar dados de log assincronamente
         loadLogsAsync().thenAccept(success -> {
             if (success) {
-                // 在主线程中设置物品和完整的导航按钮
+                // Configurar itens e botões de navegação completos na thread principal
                 CompatibleScheduler.runTask(plugin, () -> {
                     setupLogItems(inventory);
                     setupBasicNavigationButtons(inventory);
                     setupFullNavigationButtons(inventory);
                 });
             } else {
-                // 如果加载失败，在主线程中显示错误信息
+                // Se o carregamento falhar, exibir mensagem de erro na thread principal
                 CompatibleScheduler.runTask(plugin, () -> {
                     ItemStack errorItem = createItem(
                         Material.BARRIER,
-                        ColorUtils.colorize("&c加载失败"),
-                        ColorUtils.colorize("&7无法加载日志数据，请重试")
+                        ColorUtils.colorize("&cFalha ao Carregar"),
+                        ColorUtils.colorize("&7Não foi possível carregar os logs, tente novamente")
                     );
                     inventory.setItem(22, errorItem);
                     setupBasicNavigationButtons(inventory);
@@ -86,29 +86,29 @@ public class GuildLogsGUI implements GUI {
     private CompletableFuture<Boolean> loadLogsAsync() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                plugin.getLogger().info("开始加载工会 " + guild.getName() + " 的日志数据...");
+                plugin.getLogger().info("Iniciando carregamento de dados de log da guilda " + guild.getName() + " ...");
                 
-                // 检查工会ID是否有效
+                // Verificar se o ID da guilda é válido
                 if (guild.getId() <= 0) {
-                    plugin.getLogger().warning("工会ID无效: " + guild.getId());
+                    plugin.getLogger().warning("ID da guilda inválido: " + guild.getId());
                     return false;
                 }
                 
-                // 获取日志总数
+                // Obter número total de logs
                 totalLogs = plugin.getGuildService().getGuildLogsCountAsync(guild.getId()).get();
-                plugin.getLogger().info("工会 " + guild.getName() + " 共有 " + totalLogs + " 条日志记录");
+                plugin.getLogger().info("Guilda " + guild.getName() + " tem um total de " + totalLogs + " registros de log");
                 
-                // 获取当前页的日志
+                // Obter logs da página atual
                 int offset = page * itemsPerPage;
                 logs = plugin.getGuildService().getGuildLogsAsync(guild.getId(), itemsPerPage, offset).get();
-                plugin.getLogger().info("成功加载第 " + (page + 1) + " 页的 " + logs.size() + " 条日志记录");
+                plugin.getLogger().info("Sucesso ao carregar a página " + (page + 1) + " com " + logs.size() + " registros de log");
                 
                 return true;
             } catch (Exception e) {
-                plugin.getLogger().severe("加载工会日志时发生错误: " + e.getMessage());
+                plugin.getLogger().severe("Erro ao carregar logs da guilda: " + e.getMessage());
                 e.printStackTrace();
                 
-                // 设置默认值
+                // Definir valores padrão
                 totalLogs = 0;
                 logs = new java.util.ArrayList<>();
                 
@@ -121,33 +121,33 @@ public class GuildLogsGUI implements GUI {
      * 设置日志物品
      */
     private void setupLogItems(Inventory inventory) {
-        plugin.getLogger().info("设置日志物品，logs大小: " + (logs != null ? logs.size() : "null"));
+        plugin.getLogger().info("Configurando itens de log, tamanho dos logs: " + (logs != null ? logs.size() : "null"));
         
         if (logs == null) {
-            logs = new java.util.ArrayList<>(); // 确保logs不为null
+            logs = new java.util.ArrayList<>(); // Garantir que logs não seja null
         }
         
         if (logs.isEmpty()) {
-            plugin.getLogger().info("日志列表为空，显示无日志信息");
-            // 显示无日志信息
+            plugin.getLogger().info("Lista de logs vazia, exibindo mensagem de sem logs");
+            // Exibir mensagem de sem logs
             ItemStack noLogs = createItem(
                 Material.BARRIER,
-                ColorUtils.colorize("&c暂无日志记录"),
-                ColorUtils.colorize("&7该工会还没有任何操作记录"),
-                ColorUtils.colorize("&7请等待工会活动产生日志")
+                ColorUtils.colorize("&cSem Logs"),
+                ColorUtils.colorize("&7Esta guilda não tem registros de operação"),
+                ColorUtils.colorize("&7Aguarde atividades da guilda para gerar logs")
             );
             inventory.setItem(22, noLogs);
             return;
         }
         
-        plugin.getLogger().info("开始显示 " + logs.size() + " 条日志记录");
+        plugin.getLogger().info("Iniciando exibição de " + logs.size() + " registros de log");
         
-        // 显示日志列表
+        // Exibir lista de logs
         for (int i = 0; i < Math.min(logs.size(), itemsPerPage); i++) {
             GuildLog log = logs.get(i);
             int slot = getLogSlot(i);
             
-            plugin.getLogger().info("设置日志项目 " + i + " 到槽位 " + slot + ": " + log.getLogType().getDisplayName());
+            plugin.getLogger().info("Configurando item de log " + i + " no slot " + slot + ": " + log.getLogType().getDisplayName());
             
             ItemStack logItem = createLogItem(log);
             inventory.setItem(slot, logItem);
@@ -162,12 +162,12 @@ public class GuildLogsGUI implements GUI {
         String name = ColorUtils.colorize("&e" + log.getLogType().getDisplayName());
         
         List<String> lore = new java.util.ArrayList<>();
-        lore.add(ColorUtils.colorize("&7操作者: &f" + log.getPlayerName()));
-        lore.add(ColorUtils.colorize("&7时间: &f" + log.getSimpleTime()));
-        lore.add(ColorUtils.colorize("&7描述: &f" + log.getDescription()));
+        lore.add(ColorUtils.colorize("&7Operador: &f" + log.getPlayerName()));
+        lore.add(ColorUtils.colorize("&7Tempo: &f" + log.getSimpleTime()));
+        lore.add(ColorUtils.colorize("&7Descrição: &f" + log.getDescription()));
         
         if (log.getDetails() != null && !log.getDetails().isEmpty()) {
-            lore.add(ColorUtils.colorize("&7详情: &f" + log.getDetails()));
+            lore.add(ColorUtils.colorize("&7Detalhes: &f" + log.getDetails()));
         }
         
         return createItem(material, name, lore.toArray(new String[0]));
@@ -229,20 +229,20 @@ public class GuildLogsGUI implements GUI {
      * 获取日志物品的槽位 - 修复后的计算逻辑
      */
     private int getLogSlot(int index) {
-        int row = index / 7; // 7列
+        int row = index / 7; // 7 colunas
         int col = index % 7;
-        return (row + 1) * 9 + (col + 1); // 从第1行第1列开始 (slots 10-43)
+        return (row + 1) * 9 + (col + 1); // Começando da linha 1, coluna 1 (slots 10-43)
     }
     
     /**
      * 设置基本的导航按钮（不依赖日志数据）
      */
     private void setupBasicNavigationButtons(Inventory inventory) {
-        // 返回按钮 - 移到槽位49，与其他GUI保持一致
+        // Botão de voltar - Movido para o slot 49, consistente com outras GUIs
         ItemStack backButton = createItem(
             Material.ARROW,
-            ColorUtils.colorize("&c返回"),
-            ColorUtils.colorize("&7返回上一级菜单")
+            ColorUtils.colorize("&cVoltar"),
+            ColorUtils.colorize("&7Voltar ao menu anterior")
         );
         inventory.setItem(49, backButton);
     }
@@ -251,12 +251,12 @@ public class GuildLogsGUI implements GUI {
      * 设置完整的导航按钮（依赖日志数据）
      */
     private void setupFullNavigationButtons(Inventory inventory) {
-        // 分页按钮
+        // Botões de paginação
         if (page > 0) {
             ItemStack prevButton = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e上一页"),
-                ColorUtils.colorize("&7查看上一页日志")
+                ColorUtils.colorize("&ePágina Anterior"),
+                ColorUtils.colorize("&7Ver logs anteriores")
             );
             inventory.setItem(45, prevButton);
         }
@@ -264,27 +264,27 @@ public class GuildLogsGUI implements GUI {
         if ((page + 1) * itemsPerPage < totalLogs) {
             ItemStack nextButton = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e下一页"),
-                ColorUtils.colorize("&7查看下一页日志")
+                ColorUtils.colorize("&ePróxima Página"),
+                ColorUtils.colorize("&7Ver próximos logs")
             );
             inventory.setItem(53, nextButton);
         }
         
-        // 页码信息
+        // Informações da página
         ItemStack pageInfo = createItem(
             Material.PAPER,
-            ColorUtils.colorize("&6页码信息"),
-            ColorUtils.colorize("&7当前页: &f" + (page + 1)),
-            ColorUtils.colorize("&7总页数: &f" + ((totalLogs - 1) / itemsPerPage + 1)),
-            ColorUtils.colorize("&7总记录: &f" + totalLogs)
+            ColorUtils.colorize("&6Informações da Página"),
+            ColorUtils.colorize("&7Página Atual: &f" + (page + 1)),
+            ColorUtils.colorize("&7Total de Páginas: &f" + ((totalLogs - 1) / itemsPerPage + 1)),
+            ColorUtils.colorize("&7Total de Registros: &f" + totalLogs)
         );
         inventory.setItem(47, pageInfo);
         
-        // 刷新按钮
+        // Botão de atualizar
         ItemStack refreshButton = createItem(
             Material.EMERALD,
-            ColorUtils.colorize("&a刷新"),
-            ColorUtils.colorize("&7刷新日志列表")
+            ColorUtils.colorize("&aAtualizar"),
+            ColorUtils.colorize("&7Atualizar lista de logs")
         );
         inventory.setItem(51, refreshButton);
     }
@@ -295,16 +295,16 @@ public class GuildLogsGUI implements GUI {
         
         String itemName = clickedItem.getItemMeta().getDisplayName();
         
-        // 返回按钮
-        if (itemName.contains("返回")) {
-            // 返回到工会信息GUI
+        // Botão de voltar
+        if (itemName.contains("Voltar")) {
+            // Voltar para a GUI de informações da guilda
             GuildInfoGUI guildInfoGUI = new GuildInfoGUI(plugin, player, guild);
             plugin.getGuiManager().openGUI(player, guildInfoGUI);
             return;
         }
         
-        // 上一页按钮
-        if (itemName.contains("上一页")) {
+        // Botão de página anterior
+        if (itemName.contains("Página Anterior")) {
             if (page > 0) {
                 GuildLogsGUI prevPageGUI = new GuildLogsGUI(plugin, guild, player, page - 1);
                 plugin.getGuiManager().openGUI(player, prevPageGUI);
@@ -312,8 +312,8 @@ public class GuildLogsGUI implements GUI {
             return;
         }
         
-        // 下一页按钮
-        if (itemName.contains("下一页")) {
+        // Botão de próxima página
+        if (itemName.contains("Próxima Página")) {
             if ((page + 1) * itemsPerPage < totalLogs) {
                 GuildLogsGUI nextPageGUI = new GuildLogsGUI(plugin, guild, player, page + 1);
                 plugin.getGuiManager().openGUI(player, nextPageGUI);
@@ -321,14 +321,14 @@ public class GuildLogsGUI implements GUI {
             return;
         }
         
-        // 刷新按钮
-        if (itemName.contains("刷新")) {
+        // Botão de atualizar
+        if (itemName.contains("Atualizar")) {
             GuildLogsGUI refreshGUI = new GuildLogsGUI(plugin, guild, player, page);
             plugin.getGuiManager().openGUI(player, refreshGUI);
             return;
         }
         
-        // 日志项目点击 - 检查是否在日志显示区域
+        // Clique no item de log - Verificar se está na área de exibição de log
         if (slot >= 10 && slot <= 43) {
             int row = slot / 9;
             int col = slot % 9;
@@ -347,27 +347,27 @@ public class GuildLogsGUI implements GUI {
      * 处理日志点击
      */
     private void handleLogClick(Player player, GuildLog log) {
-        // 显示日志详细信息
-        String message = ColorUtils.colorize("&6=== 日志详情 ===");
+        // Exibir detalhes do log
+        String message = ColorUtils.colorize("&6=== Detalhes do Log ===");
         player.sendMessage(message);
-        player.sendMessage(ColorUtils.colorize("&7类型: &f" + log.getLogType().getDisplayName()));
-        player.sendMessage(ColorUtils.colorize("&7操作者: &f" + log.getPlayerName()));
-        player.sendMessage(ColorUtils.colorize("&7时间: &f" + log.getSimpleTime()));
-        player.sendMessage(ColorUtils.colorize("&7描述: &f" + log.getDescription()));
+        player.sendMessage(ColorUtils.colorize("&7Tipo: &f" + log.getLogType().getDisplayName()));
+        player.sendMessage(ColorUtils.colorize("&7Operador: &f" + log.getPlayerName()));
+        player.sendMessage(ColorUtils.colorize("&7Tempo: &f" + log.getSimpleTime()));
+        player.sendMessage(ColorUtils.colorize("&7Descrição: &f" + log.getDescription()));
         if (log.getDetails() != null && !log.getDetails().isEmpty()) {
-            player.sendMessage(ColorUtils.colorize("&7详情: &f" + log.getDetails()));
+            player.sendMessage(ColorUtils.colorize("&7Detalhes: &f" + log.getDetails()));
         }
         player.sendMessage(ColorUtils.colorize("&6=================="));
     }
     
     @Override
     public void onClose(Player player) {
-        // 关闭时的处理
+        // Processamento ao fechar
     }
     
     @Override
     public void refresh(Player player) {
-        // 刷新GUI
+        // Atualizar GUI
         GuildLogsGUI refreshGUI = new GuildLogsGUI(plugin, guild, player, page);
         plugin.getGuiManager().openGUI(player, refreshGUI);
     }

@@ -15,13 +15,6 @@ public class Guild {
     private String description;
     private UUID leaderUuid;
     private String leaderName;
-    private String homeWorld;
-    private double homeX;
-    private double homeY;
-    private double homeZ;
-    private float homeYaw;
-    private float homePitch;
-    private double balance;
     private int level;
     private int maxMembers;
     private boolean frozen;
@@ -105,63 +98,8 @@ public class Guild {
         this.updatedAt = updatedAt;
     }
     
-    // 家的位置相关方法
-    public String getHomeWorld() {
-        return homeWorld;
-    }
-    
-    public void setHomeWorld(String homeWorld) {
-        this.homeWorld = homeWorld;
-    }
-    
-    public double getHomeX() {
-        return homeX;
-    }
-    
-    public void setHomeX(double homeX) {
-        this.homeX = homeX;
-    }
-    
-    public double getHomeY() {
-        return homeY;
-    }
-    
-    public void setHomeY(double homeY) {
-        this.homeY = homeY;
-    }
-    
-    public double getHomeZ() {
-        return homeZ;
-    }
-    
-    public void setHomeZ(double homeZ) {
-        this.homeZ = homeZ;
-    }
-    
-    public float getHomeYaw() {
-        return homeYaw;
-    }
-    
-    public void setHomeYaw(float homeYaw) {
-        this.homeYaw = homeYaw;
-    }
-    
-    public float getHomePitch() {
-        return homePitch;
-    }
-    
-    public void setHomePitch(float homePitch) {
-        this.homePitch = homePitch;
-    }
-    
-    public double getBalance() {
-        return balance;
-    }
-    
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-    
+
+
     public int getLevel() {
         return level;
     }
@@ -186,35 +124,7 @@ public class Guild {
         this.frozen = frozen;
     }
     
-    /**
-     * 检查工会是否设置了家
-     */
-    public boolean hasHome() {
-        return homeWorld != null && !homeWorld.isEmpty();
-    }
-    
-    /**
-     * 设置家的位置
-     */
-    public void setHome(Location location) {
-        this.homeWorld = location.getWorld().getName();
-        this.homeX = location.getX();
-        this.homeY = location.getY();
-        this.homeZ = location.getZ();
-        this.homeYaw = location.getYaw();
-        this.homePitch = location.getPitch();
-    }
-    
-    /**
-     * 获取家的位置（需要传入世界对象）
-     */
-    public Location getHomeLocation(org.bukkit.World world) {
-        if (!hasHome() || world == null) {
-            return null;
-        }
-        return new Location(world, homeX, homeY, homeZ, homeYaw, homePitch);
-    }
-    
+
     @Override
     public String toString() {
         return "Guild{" +
@@ -224,7 +134,6 @@ public class Guild {
                 ", description='" + description + '\'' +
                 ", leaderUuid=" + leaderUuid +
                 ", leaderName='" + leaderName + '\'' +
-                ", hasHome=" + hasHome() +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

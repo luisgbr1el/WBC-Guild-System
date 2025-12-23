@@ -48,13 +48,6 @@ public class PlaceholderUtils {
             .replace("{leader_name}", guild.getLeaderName())
             .replace("{leader_uuid}", guild.getLeaderUuid().toString())
             
-            // 工会位置信息
-            .replace("{guild_home_world}", guild.getHomeWorld() != null ? guild.getHomeWorld() : "")
-            .replace("{guild_home_x}", String.valueOf(guild.getHomeX()))
-            .replace("{guild_home_y}", String.valueOf(guild.getHomeY()))
-            .replace("{guild_home_z}", String.valueOf(guild.getHomeZ()))
-            .replace("{guild_home_location}", formatHomeLocation(guild))
-            
             // 玩家信息
             .replace("{player_name}", player != null ? player.getName() : "")
             .replace("{player_uuid}", player != null ? player.getUniqueId().toString() : "")
@@ -62,21 +55,8 @@ public class PlaceholderUtils {
             
             // 静态信息
             .replace("{guild_level}", String.valueOf(guild.getLevel()))
-            .replace("{guild_balance}", String.valueOf(guild.getBalance()))
             .replace("{guild_max_members}", String.valueOf(guild.getMaxMembers()))
-            .replace("{guild_frozen}", guild.isFrozen() ? "已冻结" : "正常")
-            
-            // 经济相关变量 - 支持GUI配置中的变量名
-            .replace("{guild_balance_formatted}", formatBalance(guild.getBalance()))
-            .replace("{guild_next_level_requirement}", getNextLevelRequirement(guild.getLevel()))
-            .replace("{guild_level_progress}", getLevelProgress(guild.getLevel(), guild.getBalance()))
-            .replace("{guild_upgrade_cost}", getUpgradeCost(guild.getLevel()))
-            .replace("{guild_currency_name}", "金币")
-            .replace("{guild_currency_name_singular}", "金币")
-            
-            // 兼容性变量 - 支持旧格式
-            .replace("{guild_max_exp}", getNextLevelRequirement(guild.getLevel()))
-            .replace("{guild_exp_percentage}", getLevelProgress(guild.getLevel(), guild.getBalance()));
+            .replace("{guild_frozen}", guild.isFrozen() ? "已冻结" : "正常");
         
         // 处理颜色代码
         return ColorUtils.colorize(result);
@@ -103,16 +83,12 @@ public class PlaceholderUtils {
             try {
                 return result
                     .replace("{member_count}", String.valueOf(memberCount))
-                    .replace("{online_member_count}", String.valueOf(memberCount)) // 暂时使用总成员数，后续可以添加在线统计
-                    .replace("{guild_max_exp}", getNextLevelRequirement(guild.getLevel()))
-                    .replace("{guild_exp_percentage}", getLevelProgress(guild.getLevel(), guild.getBalance()));
+                    .replace("{online_member_count}", String.valueOf(memberCount)); // 暂时使用总成员数，后续可以添加在线统计
             } catch (Exception e) {
                 // 如果获取失败，使用默认值
                 return result
                     .replace("{member_count}", "0")
-                    .replace("{online_member_count}", "0")
-                    .replace("{guild_max_exp}", getNextLevelRequirement(guild.getLevel()))
-                    .replace("{guild_exp_percentage}", getLevelProgress(guild.getLevel(), guild.getBalance()));
+                    .replace("{online_member_count}", "0");
             }
         });
     }
@@ -193,17 +169,7 @@ public class PlaceholderUtils {
         return ColorUtils.colorize(result);
     }
     
-    /**
-     * 格式化工会家位置
-     */
-    private static String formatHomeLocation(Guild guild) {
-        if (guild.getHomeWorld() == null) {
-            return "未设置";
-        }
-        return String.format("%s %.1f, %.1f, %.1f", 
-            guild.getHomeWorld(), guild.getHomeX(), guild.getHomeY(), guild.getHomeZ());
-    }
-    
+
     /**
      * 获取角色显示名称
      */
@@ -286,92 +252,4 @@ public class PlaceholderUtils {
         cachedSeparatorDefaultColor = cfg.getString("display.role-separator.default-color", "&7");
     }
     
-    /**
-     * 格式化余额
-     */
-    private static String formatBalance(double balance) {
-        // 尝试使用经济管理器格式化，如果不可用则使用默认格式
-        try {
-            com.guild.GuildPlugin plugin = com.guild.GuildPlugin.getInstance();
-            if (plugin != null && plugin.getEconomyManager() != null && plugin.getEconomyManager().isVaultAvailable()) {
-                return plugin.getEconomyManager().format(balance);
-            }
-        } catch (Exception e) {
-            // 忽略错误，使用默认格式
-        }
-        return String.format("%.2f", balance);
-    }
-    
-    /**
-     * 获取下一级升级需求
-     */
-    private static String getNextLevelRequirement(int currentLevel) {
-        if (currentLevel >= 10) {
-            return "已达到最高等级";
-        }
-        
-        double required = 0;
-        switch (currentLevel) {
-            case 1: required = 5000; break;
-            case 2: required = 10000; break;
-            case 3: required = 20000; break;
-            case 4: required = 35000; break;
-            case 5: required = 50000; break;
-            case 6: required = 75000; break;
-            case 7: required = 100000; break;
-            case 8: required = 150000; break;
-            case 9: required = 200000; break;
-        }
-        
-        return String.format("%.2f", required);
-    }
-    
-    /**
-     * 获取等级进度
-     */
-    private static String getLevelProgress(int currentLevel, double currentBalance) {
-        if (currentLevel >= 10) {
-            return "100%";
-        }
-        
-        double required = 0;
-        switch (currentLevel) {
-            case 1: required = 5000; break;
-            case 2: required = 10000; break;
-            case 3: required = 20000; break;
-            case 4: required = 35000; break;
-            case 5: required = 50000; break;
-            case 6: required = 75000; break;
-            case 7: required = 100000; break;
-            case 8: required = 150000; break;
-            case 9: required = 200000; break;
-        }
-        
-        double progress = (currentBalance / required) * 100;
-        return String.format("%.1f%%", Math.min(progress, 100));
-    }
-    
-    /**
-     * 获取升级费用
-     */
-    private static String getUpgradeCost(int currentLevel) {
-        if (currentLevel >= 10) {
-            return "0";
-        }
-        
-        double cost = 0;
-        switch (currentLevel) {
-            case 1: cost = 5000; break;
-            case 2: cost = 10000; break;
-            case 3: cost = 20000; break;
-            case 4: cost = 35000; break;
-            case 5: cost = 50000; break;
-            case 6: cost = 75000; break;
-            case 7: cost = 100000; break;
-            case 8: cost = 150000; break;
-            case 9: cost = 200000; break;
-        }
-        
-        return String.format("%.2f", cost);
-    }
 }

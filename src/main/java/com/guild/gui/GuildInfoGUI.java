@@ -40,7 +40,7 @@ public class GuildInfoGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-info.title", "&6工会信息"));
+        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-info.title", "&6Informações da Guilda"));
     }
     
     @Override
@@ -124,66 +124,61 @@ public class GuildInfoGUI implements GUI {
     
     private void setupDefaultItems() {
         // 工会名称
-        ItemStack nameItem = createItem(Material.NAME_TAG, "§6工会名称", 
+        ItemStack nameItem = createItem(Material.NAME_TAG, "§6Nome da Guilda", 
             "§e" + guild.getName());
         inventory.setItem(10, nameItem);
         
         // 工会标签
         if (guild.getTag() != null && !guild.getTag().isEmpty()) {
-            ItemStack tagItem = createItem(Material.OAK_SIGN, "§6工会标签", 
+            ItemStack tagItem = createItem(Material.OAK_SIGN, "§6Tag da Guilda", 
                 "§e[" + guild.getTag() + "]");
             inventory.setItem(12, tagItem);
         }
         
         // 工会描述
         if (guild.getDescription() != null && !guild.getDescription().isEmpty()) {
-            ItemStack descItem = createItem(Material.BOOK, "§6工会描述", 
+            ItemStack descItem = createItem(Material.BOOK, "§6Descrição da Guilda", 
                 "§e" + guild.getDescription());
             inventory.setItem(14, descItem);
         }
         
         // 会长信息
-        ItemStack leaderItem = createItem(Material.GOLDEN_HELMET, "§6会长", 
+        ItemStack leaderItem = createItem(Material.GOLDEN_HELMET, "§6Líder", 
             "§e" + guild.getLeaderName());
         inventory.setItem(16, leaderItem);
         
         // 成员数量 - 使用异步方法
         plugin.getGuildService().getGuildMemberCountAsync(guild.getId()).thenAccept(memberCount -> {
             CompatibleScheduler.runTask(plugin, () -> {
-                ItemStack memberItem = createItem(Material.PLAYER_HEAD, "§6成员数量", 
-                    "§e" + memberCount + "/" + guild.getMaxMembers() + " 人");
+                ItemStack memberItem = createItem(Material.PLAYER_HEAD, "§6Membros", 
+                    "§e" + memberCount + "/" + guild.getMaxMembers() + " pessoas");
                 inventory.setItem(28, memberItem);
             });
         });
         
         // 工会等级
-        ItemStack levelItem = createItem(Material.EXPERIENCE_BOTTLE, "§6工会等级", 
-            "§e等级 " + guild.getLevel(),
-            "§7最大成员: " + guild.getMaxMembers() + " 人");
+        ItemStack levelItem = createItem(Material.EXPERIENCE_BOTTLE, "§6Nível da Guilda", 
+            "§eNível " + guild.getLevel(),
+            "§7Máx Membros: " + guild.getMaxMembers() + " pessoas");
         inventory.setItem(30, levelItem);
         
-        // 工会资金
-        ItemStack balanceItem = createItem(Material.GOLD_INGOT, "§6工会资金", 
-            "§e" + plugin.getEconomyManager().format(guild.getBalance()),
-            "§7等级升级需要: " + getNextLevelRequirement(guild.getLevel()));
-        inventory.setItem(32, balanceItem);
-        
+
         // 创建时间（使用现实时间格式）
         String createdTime = guild.getCreatedAt() != null
             ? guild.getCreatedAt().format(com.guild.core.time.TimeProvider.FULL_FORMATTER)
-            : "未知";
-        ItemStack timeItem = createItem(Material.CLOCK, "§6创建时间", "§e" + createdTime);
+            : "Desconhecido";
+        ItemStack timeItem = createItem(Material.CLOCK, "§6Criada em", "§e" + createdTime);
         inventory.setItem(34, timeItem);
         
         // 工会状态
-        String status = guild.isFrozen() ? "§c已冻结" : "§a正常";
-        ItemStack statusItem = createItem(Material.BEACON, "§6工会状态", 
+        String status = guild.isFrozen() ? "§cCongelada" : "§aNormal";
+        ItemStack statusItem = createItem(Material.BEACON, "§6Status da Guilda", 
             status);
         inventory.setItem(36, statusItem);
         
         // 返回按钮
-        ItemStack backItem = createItem(Material.ARROW, "§c返回", 
-            "§e点击返回主菜单");
+        ItemStack backItem = createItem(Material.ARROW, "§cVoltar", 
+            "§eClique para voltar ao menu principal");
         inventory.setItem(49, backItem);
     }
     
@@ -242,52 +237,4 @@ public class GuildInfoGUI implements GUI {
         return inventory;
     }
     
-    /**
-     * 获取下一级升级所需资金
-     */
-    private String getNextLevelRequirement(int currentLevel) {
-        if (currentLevel >= 10) {
-            return "已达到最高等级";
-        }
-        
-        double required = 0;
-        switch (currentLevel) {
-            case 1: required = 5000; break;
-            case 2: required = 10000; break;
-            case 3: required = 20000; break;
-            case 4: required = 35000; break;
-            case 5: required = 50000; break;
-            case 6: required = 75000; break;
-            case 7: required = 100000; break;
-            case 8: required = 150000; break;
-            case 9: required = 200000; break;
-        }
-        
-        return plugin.getEconomyManager().format(required);
-    }
-
-    /**
-     * 获取当前等级进度
-     */
-    private String getLevelProgress(int currentLevel, double currentBalance) {
-        if (currentLevel >= 10) {
-            return "100%";
-        }
-
-        double required = 0;
-        switch (currentLevel) {
-            case 1: required = 5000; break;
-            case 2: required = 10000; break;
-            case 3: required = 20000; break;
-            case 4: required = 35000; break;
-            case 5: required = 50000; break;
-            case 6: required = 75000; break;
-            case 7: required = 100000; break;
-            case 8: required = 150000; break;
-            case 9: required = 200000; break;
-        }
-
-        double percentage = (currentBalance / required) * 100;
-        return String.format("%.1f%%", percentage);
-    }
 }

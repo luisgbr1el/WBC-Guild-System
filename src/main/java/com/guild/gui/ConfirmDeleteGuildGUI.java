@@ -30,7 +30,7 @@ public class ConfirmDeleteGuildGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&4确认删除工会");
+        return ColorUtils.colorize("&4Confirmar Exclusão da Guilda");
     }
     
     @Override
@@ -83,12 +83,12 @@ public class ConfirmDeleteGuildGUI implements GUI {
     private void displayConfirmInfo(Inventory inventory) {
         ItemStack info = createItem(
             Material.BOOK,
-            ColorUtils.colorize("&4确认删除工会"),
-            ColorUtils.colorize("&7工会: &e" + guild.getName()),
-            ColorUtils.colorize("&7你确定要删除这个工会吗？"),
-            ColorUtils.colorize("&c此操作将永久删除工会！"),
-            ColorUtils.colorize("&c所有成员将被移除！"),
-            ColorUtils.colorize("&c此操作不可撤销！")
+            ColorUtils.colorize("&4Confirmar Exclusão da Guilda"),
+            ColorUtils.colorize("&7Guilda: &e" + guild.getName()),
+            ColorUtils.colorize("&7Tem certeza que deseja excluir esta guilda?"),
+            ColorUtils.colorize("&cEsta operação excluirá permanentemente a guilda!"),
+            ColorUtils.colorize("&cTodos os membros serão removidos!"),
+            ColorUtils.colorize("&cEsta operação é irreversível!")
         );
         inventory.setItem(13, info);
     }
@@ -100,17 +100,17 @@ public class ConfirmDeleteGuildGUI implements GUI {
         // 确认删除按钮
         ItemStack confirm = createItem(
             Material.TNT,
-            ColorUtils.colorize("&4确认删除"),
-            ColorUtils.colorize("&7点击确认删除工会"),
-            ColorUtils.colorize("&c此操作不可撤销！")
+            ColorUtils.colorize("&4Confirmar Exclusão"),
+            ColorUtils.colorize("&7Clique para confirmar a exclusão"),
+            ColorUtils.colorize("&cEsta operação é irreversível!")
         );
         inventory.setItem(11, confirm);
         
         // 取消按钮
         ItemStack cancel = createItem(
             Material.EMERALD_BLOCK,
-            ColorUtils.colorize("&a取消"),
-            ColorUtils.colorize("&7取消删除工会")
+            ColorUtils.colorize("&aCancelar"),
+            ColorUtils.colorize("&7Cancelar exclusão da guilda")
         );
         inventory.setItem(15, cancel);
     }
@@ -122,7 +122,7 @@ public class ConfirmDeleteGuildGUI implements GUI {
         // 检查权限（只有当前工会会长可以删除）
         GuildMember member = plugin.getGuildService().getGuildMember(player.getUniqueId());
         if (member == null || member.getGuildId() != guild.getId() || member.getRole() != GuildMember.Role.LEADER) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&c只有工会会长才能执行此操作");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta operação");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
@@ -130,7 +130,7 @@ public class ConfirmDeleteGuildGUI implements GUI {
         // 删除工会
         plugin.getGuildService().deleteGuildAsync(guild.getId(), player.getUniqueId()).thenAccept(success -> {
             if (success) {
-                String template = plugin.getConfigManager().getMessagesConfig().getString("delete.success", "&a工会 &e{guild} &a已被删除！");
+                String template = plugin.getConfigManager().getMessagesConfig().getString("delete.success", "&aGuilda &e{guild} &afoi excluída!");
                 // 回到主线程进行界面操作
                 CompatibleScheduler.runTask(plugin, () -> {
                     String rendered = ColorUtils.replaceWithColorIsolation(template, "{guild}", guild.getName());
@@ -140,7 +140,7 @@ public class ConfirmDeleteGuildGUI implements GUI {
                     plugin.getGuiManager().openGUI(player, new MainGuildGUI(plugin));
                 });
             } else {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("delete.failed", "&c删除工会失败！");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("delete.failed", "&cFalha ao excluir guilda!");
                 player.sendMessage(ColorUtils.colorize(message));
             }
         });

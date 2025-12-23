@@ -19,7 +19,7 @@ public class ServiceContainer {
      */
     public <T> void register(Class<T> serviceClass, T service) {
         services.put(serviceClass, service);
-        logger.info("注册服务: " + serviceClass.getSimpleName());
+        logger.info("Registrando serviço: " + serviceClass.getSimpleName());
     }
     
     /**
@@ -28,7 +28,7 @@ public class ServiceContainer {
     public <T> void register(Class<T> serviceClass, T service, ServiceLifecycle lifecycle) {
         services.put(serviceClass, service);
         lifecycles.put(serviceClass, lifecycle);
-        logger.info("注册服务: " + serviceClass.getSimpleName() + " (带生命周期)");
+        logger.info("Registrando serviço: " + serviceClass.getSimpleName() + " (com ciclo de vida)");
     }
     
     /**
@@ -55,13 +55,13 @@ public class ServiceContainer {
      */
     public CompletableFuture<Void> startAll() {
         return CompletableFuture.runAsync(() -> {
-            logger.info("正在启动所有服务...");
+            logger.info("Iniciando todos os serviços...");
             for (Map.Entry<Class<?>, ServiceLifecycle> entry : lifecycles.entrySet()) {
                 try {
                     entry.getValue().start();
-                    logger.info("服务启动成功: " + entry.getKey().getSimpleName());
+                    logger.info("Serviço iniciado com sucesso: " + entry.getKey().getSimpleName());
                 } catch (Exception e) {
-                    logger.severe("服务启动失败: " + entry.getKey().getSimpleName() + " - " + e.getMessage());
+                    logger.severe("Falha ao iniciar serviço: " + entry.getKey().getSimpleName() + " - " + e.getMessage());
                 }
             }
         });
@@ -72,13 +72,13 @@ public class ServiceContainer {
      */
     public CompletableFuture<Void> stopAll() {
         return CompletableFuture.runAsync(() -> {
-            logger.info("正在停止所有服务...");
+            logger.info("Parando todos os serviços...");
             for (Map.Entry<Class<?>, ServiceLifecycle> entry : lifecycles.entrySet()) {
                 try {
                     entry.getValue().stop();
-                    logger.info("服务停止成功: " + entry.getKey().getSimpleName());
+                    logger.info("Serviço parado com sucesso: " + entry.getKey().getSimpleName());
                 } catch (Exception e) {
-                    logger.severe("服务停止失败: " + entry.getKey().getSimpleName() + " - " + e.getMessage());
+                    logger.severe("Falha ao parar serviço: " + entry.getKey().getSimpleName() + " - " + e.getMessage());
                 }
             }
         });
@@ -92,9 +92,9 @@ public class ServiceContainer {
             stopAll().get();
             services.clear();
             lifecycles.clear();
-            logger.info("服务容器已关闭");
+            logger.info("Container de serviços fechado");
         } catch (Exception e) {
-            logger.severe("关闭服务容器时发生错误: " + e.getMessage());
+            logger.severe("Erro ao fechar container de serviços: " + e.getMessage());
         }
     }
     

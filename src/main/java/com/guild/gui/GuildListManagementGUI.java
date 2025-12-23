@@ -36,7 +36,7 @@ public class GuildListManagementGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&4工会列表管理");
+        return ColorUtils.colorize("&4Gerenciamento da Lista de Guildas");
     }
     
     @Override
@@ -79,22 +79,21 @@ public class GuildListManagementGUI implements GUI {
     
     private ItemStack createGuildItem(Guild guild) {
         Material material = guild.isFrozen() ? Material.RED_WOOL : Material.GREEN_WOOL;
-        String status = guild.isFrozen() ? "&c已冻结" : "&a正常";
+        String status = guild.isFrozen() ? "&cCongelada" : "&aNormal";
         
         List<String> lore = new ArrayList<>();
         lore.add(ColorUtils.colorize("&7ID: " + guild.getId()));
-        lore.add(ColorUtils.colorize("&7标签: [" + (guild.getTag() != null ? guild.getTag() : "无") + "]"));
-        lore.add(ColorUtils.colorize("&7会长: " + guild.getLeaderName()));
-        lore.add(ColorUtils.colorize("&7等级: " + guild.getLevel()));
-        lore.add(ColorUtils.colorize("&7资金: " + plugin.getEconomyManager().format(guild.getBalance())));
-        lore.add(ColorUtils.colorize("&7状态: " + status));
+        lore.add(ColorUtils.colorize("&7Tag: [" + (guild.getTag() != null ? guild.getTag() : "Nenhuma") + "]"));
+        lore.add(ColorUtils.colorize("&7Líder: " + guild.getLeaderName()));
+        lore.add(ColorUtils.colorize("&7Nível: " + guild.getLevel()));
+        lore.add(ColorUtils.colorize("&7Status: " + status));
         lore.add("");
-        lore.add(ColorUtils.colorize("&e左键: 查看详情"));
-        lore.add(ColorUtils.colorize("&c右键: 删除工会"));
+        lore.add(ColorUtils.colorize("&eBotão Esquerdo: Ver Detalhes"));
+        lore.add(ColorUtils.colorize("&cBotão Direito: Excluir Guilda"));
         if (guild.isFrozen()) {
-            lore.add(ColorUtils.colorize("&a中键: 解冻工会"));
+            lore.add(ColorUtils.colorize("&aBotão do Meio: Descongelar Guilda"));
         } else {
-            lore.add(ColorUtils.colorize("&6中键: 冻结工会"));
+            lore.add(ColorUtils.colorize("&6Botão do Meio: Congelar Guilda"));
         }
         
         return createItem(material, ColorUtils.colorize("&6" + guild.getName()), lore.toArray(new String[0]));
@@ -105,26 +104,26 @@ public class GuildListManagementGUI implements GUI {
         
         // 上一页按钮
         if (currentPage > 0) {
-            inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&a上一页"), 
-                ColorUtils.colorize("&7第 " + (currentPage) + " 页")));
+            inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&aPágina Anterior"), 
+                ColorUtils.colorize("&7Pág " + (currentPage) + "")));
         }
         
         // 页码信息
-        inventory.setItem(49, createItem(Material.PAPER, ColorUtils.colorize("&e第 " + (currentPage + 1) + " 页，共 " + totalPages + " 页")));
+        inventory.setItem(49, createItem(Material.PAPER, ColorUtils.colorize("&ePág " + (currentPage + 1) + " de " + totalPages + "")));
         
         // 下一页按钮
         if (currentPage < totalPages - 1) {
-            inventory.setItem(53, createItem(Material.ARROW, ColorUtils.colorize("&a下一页"), 
-                ColorUtils.colorize("&7第 " + (currentPage + 2) + " 页")));
+            inventory.setItem(53, createItem(Material.ARROW, ColorUtils.colorize("&aPróxima Página"), 
+                ColorUtils.colorize("&7Pág " + (currentPage + 2) + "")));
         }
     }
     
     private void setupActionButtons(Inventory inventory) {
         // 返回按钮
-        inventory.setItem(46, createItem(Material.BARRIER, ColorUtils.colorize("&c返回")));
+        inventory.setItem(46, createItem(Material.BARRIER, ColorUtils.colorize("&cVoltar")));
         
         // 刷新按钮
-        inventory.setItem(52, createItem(Material.EMERALD, ColorUtils.colorize("&a刷新列表")));
+        inventory.setItem(52, createItem(Material.EMERALD, ColorUtils.colorize("&aAtualizar Lista")));
     }
     
     private void fillBorder(Inventory inventory) {
@@ -204,19 +203,19 @@ public class GuildListManagementGUI implements GUI {
     
     private void deleteGuild(Player player, Guild guild) {
         // 确认删除
-        player.sendMessage(ColorUtils.colorize("&c您确定要删除工会 " + guild.getName() + " 吗？"));
-        player.sendMessage(ColorUtils.colorize("&c输入 &f/guildadmin delete " + guild.getName() + " confirm &c确认删除"));
+        player.sendMessage(ColorUtils.colorize("&cTem certeza que deseja excluir a guilda " + guild.getName() + "?"));
+        player.sendMessage(ColorUtils.colorize("&cDigite &f/guildadmin delete " + guild.getName() + " confirm &cpara confirmar exclusão"));
     }
     
     private void toggleGuildFreeze(Player player, Guild guild) {
         boolean newStatus = !guild.isFrozen();
         plugin.getGuildService().updateGuildFrozenStatusAsync(guild.getId(), newStatus).thenAccept(success -> {
             if (success) {
-                String message = newStatus ? "&a工会 " + guild.getName() + " 已被冻结！" : "&a工会 " + guild.getName() + " 已被解冻！";
+                String message = newStatus ? "&aGuilda " + guild.getName() + " foi congelada!" : "&aGuilda " + guild.getName() + " foi descongelada!";
                 player.sendMessage(ColorUtils.colorize(message));
                 loadGuilds(); // 刷新列表
             } else {
-                player.sendMessage(ColorUtils.colorize("&c操作失败！"));
+                player.sendMessage(ColorUtils.colorize("&cOperação falhou!"));
             }
         });
     }

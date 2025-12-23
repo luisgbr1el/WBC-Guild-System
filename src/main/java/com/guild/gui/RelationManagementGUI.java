@@ -42,7 +42,7 @@ public class RelationManagementGUI implements GUI {
         this.player = player;
         // 检查管理员权限
         if (!player.hasPermission("guild.admin")) {
-            player.sendMessage(ColorUtils.colorize("&c您没有管理员权限！"));
+            player.sendMessage(ColorUtils.colorize("&cVocê não tem permissão de administrador!"));
             return;
         }
         loadRelations();
@@ -50,7 +50,7 @@ public class RelationManagementGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&4关系管理 - 管理员");
+        return ColorUtils.colorize("&4Gerenciamento de Relações - Admin");
     }
     
     @Override
@@ -76,16 +76,16 @@ public class RelationManagementGUI implements GUI {
     private void setupRelationList(Inventory inventory) {
         if (isLoading) {
             // 显示加载中
-            ItemStack loadingItem = createItem(Material.SAND, ColorUtils.colorize("&e加载中..."), 
-                ColorUtils.colorize("&7正在加载关系数据..."));
+            ItemStack loadingItem = createItem(Material.SAND, ColorUtils.colorize("&eCarregando..."), 
+                ColorUtils.colorize("&7Carregando dados de relação..."));
             inventory.setItem(22, loadingItem);
             return;
         }
         
         if (allRelations.isEmpty()) {
             // 显示无数据
-            ItemStack emptyItem = createItem(Material.BARRIER, ColorUtils.colorize("&c暂无关系数据"), 
-                ColorUtils.colorize("&7没有找到任何工会关系"));
+            ItemStack emptyItem = createItem(Material.BARRIER, ColorUtils.colorize("&cSem dados de relação"), 
+                ColorUtils.colorize("&7Nenhuma relação de guilda encontrada"));
             inventory.setItem(22, emptyItem);
             return;
         }
@@ -116,21 +116,21 @@ public class RelationManagementGUI implements GUI {
                                   pendingDeletions.get(player.getUniqueId()).getId() == relation.getId();
         
         List<String> lore = new ArrayList<>();
-        lore.add(ColorUtils.colorize("&7关系类型: " + getRelationTypeName(relation.getType())));
-        lore.add(ColorUtils.colorize("&7状态: " + status));
-        lore.add(ColorUtils.colorize("&7工会1: " + relation.getGuild1Name()));
-        lore.add(ColorUtils.colorize("&7工会2: " + relation.getGuild2Name()));
-        lore.add(ColorUtils.colorize("&7发起人: " + relation.getInitiatorName()));
-        lore.add(ColorUtils.colorize("&7创建时间: " + formatDateTime(relation.getCreatedAt())));
+        lore.add(ColorUtils.colorize("&7Tipo de Relação: " + getRelationTypeName(relation.getType())));
+        lore.add(ColorUtils.colorize("&7Status: " + status));
+        lore.add(ColorUtils.colorize("&7Guilda 1: " + relation.getGuild1Name()));
+        lore.add(ColorUtils.colorize("&7Guilda 2: " + relation.getGuild2Name()));
+        lore.add(ColorUtils.colorize("&7Iniciador: " + relation.getInitiatorName()));
+        lore.add(ColorUtils.colorize("&7Criado em: " + formatDateTime(relation.getCreatedAt())));
         lore.add("");
         
         if (isPendingDeletion) {
-            lore.add(ColorUtils.colorize("&4⚠ 待确认删除"));
-            lore.add(ColorUtils.colorize("&c左键: 确认删除"));
-            lore.add(ColorUtils.colorize("&e右键: 取消删除"));
+            lore.add(ColorUtils.colorize("&4⚠ Exclusão Pendente"));
+            lore.add(ColorUtils.colorize("&cBotão Esquerdo: Confirmar Exclusão"));
+            lore.add(ColorUtils.colorize("&eBotão Direito: Cancelar Exclusão"));
         } else {
-            lore.add(ColorUtils.colorize("&c左键: 删除关系"));
-            lore.add(ColorUtils.colorize("&e右键: 查看详情"));
+            lore.add(ColorUtils.colorize("&cBotão Esquerdo: Excluir Relação"));
+            lore.add(ColorUtils.colorize("&eBotão Direito: Ver Detalhes"));
         }
         
         String displayName = ColorUtils.colorize("&6" + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name());
@@ -154,27 +154,27 @@ public class RelationManagementGUI implements GUI {
     
     private String getRelationTypeName(GuildRelation.RelationType type) {
         switch (type) {
-            case ALLY: return "盟友";
-            case ENEMY: return "敌对";
-            case WAR: return "开战";
-            case TRUCE: return "停战";
-            case NEUTRAL: return "中立";
-            default: return "未知";
+            case ALLY: return "Aliado";
+            case ENEMY: return "Inimigo";
+            case WAR: return "Guerra";
+            case TRUCE: return "Trégua";
+            case NEUTRAL: return "Neutro";
+            default: return "Desconhecido";
         }
     }
     
     private String getRelationStatus(GuildRelation.RelationStatus status) {
         switch (status) {
-            case PENDING: return "待处理";
-            case ACTIVE: return "活跃";
-            case EXPIRED: return "已过期";
-            case CANCELLED: return "已取消";
-            default: return "未知";
+            case PENDING: return "Pendente";
+            case ACTIVE: return "Ativo";
+            case EXPIRED: return "Expirado";
+            case CANCELLED: return "Cancelado";
+            default: return "Desconhecido";
         }
     }
     
     private String formatDateTime(java.time.LocalDateTime dateTime) {
-        if (dateTime == null) return "未知";
+        if (dateTime == null) return "Desconhecido";
         return dateTime.format(com.guild.core.time.TimeProvider.FULL_FORMATTER);
     }
     
@@ -183,29 +183,29 @@ public class RelationManagementGUI implements GUI {
         
         // 上一页按钮
         if (currentPage > 0) {
-            inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&a上一页"), 
-                ColorUtils.colorize("&7第 " + (currentPage) + " 页")));
+            inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&aPágina Anterior"), 
+                ColorUtils.colorize("&7Página " + (currentPage) + "")));
         }
         
         // 页码信息
-        inventory.setItem(49, createItem(Material.PAPER, ColorUtils.colorize("&e第 " + (currentPage + 1) + " 页，共 " + totalPages + " 页"),
-            ColorUtils.colorize("&7总计 " + allRelations.size() + " 个关系")));
+        inventory.setItem(49, createItem(Material.PAPER, ColorUtils.colorize("&ePágina " + (currentPage + 1) + " de " + totalPages + ""),
+            ColorUtils.colorize("&7Total de " + allRelations.size() + " relações")));
         
         // 下一页按钮
         if (currentPage < totalPages - 1) {
-            inventory.setItem(53, createItem(Material.ARROW, ColorUtils.colorize("&a下一页"), 
-                ColorUtils.colorize("&7第 " + (currentPage + 2) + " 页")));
+            inventory.setItem(53, createItem(Material.ARROW, ColorUtils.colorize("&aPróxima Página"), 
+                ColorUtils.colorize("&7Página " + (currentPage + 2) + "")));
         }
     }
     
     private void setupActionButtons(Inventory inventory) {
         // 返回按钮
-        inventory.setItem(46, createItem(Material.BARRIER, ColorUtils.colorize("&c返回"),
-            ColorUtils.colorize("&7返回管理员菜单")));
+        inventory.setItem(46, createItem(Material.BARRIER, ColorUtils.colorize("&cVoltar"),
+            ColorUtils.colorize("&7Voltar ao menu de admin")));
         
         // 刷新按钮
-        inventory.setItem(52, createItem(Material.EMERALD, ColorUtils.colorize("&a刷新列表"),
-            ColorUtils.colorize("&7重新加载关系数据")));
+        inventory.setItem(52, createItem(Material.EMERALD, ColorUtils.colorize("&aAtualizar Lista"),
+            ColorUtils.colorize("&7Recarregar dados de relação")));
     }
     
     private void fillBorder(Inventory inventory) {
@@ -243,7 +243,7 @@ public class RelationManagementGUI implements GUI {
                         try {
                             allRelationsList.addAll(future.get());
                         } catch (Exception e) {
-                            plugin.getLogger().warning("加载工会关系时发生错误: " + e.getMessage());
+                            plugin.getLogger().warning("Erro ao carregar relações da guilda: " + e.getMessage());
                         }
                     }
                     return allRelationsList;
@@ -263,7 +263,7 @@ public class RelationManagementGUI implements GUI {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 isLoading = false;
                 if (player.isOnline()) {
-                    player.sendMessage(ColorUtils.colorize("&c加载关系数据时发生错误: " + throwable.getMessage()));
+                    player.sendMessage(ColorUtils.colorize("&cErro ao carregar dados de relação: " + throwable.getMessage()));
                     plugin.getGuiManager().refreshGUI(player);
                 }
             });
@@ -275,7 +275,7 @@ public class RelationManagementGUI implements GUI {
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         // 检查管理员权限
         if (!player.hasPermission("guild.admin")) {
-            player.sendMessage(ColorUtils.colorize("&c您没有管理员权限！"));
+            player.sendMessage(ColorUtils.colorize("&cVocê não tem permissão de administrador!"));
             return;
         }
         
@@ -290,7 +290,7 @@ public class RelationManagementGUI implements GUI {
             // 刷新
             if (!isLoading) {
                 loadRelations();
-                player.sendMessage(ColorUtils.colorize("&a正在刷新关系列表..."));
+                player.sendMessage(ColorUtils.colorize("&aAtualizando lista de relações..."));
             }
         } else if (slot == 45 && currentPage > 0) {
             // 上一页
@@ -344,9 +344,9 @@ public class RelationManagementGUI implements GUI {
         pendingDeletions.put(player.getUniqueId(), relation);
         deletionTimers.put(player.getUniqueId(), System.currentTimeMillis());
         
-        player.sendMessage(ColorUtils.colorize("&c确定要删除关系: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name() + " 吗？"));
-        player.sendMessage(ColorUtils.colorize("&c左键: 确认删除 | 右键: 取消删除"));
-        player.sendMessage(ColorUtils.colorize("&e10秒后自动取消"));
+        player.sendMessage(ColorUtils.colorize("&cTem certeza que deseja excluir a relação: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name() + "?"));
+        player.sendMessage(ColorUtils.colorize("&cBotão Esquerdo: Confirmar | Botão Direito: Cancelar"));
+        player.sendMessage(ColorUtils.colorize("&eCancelamento automático em 10 segundos"));
         
         // 刷新GUI显示待删除状态
         plugin.getGuiManager().refreshGUI(player);
@@ -369,18 +369,18 @@ public class RelationManagementGUI implements GUI {
         plugin.getGuildService().deleteGuildRelationAsync(relation.getId()).thenAccept(success -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (success) {
-                    player.sendMessage(ColorUtils.colorize("&a已删除关系: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name()));
+                    player.sendMessage(ColorUtils.colorize("&aRelação excluída: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name()));
                     // 从列表中移除
                     allRelations.remove(relation);
                     // 刷新GUI
                     plugin.getGuiManager().refreshGUI(player);
                 } else {
-                    player.sendMessage(ColorUtils.colorize("&c删除关系失败！"));
+                    player.sendMessage(ColorUtils.colorize("&cFalha ao excluir relação!"));
                 }
             });
         }).exceptionally(throwable -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                player.sendMessage(ColorUtils.colorize("&c删除关系时发生错误: " + throwable.getMessage()));
+                player.sendMessage(ColorUtils.colorize("&cErro ao excluir relação: " + throwable.getMessage()));
             });
             return null;
         });
@@ -391,25 +391,25 @@ public class RelationManagementGUI implements GUI {
         deletionTimers.remove(player.getUniqueId());
         
         if (relation != null) {
-            player.sendMessage(ColorUtils.colorize("&e已取消删除关系: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name()));
+            player.sendMessage(ColorUtils.colorize("&eExclusão de relação cancelada: " + relation.getGuild1Name() + " ↔ " + relation.getGuild2Name()));
             // 刷新GUI
             plugin.getGuiManager().refreshGUI(player);
         }
     }
     
     private void showRelationDetails(Player player, GuildRelation relation) {
-        player.sendMessage(ColorUtils.colorize("&6=== 关系详情 ==="));
-        player.sendMessage(ColorUtils.colorize("&e关系类型: " + getRelationTypeName(relation.getType())));
-        player.sendMessage(ColorUtils.colorize("&e状态: " + getRelationStatus(relation.getStatus())));
-        player.sendMessage(ColorUtils.colorize("&e工会1: " + relation.getGuild1Name() + " (ID: " + relation.getGuild1Id() + ")"));
-        player.sendMessage(ColorUtils.colorize("&e工会2: " + relation.getGuild2Name() + " (ID: " + relation.getGuild2Id() + ")"));
-        player.sendMessage(ColorUtils.colorize("&e发起人: " + relation.getInitiatorName()));
-        player.sendMessage(ColorUtils.colorize("&e创建时间: " + formatDateTime(relation.getCreatedAt())));
+        player.sendMessage(ColorUtils.colorize("&6=== Detalhes da Relação ==="));
+        player.sendMessage(ColorUtils.colorize("&eTipo de Relação: " + getRelationTypeName(relation.getType())));
+        player.sendMessage(ColorUtils.colorize("&eStatus: " + getRelationStatus(relation.getStatus())));
+        player.sendMessage(ColorUtils.colorize("&eGuilda 1: " + relation.getGuild1Name() + " (ID: " + relation.getGuild1Id() + ")"));
+        player.sendMessage(ColorUtils.colorize("&eGuilda 2: " + relation.getGuild2Name() + " (ID: " + relation.getGuild2Id() + ")"));
+        player.sendMessage(ColorUtils.colorize("&eIniciador: " + relation.getInitiatorName()));
+        player.sendMessage(ColorUtils.colorize("&eCriado em: " + formatDateTime(relation.getCreatedAt())));
         if (relation.getUpdatedAt() != null) {
-            player.sendMessage(ColorUtils.colorize("&e更新时间: " + formatDateTime(relation.getUpdatedAt())));
+            player.sendMessage(ColorUtils.colorize("&eAtualizado em: " + formatDateTime(relation.getUpdatedAt())));
         }
         if (relation.getExpiresAt() != null) {
-            player.sendMessage(ColorUtils.colorize("&e过期时间: " + formatDateTime(relation.getExpiresAt())));
+            player.sendMessage(ColorUtils.colorize("&eExpira em: " + formatDateTime(relation.getExpiresAt())));
         }
         player.sendMessage(ColorUtils.colorize("&6=================="));
     }

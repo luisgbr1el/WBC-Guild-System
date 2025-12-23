@@ -1,30 +1,30 @@
 @echo off
-echo 正在构建工会插件...
+echo Construindo WBC Guild System...
 
-REM 检查Maven是否安装
+REM Verificando se o Maven está instalado
 mvn -version >nul 2>&1
 if errorlevel 1 (
-    echo 错误: 未找到Maven，请先安装Maven
+    echo Erro: Maven não encontrado, por favor instale o Maven primeiro
     pause
     exit /b 1
 )
 
-REM 清理并编译项目
-echo 清理项目...
+REM Limpando e compilando o projeto
+echo Limpando o projeto...
 mvn clean
 
-echo 编译项目...
+echo Compilando o projeto...
 mvn compile
 
-echo 打包项目...
+echo Empacotando o projeto...
 mvn package
 
 if errorlevel 1 (
-    echo 构建失败！
+    echo Falha na construção!
     pause
     exit /b 1
 )
 
-echo 构建成功！
-echo 插件文件位置: target/guild-plugin-1.0.0.jar
+echo Construção concluída com sucesso!
+echo Localização do arquivo do plugin: target/guild-plugin-1.2.1.jar
 pause

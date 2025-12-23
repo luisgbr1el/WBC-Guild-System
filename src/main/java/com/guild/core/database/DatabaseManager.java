@@ -45,7 +45,7 @@ public class DatabaseManager {
             // 创建数据表
             createTables();
             
-            logger.info("数据库连接初始化成功: " + databaseType);
+            logger.info("Conexão com banco de dados inicializada com sucesso: " + databaseType);
             
         } catch (Exception e) {
             logger.severe("数据库连接初始化失败: " + e.getMessage());
@@ -156,12 +156,9 @@ public class DatabaseManager {
                 description TEXT,
                 leader_uuid TEXT NOT NULL,
                 leader_name TEXT NOT NULL,
-                home_world TEXT,
-                home_x REAL,
-                home_y REAL,
-                home_z REAL,
-                home_yaw REAL,
-                home_pitch REAL,
+                level INTEGER DEFAULT 1,
+                max_members INTEGER DEFAULT 6,
+                frozen INTEGER DEFAULT 0,
                 created_at TEXT DEFAULT (datetime('now','localtime')),
                 updated_at TEXT DEFAULT (datetime('now','localtime'))
             )
@@ -232,36 +229,7 @@ public class DatabaseManager {
             )
         """);
         
-        // 工会经济表
-        executeUpdate("""
-            CREATE TABLE IF NOT EXISTS guild_economy (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                guild_id INTEGER NOT NULL UNIQUE,
-                balance REAL DEFAULT 0.0,
-                level INTEGER DEFAULT 1,
-                experience REAL DEFAULT 0.0,
-                max_experience REAL DEFAULT 5000.0,
-                max_members INTEGER DEFAULT 6,
-                last_updated TEXT DEFAULT (datetime('now','localtime')),
-                FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
-            )
-        """);
-        
-        // 工会贡献记录表
-        executeUpdate("""
-            CREATE TABLE IF NOT EXISTS guild_contributions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                guild_id INTEGER NOT NULL,
-                player_uuid TEXT NOT NULL,
-                player_name TEXT NOT NULL,
-                amount REAL NOT NULL,
-                contribution_type TEXT NOT NULL,
-                description TEXT,
-                created_at TEXT DEFAULT (datetime('now','localtime')),
-                FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
-            )
-        """);
-        
+
         // 工会日志表
         executeUpdate("""
             CREATE TABLE IF NOT EXISTS guild_logs (
@@ -292,12 +260,9 @@ public class DatabaseManager {
                 description TEXT,
                 leader_uuid VARCHAR(36) NOT NULL,
                 leader_name VARCHAR(16) NOT NULL,
-                home_world VARCHAR(100),
-                home_x DOUBLE,
-                home_y DOUBLE,
-                home_z DOUBLE,
-                home_yaw FLOAT,
-                home_pitch FLOAT,
+                level INT DEFAULT 1,
+                max_members INT DEFAULT 6,
+                frozen BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -368,36 +333,7 @@ public class DatabaseManager {
             )
         """);
         
-        // 工会经济表
-        executeUpdate("""
-            CREATE TABLE IF NOT EXISTS guild_economy (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                guild_id INT NOT NULL UNIQUE,
-                balance DOUBLE DEFAULT 0.0,
-                level INT DEFAULT 1,
-                experience DOUBLE DEFAULT 0.0,
-                max_experience DOUBLE DEFAULT 5000.0,
-                max_members INT DEFAULT 6,
-                last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
-            )
-        """);
-        
-        // 工会贡献记录表
-        executeUpdate("""
-            CREATE TABLE IF NOT EXISTS guild_contributions (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                guild_id INT NOT NULL,
-                player_uuid VARCHAR(36) NOT NULL,
-                player_name VARCHAR(16) NOT NULL,
-                amount DOUBLE NOT NULL,
-                contribution_type VARCHAR(20) NOT NULL,
-                description TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE
-            )
-        """);
-        
+
         // 工会日志表
         executeUpdate("""
             CREATE TABLE IF NOT EXISTS guild_logs (
@@ -514,52 +450,6 @@ public class DatabaseManager {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false); // 开启事务以提高性能
             
-            // 检查guilds表是否有home相关列
-            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "guilds", "home_world")) {
-                if (!rs.next()) {
-                    // 添加home相关列
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_world TEXT")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_x REAL")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_y REAL")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_z REAL")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_yaw REAL")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_pitch REAL")) {
-                        stmt.executeUpdate();
-                    }
-                    logger.info("已为guilds表添加home相关列");
-                }
-            }
-            
-            // 检查guilds表是否有economy相关列
-            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "guilds", "balance")) {
-                if (!rs.next()) {
-                    // 添加economy相关列
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN balance REAL DEFAULT 0.0")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN level INTEGER DEFAULT 1")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN max_members INTEGER DEFAULT 6")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN frozen INTEGER DEFAULT 0")) {
-                        stmt.executeUpdate();
-                    }
-                    logger.info("已为guilds表添加economy相关列");
-                }
-            }
-            
             conn.commit(); // 提交事务
         } catch (SQLException e) {
             logger.warning("检查SQLite列时发生错误: " + e.getMessage());
@@ -572,52 +462,6 @@ public class DatabaseManager {
     private void checkAndAddMySQLColumns() {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false); // 开启事务以提高性能
-            
-            // 检查guilds表是否有home相关列
-            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "guilds", "home_world")) {
-                if (!rs.next()) {
-                    // 添加home相关列
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_world VARCHAR(100)")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_x DOUBLE")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_y DOUBLE")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_z DOUBLE")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_yaw FLOAT")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN home_pitch FLOAT")) {
-                        stmt.executeUpdate();
-                    }
-                    logger.info("已为guilds表添加home相关列");
-                }
-            }
-            
-            // 检查guilds表是否有economy相关列
-            try (ResultSet rs = conn.getMetaData().getColumns(null, null, "guilds", "balance")) {
-                if (!rs.next()) {
-                    // 添加economy相关列
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN balance DOUBLE DEFAULT 0.0")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN level INT DEFAULT 1")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN max_members INT DEFAULT 6")) {
-                        stmt.executeUpdate();
-                    }
-                    try (PreparedStatement stmt = conn.prepareStatement("ALTER TABLE guilds ADD COLUMN frozen BOOLEAN DEFAULT FALSE")) {
-                        stmt.executeUpdate();
-                    }
-                    logger.info("已为guilds表添加economy相关列");
-                }
-            }
             
             conn.commit(); // 提交事务
         } catch (SQLException e) {

@@ -41,7 +41,7 @@ public class GuildListGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.title", "&6工会列表"));
+        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.title", "&6Lista de Guildas"));
     }
     
     @Override
@@ -103,26 +103,26 @@ public class GuildListGUI implements GUI {
         // 搜索按钮
         ItemStack search = createItem(
             Material.COMPASS,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.search.name", "&e搜索工会")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.search.lore.1", "&7搜索特定工会")),
-            ColorUtils.colorize("&7当前搜索: " + (searchQuery.isEmpty() ? "无" : searchQuery))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.search.name", "&ePesquisar Guilda")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.search.lore.1", "&7Pesquisar por uma guilda específica")),
+            ColorUtils.colorize("&7Pesquisa atual: " + (searchQuery.isEmpty() ? "Nenhuma" : searchQuery))
         );
         inventory.setItem(45, search);
         
         // 筛选按钮
         ItemStack filter = createItem(
             Material.HOPPER,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.filter.name", "&e筛选")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.filter.lore.1", "&7按条件筛选工会")),
-            ColorUtils.colorize("&7当前筛选: " + getFilterDisplayName())
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.filter.name", "&eFiltrar")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.filter.lore.1", "&7Filtrar guildas por condição")),
+            ColorUtils.colorize("&7Filtro atual: " + getFilterDisplayName())
         );
         inventory.setItem(47, filter);
         
         // 返回按钮
         ItemStack back = createItem(
             Material.ARROW,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.back.name", "&7返回")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.back.lore.1", "&7返回主菜单"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.back.name", "&7Voltar")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.back.lore.1", "&7Voltar ao Menu Principal"))
         );
         inventory.setItem(49, back);
     }
@@ -138,8 +138,8 @@ public class GuildListGUI implements GUI {
                     // 显示无工会信息
                     ItemStack noGuilds = createItem(
                         Material.BARRIER,
-                        ColorUtils.colorize("&c暂无工会"),
-                        ColorUtils.colorize("&7服务器中还没有工会")
+                        ColorUtils.colorize("&cSem Guildas"),
+                        ColorUtils.colorize("&7Não há guildas no servidor ainda")
                     );
                     inventory.setItem(22, noGuilds);
                     return;
@@ -152,8 +152,8 @@ public class GuildListGUI implements GUI {
                     // 显示无搜索结果
                     ItemStack noResults = createItem(
                         Material.BARRIER,
-                        ColorUtils.colorize("&c无搜索结果"),
-                        ColorUtils.colorize("&7没有找到匹配的工会")
+                        ColorUtils.colorize("&cSem Resultados"),
+                        ColorUtils.colorize("&7Nenhuma guilda correspondente encontrada")
                     );
                     inventory.setItem(22, noResults);
                     return;
@@ -258,8 +258,8 @@ public class GuildListGUI implements GUI {
         if (currentPage > 0) {
             ItemStack previousPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.previous-page.name", "&c上一页")),
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.previous-page.lore.1", "&7查看上一页"))
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.previous-page.name", "&cPágina Anterior")),
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.previous-page.lore.1", "&7Ver página anterior"))
             );
             inventory.setItem(18, previousPage);
         }
@@ -268,8 +268,8 @@ public class GuildListGUI implements GUI {
         if (currentPage < totalPages) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.next-page.name", "&a下一页")),
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.next-page.lore.1", "&7查看下一页"))
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.next-page.name", "&aPróxima Página")),
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("guild-list.items.next-page.lore.1", "&7Ver próxima página"))
             );
             inventory.setItem(26, nextPage);
         }
@@ -280,13 +280,13 @@ public class GuildListGUI implements GUI {
      */
     private ItemStack createGuildItemWithMemberCount(Guild guild, int memberCount) {
         List<String> lore = new ArrayList<>();
-        lore.add(PlaceholderUtils.replaceGuildPlaceholders("&7标签: {guild_tag}", guild, null));
-        lore.add(PlaceholderUtils.replaceGuildPlaceholders("&7会长: {leader_name}", guild, null));
-        lore.add(ColorUtils.colorize("&7成员: " + memberCount));
-        lore.add(PlaceholderUtils.replaceGuildPlaceholders("&7创建时间: {guild_created_time}", guild, null));
+        lore.add(PlaceholderUtils.replaceGuildPlaceholders("&7Tag: {guild_tag}", guild, null));
+        lore.add(PlaceholderUtils.replaceGuildPlaceholders("&7Líder: {leader_name}", guild, null));
+        lore.add(ColorUtils.colorize("&7Membros: " + memberCount));
+        lore.add(PlaceholderUtils.replaceGuildPlaceholders("&7Criada em: {guild_created_time}", guild, null));
         lore.add("");
-        lore.add(ColorUtils.colorize("&a左键: 查看详情"));
-        lore.add(ColorUtils.colorize("&e右键: 申请加入"));
+        lore.add(ColorUtils.colorize("&aBotão Esquerdo: Ver Detalhes"));
+        lore.add(ColorUtils.colorize("&eBotão Direito: Solicitar Entrada"));
         
         return createItem(
             Material.SHIELD,
@@ -308,11 +308,11 @@ public class GuildListGUI implements GUI {
     private String getFilterDisplayName() {
         switch (filterType) {
             case "name":
-                return "按名称";
+                return "Por Nome";
             case "tag":
-                return "按标签";
+                return "Por Tag";
             default:
-                return "全部";
+                return "Todos";
         }
     }
     
@@ -386,7 +386,7 @@ public class GuildListGUI implements GUI {
      * 处理搜索
      */
     private void handleSearch(Player player) {
-        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.search-dev", "&a搜索功能正在开发中...");
+        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.search-dev", "&aFunção de pesquisa em desenvolvimento...");
         player.sendMessage(ColorUtils.colorize(message));
     }
     
@@ -394,7 +394,7 @@ public class GuildListGUI implements GUI {
      * 处理筛选
      */
     private void handleFilter(Player player) {
-        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.filter-dev", "&a筛选功能正在开发中...");
+        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.filter-dev", "&aFunção de filtro em desenvolvimento...");
         player.sendMessage(ColorUtils.colorize(message));
     }
     
@@ -407,7 +407,7 @@ public class GuildListGUI implements GUI {
             // 确保在主线程中执行GUI操作
             CompatibleScheduler.runTask(plugin, () -> {
                 if (guilds == null || guilds.isEmpty()) {
-                    String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guilds", "&c没有找到工会");
+                    String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guilds", "&cNenhuma guilda encontrada");
                     player.sendMessage(ColorUtils.colorize(message));
                     return;
                 }
@@ -434,7 +434,7 @@ public class GuildListGUI implements GUI {
             // 确保在主线程中执行GUI操作
             CompatibleScheduler.runTask(plugin, () -> {
                 if (playerGuild != null) {
-                    String message = plugin.getConfigManager().getMessagesConfig().getString("create.already-in-guild", "&c您已经在一个工会中了！");
+                    String message = plugin.getConfigManager().getMessagesConfig().getString("create.already-in-guild", "&cVocê já está em uma guilda!");
                     player.sendMessage(ColorUtils.colorize(message));
                     return;
                 }
@@ -444,7 +444,7 @@ public class GuildListGUI implements GUI {
                     // 确保在主线程中执行GUI操作
                     CompatibleScheduler.runTask(plugin, () -> {
                         if (guilds == null || guilds.isEmpty()) {
-                            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guilds", "&c没有找到工会");
+                            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guilds", "&cNenhuma guilda encontrada");
                             player.sendMessage(ColorUtils.colorize(message));
                             return;
                         }
@@ -459,7 +459,7 @@ public class GuildListGUI implements GUI {
                                 // 确保在主线程中执行GUI操作
                                 CompatibleScheduler.runTask(plugin, () -> {
                                     if (hasPending) {
-                                        String message = plugin.getConfigManager().getMessagesConfig().getString("apply.already-applied", "&c您已经申请过这个工会了！");
+                                        String message = plugin.getConfigManager().getMessagesConfig().getString("apply.already-applied", "&cVocê já solicitou entrada nesta guilda!");
                                         player.sendMessage(ColorUtils.colorize(message));
                                         return;
                                     }
@@ -469,10 +469,10 @@ public class GuildListGUI implements GUI {
                                         // 确保在主线程中执行GUI操作
                                         CompatibleScheduler.runTask(plugin, () -> {
                                             if (success) {
-                                                String message = plugin.getConfigManager().getMessagesConfig().getString("apply.success", "&a申请已提交！");
+                                                String message = plugin.getConfigManager().getMessagesConfig().getString("apply.success", "&aSolicitação enviada!");
                                                 player.sendMessage(ColorUtils.colorize(message));
                                             } else {
-                                                String message = plugin.getConfigManager().getMessagesConfig().getString("apply.failed", "&c申请提交失败！");
+                                                String message = plugin.getConfigManager().getMessagesConfig().getString("apply.failed", "&cFalha ao enviar solicitação!");
                                                 player.sendMessage(ColorUtils.colorize(message));
                                             }
                                         });

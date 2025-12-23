@@ -39,7 +39,7 @@ public class MemberDetailsGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("member-details.title", "&6成员详情")
+        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("member-details.title", "&6Detalhes do Membro")
             .replace("{member_name}", member.getPlayerName()));
     }
     
@@ -110,13 +110,13 @@ public class MemberDetailsGUI implements GUI {
             String displayName;
             switch (member.getRole()) {
                 case LEADER:
-                    displayName = ColorUtils.colorize("&c" + member.getPlayerName() + " &7(会长)");
+                    displayName = ColorUtils.colorize("&c" + member.getPlayerName() + " &7(Líder)");
                     break;
                 case OFFICER:
-                    displayName = ColorUtils.colorize("&6" + member.getPlayerName() + " &7(官员)");
+                    displayName = ColorUtils.colorize("&6" + member.getPlayerName() + " &7(Oficial)");
                     break;
                 default:
-                    displayName = ColorUtils.colorize("&f" + member.getPlayerName() + " &7(成员)");
+                    displayName = ColorUtils.colorize("&f" + member.getPlayerName() + " &7(Membro)");
                     break;
             }
             
@@ -124,14 +124,14 @@ public class MemberDetailsGUI implements GUI {
             
             List<String> lore = new ArrayList<>();
             lore.add(ColorUtils.colorize("&7UUID: &f" + member.getPlayerUuid()));
-            lore.add(ColorUtils.colorize("&7角色: &f" + member.getRole().getDisplayName()));
+            lore.add(ColorUtils.colorize("&7Cargo: &f" + member.getRole().getDisplayName()));
             
             // 格式化加入时间
             if (member.getJoinedAt() != null) {
                 String joinTime = member.getJoinedAt().format(com.guild.core.time.TimeProvider.FULL_FORMATTER);
-                lore.add(ColorUtils.colorize("&7加入时间: &f" + joinTime));
+                lore.add(ColorUtils.colorize("&7Entrou em: &f" + joinTime));
             } else {
-                lore.add(ColorUtils.colorize("&7加入时间: &f未知"));
+                lore.add(ColorUtils.colorize("&7Entrou em: &fDesconhecido"));
             }
             
             meta.setLore(lore);
@@ -148,36 +148,36 @@ public class MemberDetailsGUI implements GUI {
         // 基本信息标题
         ItemStack infoTitle = createItem(
             Material.BOOK,
-            ColorUtils.colorize("&6基本信息"),
-            ColorUtils.colorize("&7成员的详细信息")
+            ColorUtils.colorize("&6Informações Básicas"),
+            ColorUtils.colorize("&7Informações detalhadas do membro")
         );
         inventory.setItem(20, infoTitle);
         
         // 角色信息
         ItemStack roleInfo = createItem(
             Material.GOLDEN_HELMET,
-            ColorUtils.colorize("&e角色信息"),
-            ColorUtils.colorize("&7当前角色: &f" + member.getRole().getDisplayName()),
-            ColorUtils.colorize("&7角色等级: &f" + getRoleLevel(member.getRole())),
-            ColorUtils.colorize("&7是否在线: &f" + (isPlayerOnline(member.getPlayerUuid()) ? "&a是" : "&c否"))
+            ColorUtils.colorize("&eInformações do Cargo"),
+            ColorUtils.colorize("&7Cargo Atual: &f" + member.getRole().getDisplayName()),
+            ColorUtils.colorize("&7Nível do Cargo: &f" + getRoleLevel(member.getRole())),
+            ColorUtils.colorize("&7Online: &f" + (isPlayerOnline(member.getPlayerUuid()) ? "&aSim" : "&cNão"))
         );
         inventory.setItem(21, roleInfo);
         
         // 时间信息
         ItemStack timeInfo = createItem(
             Material.CLOCK,
-            ColorUtils.colorize("&e时间信息"),
-            ColorUtils.colorize("&7加入时间: &f" + formatTime(member.getJoinedAt())),
-            ColorUtils.colorize("&7在工会时长: &f" + getGuildDuration(member.getJoinedAt()))
+            ColorUtils.colorize("&eInformações de Tempo"),
+            ColorUtils.colorize("&7Entrou em: &f" + formatTime(member.getJoinedAt())),
+            ColorUtils.colorize("&7Tempo na Guilda: &f" + getGuildDuration(member.getJoinedAt()))
         );
         inventory.setItem(22, timeInfo);
         
         // 贡献信息
         ItemStack contributionInfo = createItem(
             Material.EMERALD,
-            ColorUtils.colorize("&e贡献信息"),
-            ColorUtils.colorize("&7工会贡献: &f" + getMemberContribution()),
-            ColorUtils.colorize("&7活跃度: &f" + getMemberActivity())
+            ColorUtils.colorize("&eInformações de Contribuição"),
+            ColorUtils.colorize("&7Contribuição: &f" + getMemberContribution()),
+            ColorUtils.colorize("&7Atividade: &f" + getMemberActivity())
         );
         inventory.setItem(23, contributionInfo);
     }
@@ -189,8 +189,8 @@ public class MemberDetailsGUI implements GUI {
         // 权限信息标题
         ItemStack permissionTitle = createItem(
             Material.SHIELD,
-            ColorUtils.colorize("&6权限信息"),
-            ColorUtils.colorize("&7当前拥有的权限")
+            ColorUtils.colorize("&6Informações de Permissão"),
+            ColorUtils.colorize("&7Permissões atuais")
         );
         inventory.setItem(29, permissionTitle);
         
@@ -198,7 +198,7 @@ public class MemberDetailsGUI implements GUI {
         List<String> permissions = getRolePermissions(member.getRole());
         ItemStack permissionList = createItem(
             Material.PAPER,
-            ColorUtils.colorize("&e权限列表"),
+            ColorUtils.colorize("&eLista de Permissões"),
             permissions.toArray(new String[0])
         );
         inventory.setItem(30, permissionList);
@@ -206,9 +206,9 @@ public class MemberDetailsGUI implements GUI {
         // 权限等级
         ItemStack permissionLevel = createItem(
             Material.EXPERIENCE_BOTTLE,
-            ColorUtils.colorize("&e权限等级"),
-            ColorUtils.colorize("&7当前等级: &f" + getPermissionLevel(member.getRole())),
-            ColorUtils.colorize("&7可执行操作: &f" + getExecutableActions(member.getRole()))
+            ColorUtils.colorize("&eNível de Permissão"),
+            ColorUtils.colorize("&7Nível Atual: &f" + getPermissionLevel(member.getRole())),
+            ColorUtils.colorize("&7Ações Executáveis: &f" + getExecutableActions(member.getRole()))
         );
         inventory.setItem(31, permissionLevel);
     }
@@ -235,9 +235,9 @@ public class MemberDetailsGUI implements GUI {
             if (viewerMember.getRole().canKick()) {
                 ItemStack kickButton = createItem(
                     Material.REDSTONE_BLOCK,
-                    ColorUtils.colorize("&c踢出成员"),
-                    ColorUtils.colorize("&7将成员踢出工会"),
-                    ColorUtils.colorize("&7点击确认踢出")
+                    ColorUtils.colorize("&cExpulsar Membro"),
+                    ColorUtils.colorize("&7Expulsar membro da guilda"),
+                    ColorUtils.colorize("&7Clique para confirmar expulsão")
                 );
                 inventory.setItem(37, kickButton);
             }
@@ -248,18 +248,18 @@ public class MemberDetailsGUI implements GUI {
                     // 降级按钮
                     ItemStack demoteButton = createItem(
                         Material.IRON_INGOT,
-                        ColorUtils.colorize("&7降级成员"),
-                        ColorUtils.colorize("&7将官员降级为普通成员"),
-                        ColorUtils.colorize("&7点击确认降级")
+                        ColorUtils.colorize("&7Rebaixar Membro"),
+                        ColorUtils.colorize("&7Rebaixar Oficial para Membro"),
+                        ColorUtils.colorize("&7Clique para confirmar rebaixamento")
                     );
                     inventory.setItem(39, demoteButton);
                 } else {
                     // 提升按钮
                     ItemStack promoteButton = createItem(
                         Material.GOLD_INGOT,
-                        ColorUtils.colorize("&6提升成员"),
-                        ColorUtils.colorize("&7将成员提升为官员"),
-                        ColorUtils.colorize("&7点击确认提升")
+                        ColorUtils.colorize("&6Promover Membro"),
+                        ColorUtils.colorize("&7Promover Membro para Oficial"),
+                        ColorUtils.colorize("&7Clique para confirmar promoção")
                     );
                     inventory.setItem(39, promoteButton);
                 }
@@ -268,9 +268,9 @@ public class MemberDetailsGUI implements GUI {
             // 发送消息按钮
             ItemStack messageButton = createItem(
                 Material.PAPER,
-                ColorUtils.colorize("&e发送消息"),
-                ColorUtils.colorize("&7向该成员发送私信"),
-                ColorUtils.colorize("&7点击打开聊天")
+                ColorUtils.colorize("&eEnviar Mensagem"),
+                ColorUtils.colorize("&7Enviar mensagem privada para este membro"),
+                ColorUtils.colorize("&7Clique para abrir o chat")
             );
             inventory.setItem(41, messageButton);
         });
@@ -282,8 +282,8 @@ public class MemberDetailsGUI implements GUI {
     private void setupBackButton(Inventory inventory) {
         ItemStack back = createItem(
             Material.ARROW,
-            ColorUtils.colorize("&7返回"),
-            ColorUtils.colorize("&7返回成员管理")
+            ColorUtils.colorize("&7Voltar"),
+            ColorUtils.colorize("&7Voltar ao gerenciamento de membros")
         );
         inventory.setItem(49, back);
     }
@@ -319,13 +319,13 @@ public class MemberDetailsGUI implements GUI {
         // 检查权限
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(executor -> {
             if (executor == null || !executor.getRole().canKick()) {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&c权限不足");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
                 player.sendMessage(ColorUtils.colorize(message));
                 return;
             }
             
             // 确认踢出
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.confirm-kick", "&c确定要踢出成员 {member} 吗？输入 &f/guild kick {member} confirm &c确认")
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.confirm-kick", "&cTem certeza que deseja expulsar {member}? Digite &f/guild kick {member} confirm &cpara confirmar")
                 .replace("{member}", member.getPlayerName());
             player.sendMessage(ColorUtils.colorize(message));
             player.closeInventory();
@@ -339,19 +339,19 @@ public class MemberDetailsGUI implements GUI {
         // 检查权限
         plugin.getGuildService().getGuildMemberAsync(guild.getId(), player.getUniqueId()).thenAccept(executor -> {
             if (executor == null || executor.getRole() != GuildMember.Role.LEADER) {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&c只有工会会长才能执行此操作");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode realizar esta ação");
                 player.sendMessage(ColorUtils.colorize(message));
                 return;
             }
             
             if (member.getRole() == GuildMember.Role.OFFICER) {
                 // 降级
-                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.confirm-demote", "&c确定要降级成员 {member} 吗？输入 &f/guild demote {member} confirm &c确认")
+                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.confirm-demote", "&cTem certeza que deseja rebaixar {member}? Digite &f/guild demote {member} confirm &cpara confirmar")
                     .replace("{member}", member.getPlayerName());
                 player.sendMessage(ColorUtils.colorize(message));
             } else {
                 // 提升
-                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.confirm-promote", "&a确定要提升成员 {member} 为官员吗？输入 &f/guild promote {member} confirm &a确认")
+                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.confirm-promote", "&aTem certeza que deseja promover {member} a Oficial? Digite &f/guild promote {member} confirm &apara confirmar")
                     .replace("{member}", member.getPlayerName());
                 player.sendMessage(ColorUtils.colorize(message));
             }
@@ -363,7 +363,7 @@ public class MemberDetailsGUI implements GUI {
      * 处理发送消息
      */
     private void handleSendMessage(Player player) {
-        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.open-chat", "&e请输入要发送给 {member} 的消息:")
+        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.open-chat", "&eDigite a mensagem para enviar para {member}:")
             .replace("{member}", member.getPlayerName());
         player.sendMessage(ColorUtils.colorize(message));
         player.closeInventory();
@@ -378,11 +378,11 @@ public class MemberDetailsGUI implements GUI {
     private String getRoleLevel(GuildMember.Role role) {
         switch (role) {
             case LEADER:
-                return "最高级";
+                return "Nível Máximo";
             case OFFICER:
-                return "高级";
+                return "Avançado";
             default:
-                return "普通";
+                return "Normal";
         }
     }
     
@@ -398,7 +398,7 @@ public class MemberDetailsGUI implements GUI {
      * 格式化时间
      */
     private String formatTime(java.time.LocalDateTime dateTime) {
-        if (dateTime == null) return "未知";
+        if (dateTime == null) return "Desconhecido";
         return dateTime.format(com.guild.core.time.TimeProvider.FULL_FORMATTER);
     }
     
@@ -406,7 +406,7 @@ public class MemberDetailsGUI implements GUI {
      * 获取在工会时长
      */
     private String getGuildDuration(java.time.LocalDateTime joinDateTime) {
-        if (joinDateTime == null) return "未知";
+        if (joinDateTime == null) return "Desconhecido";
         
         java.time.LocalDateTime currentTime = java.time.LocalDateTime.now();
         java.time.Duration duration = java.time.Duration.between(joinDateTime, currentTime);
@@ -416,11 +416,11 @@ public class MemberDetailsGUI implements GUI {
         long minutes = duration.toMinutes() % 60;
         
         if (days > 0) {
-            return days + "天" + hours + "小时";
+            return days + " dias " + hours + " horas";
         } else if (hours > 0) {
-            return hours + "小时" + minutes + "分钟";
+            return hours + " horas " + minutes + " minutos";
         } else {
-            return minutes + "分钟";
+            return minutes + " minutos";
         }
     }
     
@@ -429,7 +429,7 @@ public class MemberDetailsGUI implements GUI {
      */
     private String getMemberContribution() {
         // TODO: 实现贡献统计系统
-        return "待统计";
+        return "Pendente";
     }
     
     /**
@@ -437,7 +437,7 @@ public class MemberDetailsGUI implements GUI {
      */
     private String getMemberActivity() {
         // TODO: 实现活跃度统计系统
-        return "待统计";
+        return "Pendente";
     }
     
     /**
@@ -448,26 +448,26 @@ public class MemberDetailsGUI implements GUI {
         
         switch (role) {
             case LEADER:
-                permissions.add(ColorUtils.colorize("&7✓ 所有权限"));
-                permissions.add(ColorUtils.colorize("&7✓ 邀请成员"));
-                permissions.add(ColorUtils.colorize("&7✓ 踢出成员"));
-                permissions.add(ColorUtils.colorize("&7✓ 提升/降级"));
-                permissions.add(ColorUtils.colorize("&7✓ 管理工会"));
-                permissions.add(ColorUtils.colorize("&7✓ 解散工会"));
+                permissions.add(ColorUtils.colorize("&7✓ Todas as permissões"));
+                permissions.add(ColorUtils.colorize("&7✓ Convidar Membros"));
+                permissions.add(ColorUtils.colorize("&7✓ Expulsar Membros"));
+                permissions.add(ColorUtils.colorize("&7✓ Promover/Rebaixar"));
+                permissions.add(ColorUtils.colorize("&7✓ Gerenciar Guilda"));
+                permissions.add(ColorUtils.colorize("&7✓ Dissolver Guilda"));
                 break;
             case OFFICER:
-                permissions.add(ColorUtils.colorize("&7✓ 邀请成员"));
-                permissions.add(ColorUtils.colorize("&7✓ 踢出成员"));
-                permissions.add(ColorUtils.colorize("&7✗ 提升/降级"));
-                permissions.add(ColorUtils.colorize("&7✗ 管理工会"));
-                permissions.add(ColorUtils.colorize("&7✗ 解散工会"));
+                permissions.add(ColorUtils.colorize("&7✓ Convidar Membros"));
+                permissions.add(ColorUtils.colorize("&7✓ Expulsar Membros"));
+                permissions.add(ColorUtils.colorize("&7✗ Promover/Rebaixar"));
+                permissions.add(ColorUtils.colorize("&7✗ Gerenciar Guilda"));
+                permissions.add(ColorUtils.colorize("&7✗ Dissolver Guilda"));
                 break;
             default:
-                permissions.add(ColorUtils.colorize("&7✗ 邀请成员"));
-                permissions.add(ColorUtils.colorize("&7✗ 踢出成员"));
-                permissions.add(ColorUtils.colorize("&7✗ 提升/降级"));
-                permissions.add(ColorUtils.colorize("&7✗ 管理工会"));
-                permissions.add(ColorUtils.colorize("&7✗ 解散工会"));
+                permissions.add(ColorUtils.colorize("&7✗ Convidar Membros"));
+                permissions.add(ColorUtils.colorize("&7✗ Expulsar Membros"));
+                permissions.add(ColorUtils.colorize("&7✗ Promover/Rebaixar"));
+                permissions.add(ColorUtils.colorize("&7✗ Gerenciar Guilda"));
+                permissions.add(ColorUtils.colorize("&7✗ Dissolver Guilda"));
                 break;
         }
         
@@ -480,11 +480,11 @@ public class MemberDetailsGUI implements GUI {
     private String getPermissionLevel(GuildMember.Role role) {
         switch (role) {
             case LEADER:
-                return "最高级 (3级)";
+                return "Nível Máximo (Nível 3)";
             case OFFICER:
-                return "高级 (2级)";
+                return "Avançado (Nível 2)";
             default:
-                return "普通 (1级)";
+                return "Normal (Nível 1)";
         }
     }
     
@@ -494,11 +494,11 @@ public class MemberDetailsGUI implements GUI {
     private String getExecutableActions(GuildMember.Role role) {
         switch (role) {
             case LEADER:
-                return "所有操作";
+                return "Todas as ações";
             case OFFICER:
-                return "邀请、踢出";
+                return "Convidar, Expulsar";
             default:
-                return "基础操作";
+                return "Ações básicas";
         }
     }
     

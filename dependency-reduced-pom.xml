@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.guild</groupId>
   <artifactId>guild-plugin</artifactId>
-  <name>Guild Plugin</name>
+  <name>WBC Guild System</name>
   <version>1.2.1</version>
   <description>一个功能完整的我的世界工会插件</description>
   <build>
@@ -85,12 +85,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.MilkBowl</groupId>
-      <artifactId>VaultAPI</artifactId>
-      <version>1.7</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.33</version>
@@ -99,9 +93,9 @@
   </dependencies>
   <properties>
     <spigot.version>1.21.8-R0.1-SNAPSHOT</spigot.version>
-    <maven.compiler.target>17</maven.compiler.target>
-    <maven.compiler.source>17</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.target>17</maven.compiler.target>
     <folia.version>1.21.8-R0.1-SNAPSHOT</folia.version>
+    <maven.compiler.source>17</maven.compiler.source>
   </properties>
 </project>

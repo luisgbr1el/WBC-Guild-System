@@ -34,7 +34,7 @@ public class GuildNameInputGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6修改工会名称");
+        return ColorUtils.colorize("&6Modificar Nome da Guilda");
     }
     
     @Override
@@ -90,8 +90,8 @@ public class GuildNameInputGUI implements GUI {
     private void displayCurrentName(Inventory inventory) {
         ItemStack currentNameItem = createItem(
             Material.NAME_TAG,
-            ColorUtils.colorize("&e当前工会名称"),
-            ColorUtils.colorize("&7" + (currentName.isEmpty() ? "无名称" : currentName))
+            ColorUtils.colorize("&eNome Atual da Guilda"),
+            ColorUtils.colorize("&7" + (currentName.isEmpty() ? "Sem nome" : currentName))
         );
         inventory.setItem(11, currentNameItem);
     }
@@ -103,17 +103,17 @@ public class GuildNameInputGUI implements GUI {
         // 确认按钮
         ItemStack confirmButton = createItem(
             Material.EMERALD,
-            ColorUtils.colorize("&a确认修改"),
-            ColorUtils.colorize("&7点击确认修改工会名称"),
-            ColorUtils.colorize("&7注意：工会名称修改后需要重新登录才能生效")
+            ColorUtils.colorize("&aConfirmar Modificação"),
+            ColorUtils.colorize("&7Clique para confirmar a modificação do nome"),
+            ColorUtils.colorize("&7Nota: O nome da guilda será atualizado após relogar")
         );
         inventory.setItem(15, confirmButton);
         
         // 取消按钮
         ItemStack cancelButton = createItem(
             Material.REDSTONE,
-            ColorUtils.colorize("&c取消"),
-            ColorUtils.colorize("&7返回上一级菜单")
+            ColorUtils.colorize("&cCancelar"),
+            ColorUtils.colorize("&7Voltar ao menu anterior")
         );
         inventory.setItem(13, cancelButton);
     }
@@ -127,11 +127,11 @@ public class GuildNameInputGUI implements GUI {
         plugin.getGuiManager().setInputMode(player, "guild_name_input", this);
         
         // 发送输入提示
-        player.sendMessage(ColorUtils.colorize("&6请输入新的工会名称:"));
-        player.sendMessage(ColorUtils.colorize("&7当前名称: &f" + currentName));
-        player.sendMessage(ColorUtils.colorize("&7输入 &c取消 &7来取消操作"));
-        player.sendMessage(ColorUtils.colorize("&7支持颜色字符，例如: &a&l绿色粗体 &7或 &c&o红色斜体"));
-        player.sendMessage(ColorUtils.colorize("&7注意：工会名称不能与其他工会重复"));
+        player.sendMessage(ColorUtils.colorize("&6Por favor, digite o novo nome da guilda:"));
+        player.sendMessage(ColorUtils.colorize("&7Nome Atual: &f" + currentName));
+        player.sendMessage(ColorUtils.colorize("&7Digite &cCancelar &7para cancelar"));
+        player.sendMessage(ColorUtils.colorize("&7Suporta códigos de cor, ex: &a&lVerde Negrito &7ou &c&oVermelho Itálico"));
+        player.sendMessage(ColorUtils.colorize("&7Nota: O nome da guilda deve ser único"));
     }
     
     /**
@@ -140,7 +140,7 @@ public class GuildNameInputGUI implements GUI {
     private void handleConfirm(Player player) {
         // 检查权限（只有会长可以修改工会名称）
         if (!plugin.getGuildService().isGuildLeader(player.getUniqueId(), guild.getId())) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&c只有工会会长才能执行此操作");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.leader-only", "&cApenas o líder da guilda pode fazer isso");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
@@ -168,7 +168,7 @@ public class GuildNameInputGUI implements GUI {
      */
     public void handleInputComplete(Player player, String input) {
         if (input == null || input.trim().isEmpty()) {
-            player.sendMessage(ColorUtils.colorize("&c工会名称不能为空！"));
+            player.sendMessage(ColorUtils.colorize("&cO nome da guilda não pode ser vazio!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
@@ -178,27 +178,27 @@ public class GuildNameInputGUI implements GUI {
         // 检查名称长度（基于清理后的名称，不包括颜色字符）
         String cleanName = newName.replaceAll("§[0-9a-fk-or]", "").replaceAll("&[0-9a-fk-or]", "");
         if (cleanName.length() < 2) {
-            player.sendMessage(ColorUtils.colorize("&c工会名称至少需要2个字符（不包括颜色字符）！"));
+            player.sendMessage(ColorUtils.colorize("&cO nome da guilda deve ter pelo menos 2 caracteres (sem cores)!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
         
         if (cleanName.length() > 16) {
-            player.sendMessage(ColorUtils.colorize("&c工会名称不能超过16个字符（不包括颜色字符）！"));
+            player.sendMessage(ColorUtils.colorize("&cO nome da guilda não pode exceder 16 caracteres (sem cores)!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
         
         // 检查是否与当前名称相同
         if (newName.equalsIgnoreCase(currentName)) {
-            player.sendMessage(ColorUtils.colorize("&c新名称与当前名称相同！"));
+            player.sendMessage(ColorUtils.colorize("&cO novo nome é igual ao atual!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
         
         // 检查名称格式（允许中文、英文、数字和颜色字符）
         if (!cleanName.matches("^[\\u4e00-\\u9fa5a-zA-Z0-9]+$")) {
-            player.sendMessage(ColorUtils.colorize("&c工会名称只能包含中文、英文和数字！"));
+            player.sendMessage(ColorUtils.colorize("&cO nome da guilda deve conter apenas letras e números!"));
             plugin.getGuiManager().openGUI(player, this);
             return;
         }
@@ -216,7 +216,7 @@ public class GuildNameInputGUI implements GUI {
             if (existingGuild != null) {
                 // 名称已存在
                 CompatibleScheduler.runTask(plugin, () -> {
-                    player.sendMessage(ColorUtils.colorize("&c工会名称 &f" + newName + " &c已被使用！"));
+                    player.sendMessage(ColorUtils.colorize("&cNome da guilda &f" + newName + " &cjá está em uso!"));
                     plugin.getGuiManager().openGUI(player, this);
                 });
                 return;
@@ -228,8 +228,8 @@ public class GuildNameInputGUI implements GUI {
                     CompatibleScheduler.runTask(plugin, () -> {
                         if (success) {
                             // 更新成功
-                            player.sendMessage(ColorUtils.colorize("&a工会名称修改成功！"));
-                            player.sendMessage(ColorUtils.colorize("&7新名称: &f" + newName));
+                            player.sendMessage(ColorUtils.colorize("&aNome da guilda modificado com sucesso!"));
+                            player.sendMessage(ColorUtils.colorize("&7Novo Nome: &f" + newName));
                             
                             // 记录日志
                             plugin.getGuildService().logGuildActionAsync(
@@ -238,8 +238,8 @@ public class GuildNameInputGUI implements GUI {
                                 player.getUniqueId().toString(),
                                 player.getName(),
                                 com.guild.models.GuildLog.LogType.GUILD_RENAMED,
-                                "工会名称从 " + currentName + " 修改为 " + newName,
-                                "原名称: " + currentName + ", 新名称: " + newName
+                                "Nome da guilda alterado de " + currentName + " para " + newName,
+                                "Nome original: " + currentName + ", Novo nome: " + newName
                             );
                             
                             // 重新获取最新的工会信息
@@ -255,7 +255,7 @@ public class GuildNameInputGUI implements GUI {
                             });
                         } else {
                             // 更新失败
-                            player.sendMessage(ColorUtils.colorize("&c工会名称修改失败！请重试"));
+                            player.sendMessage(ColorUtils.colorize("&cFalha ao modificar nome da guilda! Tente novamente"));
                             plugin.getGuiManager().openGUI(player, this);
                         }
                     });

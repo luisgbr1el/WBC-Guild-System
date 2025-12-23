@@ -1,50 +1,50 @@
-# 工会插件主配置文件
+# Arquivo de configuração principal do plugin de Guilda
 
-# 工会配置
+# Configuração da Guilda
 guild:
-  # 工会名称最小长度
+  # Comprimento mínimo do nome da guilda
   min-name-length: 3
-  # 工会名称最大长度
+  # Comprimento máximo do nome da guilda
   max-name-length: 20
-  # 工会标签最大长度
+  # Comprimento máximo da tag da guilda
   max-tag-length: 6
-  # 工会描述最大长度
+  # Comprimento máximo da descrição da guilda
   max-description-length: 100
-  # 工会最大成员数量
+  # Número máximo de membros da guilda
   max-members: 50
-  # 创建工会所需费用（需要Vault）
-  creation-cost: 1000.0
-  # 工会标签颜色
+  # Custo para criar guilda (Requer Vault)
+  creation-cost: 0
+  # Cor da tag da guilda
   tag-color: "&6"
-  # 工会名称颜色
+  # Cor do nome da guilda
   name-color: "&e"
 
-# 显示配置
+# Configuração de exibição
 display:
-  # 职位颜色（可自定义）
+  # Cores dos cargos (personalizável)
   role-colors:
-    leader: "&6"    # 会长：金色
-    officer: "&b"   # 官员：亮蓝色
-    member: "&7"    # 成员：灰色
-  # 职位左侧分隔符配置
+    leader: "&6"    # Líder: Dourado
+    officer: "&b"   # Oficial: Azul claro
+    member: "&7"    # Membro: Cinza
+  # Configuração do separador à esquerda do cargo
   role-separator:
     enabled: true
     text: " | "
-    color-per-role: true      # 分隔符是否跟随职位颜色
-    default-color: "&7"      # 无职位或未入会时的默认颜色（一般不会使用）
+    color-per-role: true      # Se o separador segue a cor do cargo
+    default-color: "&7"      # Cor padrão quando sem cargo ou não entrou (geralmente não usado)
 
-# 权限配置
+# Configuração de permissões
 permissions:
-  # 默认权限
+  # Permissões padrão
   default:
-    can-create: true         # 允许创建工会（未入会时）
-    can-invite: false        # 非成员默认不可邀请
-    can-kick: false          # 非成员默认不可踢人
-    can-promote: false       # 非成员默认不可升职
-    can-demote: false        # 非成员默认不可降职
-    can-delete: false        # 非成员默认不可删会
+    can-create: true         # Permitir criar guilda (quando não está em uma)
+    can-invite: false        # Não membros não podem convidar por padrão
+    can-kick: false          # Não membros não podem expulsar por padrão
+    can-promote: false       # Não membros não podem promover por padrão
+    can-demote: false        # Não membros não podem rebaixar por padrão
+    can-delete: false        # Não membros não podem deletar por padrão
   
-  # 会长权限（若缺省则视为全开）
+  # Permissões de Líder (se omitido, considerado tudo permitido)
   leader:
     can-create: true
     can-invite: true
@@ -53,72 +53,72 @@ permissions:
     can-demote: true
     can-delete: true
 
-  # 官员权限
+  # Permissões de Oficial
   officer:
-    can-create: true         # 允许代操作与创建
+    can-create: true         # Permitir operações e criação
     can-invite: true
     can-kick: true
-    can-promote: false       # 是否允许升职成员（通常只会长）
-    can-demote: false        # 是否允许降职成员（通常只会长）
-    can-delete: false        # 是否允许删除工会（通常只会长）
+    can-promote: false       # Se permite promover membros (geralmente apenas líder)
+    can-demote: false        # Se permite rebaixar membros (geralmente apenas líder)
+    can-delete: false        # Se permite deletar guilda (geralmente apenas líder)
   
-  # 成员权限
+  # Permissões de Membro
   member:
-    can-create: true         # 允许退会后再创建新工会
+    can-create: true         # Permitir criar nova guilda após sair
     can-invite: false
     can-kick: false
     can-promote: false
     can-demote: false
     can-delete: false
 
-# 消息配置
+# Configuração de mensagens
 messages:
-  # 是否启用消息
+  # Se ativa mensagens
   enabled: true
-  # 消息前缀
-  prefix: "&6[工会] &r"
-  # 消息颜色
+  # Prefixo das mensagens
+  prefix: "&6[Guilda] &r"
+  # Cores das mensagens
   colors:
     success: "&a"
     error: "&c"
     info: "&e"
     warning: "&6"
 
-# GUI配置
+# Configuração de GUI
 gui:
-  # 是否启用GUI
+  # Se ativa GUI
   enabled: true
-  # GUI标题
-  title: "&6工会系统"
-  # GUI大小（必须是9的倍数）
+  # Título da GUI
+  title: "&6Sistema de Guilda"
+  # Tamanho da GUI (deve ser múltiplo de 9)
   size: 54
-  # 是否显示工会标签
+  # Se mostra tag da guilda
   show-tag: true
-  # 是否显示工会描述
+  # Se mostra descrição da guilda
   show-description: true
 
-# 占位符配置
+# Configuração de placeholders
 placeholders:
-  # 是否启用占位符
+  # Se ativa placeholders
   enabled: true
-  # 占位符前缀
+  # Prefixo dos placeholders
   prefix: "guild_"
-  # 是否缓存占位符
+  # Se ativa cache de placeholders
   cache-enabled: true
-  # 缓存时间（秒）
+  # Tempo de cache (segundos)
   cache-time: 30
 
-# 日志配置
+# Configuração de log
 logging:
-  # 是否启用日志
+  # Se ativa log
   enabled: true
-  # 日志级别: DEBUG, INFO, WARN, ERROR
+  # Nível de log: DEBUG, INFO, WARN, ERROR
   level: INFO
-  # 是否记录到文件
+  # Se grava em arquivo
   file-logging: true
-  # 日志文件路径
+  # Caminho do arquivo de log
   log-file: "logs/guild.log"
-  # 最大日志文件大小（MB）
+  # Tamanho máximo do arquivo de log (MB)
   max-file-size: 10
-  # 保留的日志文件数量
+  # Quantidade de arquivos de log mantidos
   max-files: 5

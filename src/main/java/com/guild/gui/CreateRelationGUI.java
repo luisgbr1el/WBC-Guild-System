@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 创建工会关系GUI
+ * GUI de Criação de Relação de Guilda
  */
 public class CreateRelationGUI implements GUI {
     
@@ -41,7 +41,7 @@ public class CreateRelationGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6创建工会关系");
+        return ColorUtils.colorize("&6Criar Relação de Guilda");
     }
     
     @Override
@@ -51,25 +51,25 @@ public class CreateRelationGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 加载可用工会列表
+        // Carregar lista de guildas disponíveis
         loadAvailableGuilds().thenAccept(guilds -> {
             this.availableGuilds = guilds;
             
-            // 确保在主线程中执行GUI操作
+            // Garantir execução de operações GUI na thread principal
             CompatibleScheduler.runTask(plugin, () -> {
-                // 显示关系类型选择
+                // Exibir seleção de tipo de relação
                 displayRelationTypes(inventory);
                 
-                // 显示目标工会选择
+                // Exibir seleção de guilda alvo
                 displayTargetGuilds(inventory);
                 
-                // 添加功能按钮
+                // Adicionar botões de função
                 addFunctionButtons(inventory);
                 
-                // 添加分页按钮
+                // Adicionar botões de paginação
                 addPaginationButtons(inventory);
             });
         });
@@ -81,26 +81,26 @@ public class CreateRelationGUI implements GUI {
         
         String itemName = clickedItem.getItemMeta().getDisplayName();
         
-        // 返回按钮
-        if (itemName.contains("返回")) {
+        // Botão de voltar
+        if (itemName.contains("Voltar")) {
             GuildRelationsGUI relationsGUI = new GuildRelationsGUI(plugin, guild, player);
             plugin.getGuiManager().openGUI(player, relationsGUI);
             return;
         }
         
-        // 确认创建按钮
-        if (itemName.contains("确认创建")) {
+        // Botão de confirmar criação
+        if (itemName.contains("Confirmar Criação")) {
             if (selectedType != null && targetGuildName != null) {
                 createRelation(player);
             } else {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.select-both", "&c请先选择关系类型和目标工会！");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.select-both", "&cPor favor, selecione o tipo de relação e a guilda alvo primeiro!");
                 player.sendMessage(ColorUtils.colorize(message));
             }
             return;
         }
         
-        // 分页按钮
-        if (itemName.contains("上一页")) {
+        // Botões de paginação
+        if (itemName.contains("Página Anterior")) {
             if (currentPage > 0) {
                 currentPage--;
                 refreshInventory(player);
@@ -108,7 +108,7 @@ public class CreateRelationGUI implements GUI {
             return;
         }
         
-        if (itemName.contains("下一页")) {
+        if (itemName.contains("Próxima Página")) {
             int maxPage = (availableGuilds.size() - 1) / itemsPerPage;
             if (currentPage < maxPage) {
                 currentPage++;
@@ -117,13 +117,13 @@ public class CreateRelationGUI implements GUI {
             return;
         }
         
-        // 关系类型选择 (slot 0-8)
+        // Seleção de tipo de relação (slot 0-8)
         if (slot >= 0 && slot < 9) {
             handleRelationTypeClick(player, slot);
             return;
         }
         
-        // 目标工会选择 (slot 9-44)
+        // Seleção de guilda alvo (slot 9-44)
         if (slot >= 9 && slot < 45) {
             int guildIndex = (currentPage * itemsPerPage) + (slot - 9);
             if (guildIndex < availableGuilds.size()) {
@@ -131,7 +131,7 @@ public class CreateRelationGUI implements GUI {
                 targetGuildName = targetGuild.getName();
                 refreshInventory(player);
                 
-                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.target-selected", "&a已选择目标工会: {guild}");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.target-selected", "&aGuilda alvo selecionada: {guild}");
                 message = message.replace("{guild}", targetGuildName);
                 player.sendMessage(ColorUtils.colorize(message));
             }
@@ -166,31 +166,31 @@ public class CreateRelationGUI implements GUI {
             String displayName = ColorUtils.colorize(color + type.getDisplayName());
             
             List<String> lore = new ArrayList<>();
-            lore.add(ColorUtils.colorize("&7关系类型: " + color + type.getDisplayName()));
+            lore.add(ColorUtils.colorize("&7Tipo de Relação: " + color + type.getDisplayName()));
             
-            // 添加关系类型描述
+            // Adicionar descrição do tipo de relação
             switch (type) {
                 case ALLY:
-                    lore.add(ColorUtils.colorize("&7盟友工会，互相帮助"));
+                    lore.add(ColorUtils.colorize("&7Guilda aliada, ajuda mútua"));
                     break;
                 case ENEMY:
-                    lore.add(ColorUtils.colorize("&7敌对工会，互相攻击"));
+                    lore.add(ColorUtils.colorize("&7Guilda inimiga, ataque mútuo"));
                     break;
                 case WAR:
-                    lore.add(ColorUtils.colorize("&7开战状态，全面战争"));
+                    lore.add(ColorUtils.colorize("&7Estado de guerra, guerra total"));
                     break;
                 case TRUCE:
-                    lore.add(ColorUtils.colorize("&7停战协议，暂时和平"));
+                    lore.add(ColorUtils.colorize("&7Acordo de trégua, paz temporária"));
                     break;
                 case NEUTRAL:
-                    lore.add(ColorUtils.colorize("&7中立关系，互不干涉"));
+                    lore.add(ColorUtils.colorize("&7Relação neutra, não interferência"));
                     break;
             }
             
             if (selectedType == type) {
-                lore.add(ColorUtils.colorize("&a✓ 已选择"));
+                lore.add(ColorUtils.colorize("&a✓ Selecionado"));
             } else {
-                lore.add(ColorUtils.colorize("&e点击选择"));
+                lore.add(ColorUtils.colorize("&eClique para Selecionar"));
             }
             
             ItemStack item = createItem(material, displayName, lore.toArray(new String[0]));
@@ -213,16 +213,16 @@ public class CreateRelationGUI implements GUI {
             String displayName = ColorUtils.colorize("&f" + targetGuild.getName());
             
             List<String> lore = new ArrayList<>();
-            lore.add(ColorUtils.colorize("&7工会名称: " + targetGuild.getName()));
+            lore.add(ColorUtils.colorize("&7Nome da Guilda: " + targetGuild.getName()));
             if (targetGuild.getTag() != null && !targetGuild.getTag().isEmpty()) {
-                lore.add(ColorUtils.colorize("&7工会标签: [" + targetGuild.getTag() + "]"));
+                lore.add(ColorUtils.colorize("&7Tag da Guilda: [" + targetGuild.getTag() + "]"));
             }
-            lore.add(ColorUtils.colorize("&7会长: " + targetGuild.getLeaderName()));
+            lore.add(ColorUtils.colorize("&7Líder: " + targetGuild.getLeaderName()));
             
             if (targetGuildName != null && targetGuildName.equals(targetGuild.getName())) {
-                lore.add(ColorUtils.colorize("&a✓ 已选择"));
+                lore.add(ColorUtils.colorize("&a✓ Selecionado"));
             } else {
-                lore.add(ColorUtils.colorize("&e点击选择"));
+                lore.add(ColorUtils.colorize("&eClique para Selecionar"));
             }
             
             ItemStack item = createItem(material, displayName, lore.toArray(new String[0]));
@@ -234,23 +234,23 @@ public class CreateRelationGUI implements GUI {
      * 添加功能按钮
      */
     private void addFunctionButtons(Inventory inventory) {
-        // 确认创建按钮
+        // Botão de confirmar criação
         ItemStack confirmButton = createItem(
             Material.EMERALD,
-            ColorUtils.colorize("&a确认创建"),
-            ColorUtils.colorize("&7创建工会关系"),
-            ColorUtils.colorize("&7需要先选择关系类型和目标工会")
+            ColorUtils.colorize("&aConfirmar Criação"),
+            ColorUtils.colorize("&7Criar Relação de Guilda"),
+            ColorUtils.colorize("&7Necessário selecionar tipo de relação e guilda alvo primeiro")
         );
         inventory.setItem(45, confirmButton);
         
-        // 当前选择显示
+        // Exibir seleção atual
         List<String> selectionLore = new ArrayList<>();
-        selectionLore.add(ColorUtils.colorize("&7关系类型: " + (selectedType != null ? selectedType.getColor() + selectedType.getDisplayName() : "&c未选择")));
-        selectionLore.add(ColorUtils.colorize("&7目标工会: " + (targetGuildName != null ? "&a" + targetGuildName : "&c未选择")));
+        selectionLore.add(ColorUtils.colorize("&7Tipo de Relação: " + (selectedType != null ? selectedType.getColor() + selectedType.getDisplayName() : "&cNenhuma")));
+        selectionLore.add(ColorUtils.colorize("&7Guilda Alvo: " + (targetGuildName != null ? "&a" + targetGuildName : "&cNenhuma")));
         
         ItemStack selectionInfo = createItem(
             Material.PAPER,
-            ColorUtils.colorize("&e当前选择"),
+            ColorUtils.colorize("&eSeleção Atual"),
             selectionLore.toArray(new String[0])
         );
         inventory.setItem(47, selectionInfo);
@@ -260,41 +260,41 @@ public class CreateRelationGUI implements GUI {
      * 添加分页按钮
      */
     private void addPaginationButtons(Inventory inventory) {
-        // 上一页按钮
+        // Botão de página anterior
         if (currentPage > 0) {
             ItemStack previousPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&c上一页"),
-                ColorUtils.colorize("&7查看上一页")
+                ColorUtils.colorize("&cPágina Anterior"),
+                ColorUtils.colorize("&7Ver página anterior")
             );
             inventory.setItem(18, previousPage);
         }
         
-        // 下一页按钮
+        // Botão de próxima página
         int maxPage = (availableGuilds.size() - 1) / itemsPerPage;
         if (currentPage < maxPage) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&a下一页"),
-                ColorUtils.colorize("&7查看下一页")
+                ColorUtils.colorize("&aPróxima Página"),
+                ColorUtils.colorize("&7Ver próxima página")
             );
             inventory.setItem(26, nextPage);
         }
         
-        // 返回按钮
+        // Botão de voltar
         ItemStack backButton = createItem(
             Material.ARROW,
-            ColorUtils.colorize("&7返回"),
-            ColorUtils.colorize("&7返回关系管理")
+            ColorUtils.colorize("&7Voltar"),
+            ColorUtils.colorize("&7Voltar ao Gerenciamento de Relações")
         );
         inventory.setItem(49, backButton);
         
-        // 页码显示
+        // Exibir número da página
         ItemStack pageInfo = createItem(
             Material.PAPER,
-            ColorUtils.colorize("&e第 " + (currentPage + 1) + " 页"),
-            ColorUtils.colorize("&7共 " + (maxPage + 1) + " 页"),
-            ColorUtils.colorize("&7总计 " + availableGuilds.size() + " 个工会")
+            ColorUtils.colorize("&ePágina " + (currentPage + 1) + ""),
+            ColorUtils.colorize("&7Total " + (maxPage + 1) + ""),
+            ColorUtils.colorize("&7Total de " + availableGuilds.size() + " guildas")
         );
         inventory.setItem(22, pageInfo);
     }
@@ -308,7 +308,7 @@ public class CreateRelationGUI implements GUI {
             selectedType = types[slot];
             refreshInventory(player);
             
-            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.type-selected", "&a已选择关系类型: {type}");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.type-selected", "&aTipo de relação selecionado: {type}");
             message = message.replace("{type}", selectedType.getDisplayName());
             player.sendMessage(ColorUtils.colorize(message));
         }
@@ -318,7 +318,7 @@ public class CreateRelationGUI implements GUI {
      * 创建关系
      */
     private void createRelation(Player player) {
-        // 查找目标工会
+        // Encontrar guilda alvo
         final Guild[] targetGuild = {null};
         for (Guild g : availableGuilds) {
             if (g.getName().equals(targetGuildName)) {
@@ -328,23 +328,23 @@ public class CreateRelationGUI implements GUI {
         }
         
         if (targetGuild[0] == null) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.target-not-found", "&c目标工会不存在！");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.target-not-found", "&cGuilda alvo não existe!");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
         
-        // 检查是否已有关系
+        // Verificar se a relação já existe
         plugin.getGuildService().getGuildRelationAsync(guild.getId(), targetGuild[0].getId())
             .thenAccept(existingRelation -> {
                 CompatibleScheduler.runTask(plugin, () -> {
                     if (existingRelation != null) {
-                        String message = plugin.getConfigManager().getMessagesConfig().getString("relations.already-exists", "&c与 {guild} 的关系已存在！");
+                        String message = plugin.getConfigManager().getMessagesConfig().getString("relations.already-exists", "&cA relação com {guild} já existe!");
                         message = message.replace("{guild}", targetGuildName);
                         player.sendMessage(ColorUtils.colorize(message));
                         return;
                     }
                     
-                    // 创建新关系
+                    // Criar nova relação
                     plugin.getGuildService().createGuildRelationAsync(
                         guild.getId(), targetGuild[0].getId(),
                         guild.getName(), targetGuild[0].getName(),
@@ -352,16 +352,16 @@ public class CreateRelationGUI implements GUI {
                     ).thenAccept(success -> {
                         CompatibleScheduler.runTask(plugin, () -> {
                             if (success) {
-                                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.create-success", "&a已向 {guild} 发送 {type} 关系请求！");
+                                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.create-success", "&aSolicitação de relação {type} enviada para {guild}!");
                                 message = message.replace("{guild}", targetGuildName)
                                                .replace("{type}", selectedType.getDisplayName());
                                 player.sendMessage(ColorUtils.colorize(message));
                                 
-                                // 返回关系管理界面
+                                // Voltar para a interface de gerenciamento de relações
                                 GuildRelationsGUI relationsGUI = new GuildRelationsGUI(plugin, guild, player);
                                 plugin.getGuiManager().openGUI(player, relationsGUI);
                             } else {
-                                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.create-failed", "&c创建关系失败！");
+                                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.create-failed", "&cFalha ao criar relação!");
                                 player.sendMessage(ColorUtils.colorize(message));
                             }
                         });

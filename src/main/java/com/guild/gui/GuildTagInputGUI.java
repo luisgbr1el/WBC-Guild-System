@@ -31,7 +31,7 @@ public class GuildTagInputGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6修改工会标签");
+        return ColorUtils.colorize("&6Modificar Tag da Guilda");
     }
     
     @Override
@@ -87,8 +87,8 @@ public class GuildTagInputGUI implements GUI {
     private void displayCurrentTag(Inventory inventory) {
         ItemStack currentTagItem = createItem(
             Material.OAK_SIGN,
-            ColorUtils.colorize("&e当前标签"),
-            ColorUtils.colorize("&7" + (currentTag.isEmpty() ? "无标签" : "[" + currentTag + "]"))
+            ColorUtils.colorize("&eTag Atual"),
+            ColorUtils.colorize("&7" + (currentTag.isEmpty() ? "Sem Tag" : "[" + currentTag + "]"))
         );
         inventory.setItem(11, currentTagItem);
     }
@@ -100,16 +100,16 @@ public class GuildTagInputGUI implements GUI {
         // 确认按钮
         ItemStack confirm = createItem(
             Material.EMERALD_BLOCK,
-            ColorUtils.colorize("&a确认修改"),
-            ColorUtils.colorize("&7确认修改工会标签")
+            ColorUtils.colorize("&aConfirmar Modificação"),
+            ColorUtils.colorize("&7Confirmar modificação da tag da guilda")
         );
         inventory.setItem(15, confirm);
         
         // 取消按钮
         ItemStack cancel = createItem(
             Material.REDSTONE_BLOCK,
-            ColorUtils.colorize("&c取消"),
-            ColorUtils.colorize("&7取消修改")
+            ColorUtils.colorize("&cCancelar"),
+            ColorUtils.colorize("&7Cancelar modificação")
         );
         inventory.setItem(13, cancel);
     }
@@ -122,13 +122,13 @@ public class GuildTagInputGUI implements GUI {
         player.closeInventory();
         
         // 发送消息提示输入
-        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.input-tag", "&a请在聊天框中输入新的工会标签（最多10字符）：");
+        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.input-tag", "&aPor favor, digite a nova tag da guilda no chat (máximo 10 caracteres):");
         player.sendMessage(ColorUtils.colorize(message));
         
         // 设置玩家为输入模式
         plugin.getGuiManager().setInputMode(player, input -> {
             if (input.length() > 10) {
-                String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.tag-too-long", "&c标签过长，最多10字符！");
+                String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.tag-too-long", "&cTag muito longa, máximo 10 caracteres!");
                 player.sendMessage(ColorUtils.colorize(errorMessage));
                 return false;
             }
@@ -139,13 +139,13 @@ public class GuildTagInputGUI implements GUI {
             // 保存到数据库
             plugin.getGuildService().updateGuildAsync(guild.getId(), guild.getName(), input, guild.getDescription(), player.getUniqueId()).thenAccept(success -> {
                 if (success) {
-                    String successMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.tag-updated", "&a工会标签已更新！");
+                    String successMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.tag-updated", "&aTag da guilda atualizada!");
                     player.sendMessage(ColorUtils.colorize(successMessage));
                     
                     // 安全刷新GUI
                     plugin.getGuiManager().refreshGUI(player);
                 } else {
-                    String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.tag-update-failed", "&c工会标签更新失败！");
+                    String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.tag-update-failed", "&cFalha ao atualizar tag da guilda!");
                     player.sendMessage(ColorUtils.colorize(errorMessage));
                 }
             });

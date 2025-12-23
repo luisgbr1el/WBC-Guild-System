@@ -38,7 +38,7 @@ public class InviteMemberGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6邀请成员 - 第" + (currentPage + 1) + "页");
+        return ColorUtils.colorize("&6Convidar Membro - Pág " + (currentPage + 1));
     }
     
     @Override
@@ -125,8 +125,8 @@ public class InviteMemberGUI implements GUI {
         if (currentPage > 0) {
             ItemStack prevPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e上一页"),
-                ColorUtils.colorize("&7点击查看上一页")
+                ColorUtils.colorize("&ePágina Anterior"),
+                ColorUtils.colorize("&7Clique para ver a página anterior")
             );
             inventory.setItem(45, prevPage);
         }
@@ -136,8 +136,8 @@ public class InviteMemberGUI implements GUI {
         if (currentPage < maxPage) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e下一页"),
-                ColorUtils.colorize("&7点击查看下一页")
+                ColorUtils.colorize("&ePróxima Página"),
+                ColorUtils.colorize("&7Clique para ver a próxima página")
             );
             inventory.setItem(53, nextPage);
         }
@@ -145,8 +145,8 @@ public class InviteMemberGUI implements GUI {
         // 返回按钮
         ItemStack back = createItem(
             Material.BARRIER,
-            ColorUtils.colorize("&c返回"),
-            ColorUtils.colorize("&7返回工会设置")
+            ColorUtils.colorize("&cVoltar"),
+            ColorUtils.colorize("&7Voltar para Configurações da Guilda")
         );
         inventory.setItem(49, back);
     }
@@ -162,8 +162,8 @@ public class InviteMemberGUI implements GUI {
             meta.setOwningPlayer(player);
             meta.setDisplayName(ColorUtils.colorize("&a" + player.getName()));
             meta.setLore(Arrays.asList(
-                ColorUtils.colorize("&7点击邀请该玩家"),
-                ColorUtils.colorize("&7加入工会")
+                ColorUtils.colorize("&7Clique para convidar este jogador"),
+                ColorUtils.colorize("&7para entrar na guilda")
             ));
             head.setItemMeta(meta);
         }
@@ -178,7 +178,7 @@ public class InviteMemberGUI implements GUI {
         // 检查目标玩家是否已经在工会中
         plugin.getGuildService().getGuildMemberAsync(target.getUniqueId()).thenAccept(member -> {
             if (member != null) {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("invite.already-in-guild", "&c该玩家已经在工会中！");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("invite.already-in-guild", "&cEste jogador já está em uma guilda!");
                 inviter.sendMessage(ColorUtils.colorize(message));
                 return;
             }
@@ -186,15 +186,15 @@ public class InviteMemberGUI implements GUI {
             // 发送邀请
             plugin.getGuildService().sendInvitationAsync(guild.getId(), inviter.getUniqueId(), inviter.getName(), target.getUniqueId(), target.getName()).thenAccept(success -> {
                 if (success) {
-                    String inviterMessage = plugin.getConfigManager().getMessagesConfig().getString("invite.sent", "&a已向 &e{player} &a发送邀请！")
+                    String inviterMessage = plugin.getConfigManager().getMessagesConfig().getString("invite.sent", "&aConvite enviado para &e{player}&a!")
                         .replace("{player}", target.getName());
                     inviter.sendMessage(ColorUtils.colorize(inviterMessage));
                     
-                    String targetMessage = plugin.getConfigManager().getMessagesConfig().getString("invite.received", "&a你收到了来自工会 &e{guild} &a的邀请！")
+                    String targetMessage = plugin.getConfigManager().getMessagesConfig().getString("invite.received", "&aVocê recebeu um convite da guilda &e{guild}&a!")
                         .replace("{guild}", guild.getName());
                     target.sendMessage(ColorUtils.colorize(targetMessage));
                 } else {
-                    String message = plugin.getConfigManager().getMessagesConfig().getString("invite.failed", "&c邀请发送失败！");
+                    String message = plugin.getConfigManager().getMessagesConfig().getString("invite.failed", "&cFalha ao enviar convite!");
                     inviter.sendMessage(ColorUtils.colorize(message));
                 }
             });

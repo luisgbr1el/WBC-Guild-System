@@ -36,7 +36,7 @@ public class ApplicationManagementGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.title", "&6申请管理"));
+        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.title", "&6Gerenciar Solicitações"));
     }
     
     @Override
@@ -102,9 +102,9 @@ public class ApplicationManagementGUI implements GUI {
             // 待处理申请按钮
             ItemStack pendingApplications = createItem(
                 Material.PAPER,
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.pending-applications.name", "&e待处理申请")),
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.pending-applications.lore.1", "&7查看待处理的申请")),
-                ColorUtils.colorize("&f" + pendingCount + " 个申请")
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.pending-applications.name", "&eSolicitações Pendentes")),
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.pending-applications.lore.1", "&7Ver solicitações pendentes")),
+                ColorUtils.colorize("&f" + pendingCount + " solicitações")
             );
             inventory.setItem(20, pendingApplications);
         });
@@ -112,16 +112,16 @@ public class ApplicationManagementGUI implements GUI {
         // 申请历史按钮
         ItemStack applicationHistory = createItem(
             Material.BOOK,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.application-history.name", "&e申请历史")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.application-history.lore.1", "&7查看申请历史记录"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.application-history.name", "&eHistórico de Solicitações")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.application-history.lore.1", "&7Ver histórico de solicitações"))
         );
         inventory.setItem(24, applicationHistory);
         
         // 返回按钮
         ItemStack back = createItem(
             Material.ARROW,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.back.name", "&7返回")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.back.lore.1", "&7返回主菜单"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.back.name", "&7Voltar")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.back.lore.1", "&7Voltar ao menu principal"))
         );
         inventory.setItem(49, back);
     }
@@ -146,8 +146,8 @@ public class ApplicationManagementGUI implements GUI {
                 // 显示无申请信息
                 ItemStack noApplications = createItem(
                     Material.BARRIER,
-                    ColorUtils.colorize("&a没有待处理的申请"),
-                    ColorUtils.colorize("&7当前没有待处理的申请")
+                    ColorUtils.colorize("&aNenhuma solicitação pendente"),
+                    ColorUtils.colorize("&7Não há solicitações pendentes no momento")
                 );
                 inventory.setItem(22, noApplications);
                 return;
@@ -176,8 +176,8 @@ public class ApplicationManagementGUI implements GUI {
                 // 显示无历史信息
                 ItemStack noHistory = createItem(
                     Material.BARRIER,
-                    ColorUtils.colorize("&a没有申请历史"),
-                    ColorUtils.colorize("&7当前没有申请历史记录")
+                    ColorUtils.colorize("&aSem histórico de solicitações"),
+                    ColorUtils.colorize("&7Não há histórico de solicitações no momento")
                 );
                 inventory.setItem(22, noHistory);
                 return;
@@ -227,8 +227,8 @@ public class ApplicationManagementGUI implements GUI {
         if (currentPage > 0) {
             ItemStack previousPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.previous-page.name", "&c上一页")),
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.previous-page.lore.1", "&7查看上一页"))
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.previous-page.name", "&cPágina Anterior")),
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.previous-page.lore.1", "&7Ver página anterior"))
             );
             inventory.setItem(18, previousPage);
         }
@@ -237,8 +237,8 @@ public class ApplicationManagementGUI implements GUI {
         if (currentPage < totalPages) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.next-page.name", "&a下一页")),
-                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.next-page.lore.1", "&7查看下一页"))
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.next-page.name", "&aPróxima Página")),
+                ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("application-management.items.next-page.lore.1", "&7Ver próxima página"))
             );
             inventory.setItem(26, nextPage);
         }
@@ -255,28 +255,28 @@ public class ApplicationManagementGUI implements GUI {
         switch (application.getStatus()) {
             case PENDING:
                 material = Material.YELLOW_WOOL;
-                name = PlaceholderUtils.replaceApplicationPlaceholders("&e{applicant_name} 的申请", application.getPlayerName(), guild.getName(), application.getCreatedAt());
-                lore.add(ColorUtils.colorize("&7状态: &e待处理"));
-                lore.add(PlaceholderUtils.replaceApplicationPlaceholders("&7申请时间: {apply_time}", application.getPlayerName(), guild.getName(), application.getCreatedAt()));
-                lore.add(ColorUtils.colorize("&7消息: " + application.getMessage()));
+                name = PlaceholderUtils.replaceApplicationPlaceholders("&eSolicitação de {applicant_name}", application.getPlayerName(), guild.getName(), application.getCreatedAt());
+                lore.add(ColorUtils.colorize("&7Status: &ePendente"));
+                lore.add(PlaceholderUtils.replaceApplicationPlaceholders("&7Data: {apply_time}", application.getPlayerName(), guild.getName(), application.getCreatedAt()));
+                lore.add(ColorUtils.colorize("&7Mensagem: " + application.getMessage()));
                 lore.add("");
-                lore.add(ColorUtils.colorize("&a左键: 接受"));
-                lore.add(ColorUtils.colorize("&c右键: 拒绝"));
+                lore.add(ColorUtils.colorize("&aBotão Esquerdo: Aceitar"));
+                lore.add(ColorUtils.colorize("&cBotão Direito: Rejeitar"));
                 break;
             case APPROVED:
                 material = Material.GREEN_WOOL;
-                name = PlaceholderUtils.replaceApplicationPlaceholders("&a{applicant_name} 的申请", application.getPlayerName(), guild.getName(), application.getCreatedAt());
-                lore.add(ColorUtils.colorize("&7状态: &a已通过"));
+                name = PlaceholderUtils.replaceApplicationPlaceholders("&aSolicitação de {applicant_name}", application.getPlayerName(), guild.getName(), application.getCreatedAt());
+                lore.add(ColorUtils.colorize("&7Status: &aAprovado"));
                 break;
             case REJECTED:
                 material = Material.RED_WOOL;
-                name = PlaceholderUtils.replaceApplicationPlaceholders("&c{applicant_name} 的申请", application.getPlayerName(), guild.getName(), application.getCreatedAt());
-                lore.add(ColorUtils.colorize("&7状态: &c已拒绝"));
+                name = PlaceholderUtils.replaceApplicationPlaceholders("&cSolicitação de {applicant_name}", application.getPlayerName(), guild.getName(), application.getCreatedAt());
+                lore.add(ColorUtils.colorize("&7Status: &cRejeitado"));
                 break;
             default:
                 material = Material.GRAY_WOOL;
-                name = PlaceholderUtils.replaceApplicationPlaceholders("&7{applicant_name} 的申请", application.getPlayerName(), guild.getName(), application.getCreatedAt());
-                lore.add(ColorUtils.colorize("&7状态: &7未知"));
+                name = PlaceholderUtils.replaceApplicationPlaceholders("&7Solicitação de {applicant_name}", application.getPlayerName(), guild.getName(), application.getCreatedAt());
+                lore.add(ColorUtils.colorize("&7Status: &7Desconhecido"));
                 break;
         }
         
@@ -346,7 +346,7 @@ public class ApplicationManagementGUI implements GUI {
     private void handleApplicationClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         if (showingHistory) {
             // 历史记录只能查看，不能操作
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-history-view-only", "&7这是历史记录，只能查看");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-history-view-only", "&7Este é um registro histórico, apenas visualização");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
@@ -368,7 +368,7 @@ public class ApplicationManagementGUI implements GUI {
         // 获取当前页的申请列表
         plugin.getGuildService().getPendingApplicationsAsync(guild.getId()).thenAccept(applications -> {
             if (applications == null || applications.isEmpty()) {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-pending-applications", "&c没有待处理的申请");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-pending-applications", "&cNão há solicitações pendentes");
                 player.sendMessage(ColorUtils.colorize(message));
                 return;
             }
@@ -381,13 +381,13 @@ public class ApplicationManagementGUI implements GUI {
                 // 处理申请
                 plugin.getGuildService().processApplicationAsync(application.getId(), GuildApplication.ApplicationStatus.APPROVED, player.getUniqueId()).thenAccept(success -> {
                     if (success) {
-                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-accepted", "&a申请已接受！");
+                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-accepted", "&aSolicitação aceita!");
                         player.sendMessage(ColorUtils.colorize(message));
                         
                         // 刷新GUI
                         refreshInventory(player);
                     } else {
-                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-accept-failed", "&c接受申请失败！");
+                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-accept-failed", "&cFalha ao aceitar solicitação!");
                         player.sendMessage(ColorUtils.colorize(message));
                     }
                 });
@@ -402,7 +402,7 @@ public class ApplicationManagementGUI implements GUI {
         // 获取当前页的申请列表
         plugin.getGuildService().getPendingApplicationsAsync(guild.getId()).thenAccept(applications -> {
             if (applications == null || applications.isEmpty()) {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-pending-applications", "&c没有待处理的申请");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-pending-applications", "&cNão há solicitações pendentes");
                 player.sendMessage(ColorUtils.colorize(message));
                 return;
             }
@@ -415,13 +415,13 @@ public class ApplicationManagementGUI implements GUI {
                 // 处理申请
                 plugin.getGuildService().processApplicationAsync(application.getId(), GuildApplication.ApplicationStatus.REJECTED, player.getUniqueId()).thenAccept(success -> {
                     if (success) {
-                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-rejected", "&c申请已拒绝！");
+                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-rejected", "&cSolicitação rejeitada!");
                         player.sendMessage(ColorUtils.colorize(message));
                         
                         // 刷新GUI
                         refreshInventory(player);
                     } else {
-                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-reject-failed", "&c拒绝申请失败！");
+                        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.application-reject-failed", "&cFalha ao rejeitar solicitação!");
                         player.sendMessage(ColorUtils.colorize(message));
                     }
                 });

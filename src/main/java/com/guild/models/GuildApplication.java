@@ -88,9 +88,9 @@ public class GuildApplication {
      * 申请状态枚举
      */
     public enum ApplicationStatus {
-        PENDING("待处理"),
-        APPROVED("已通过"),
-        REJECTED("已拒绝");
+        PENDING("Pendente"),
+        APPROVED("Aprovado"),
+        REJECTED("Rejeitado");
         
         private final String displayName;
         

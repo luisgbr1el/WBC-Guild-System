@@ -45,7 +45,7 @@ public class KickMemberGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6踢出成员 - 第" + (currentPage + 1) + "页");
+        return ColorUtils.colorize("&6Expulsar Membro - Pág " + (currentPage + 1));
     }
     
     @Override
@@ -132,8 +132,8 @@ public class KickMemberGUI implements GUI {
         if (currentPage > 0) {
             ItemStack prevPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e上一页"),
-                ColorUtils.colorize("&7点击查看上一页")
+                ColorUtils.colorize("&ePágina Anterior"),
+                ColorUtils.colorize("&7Clique para ver a página anterior")
             );
             inventory.setItem(45, prevPage);
         }
@@ -143,8 +143,8 @@ public class KickMemberGUI implements GUI {
         if (currentPage < maxPage) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e下一页"),
-                ColorUtils.colorize("&7点击查看下一页")
+                ColorUtils.colorize("&ePróxima Página"),
+                ColorUtils.colorize("&7Clique para ver a próxima página")
             );
             inventory.setItem(53, nextPage);
         }
@@ -152,8 +152,8 @@ public class KickMemberGUI implements GUI {
         // 返回按钮
         ItemStack back = createItem(
             Material.BARRIER,
-            ColorUtils.colorize("&c返回"),
-            ColorUtils.colorize("&7返回工会设置")
+            ColorUtils.colorize("&cVoltar"),
+            ColorUtils.colorize("&7Voltar para Configurações da Guilda")
         );
         inventory.setItem(49, back);
     }
@@ -168,9 +168,9 @@ public class KickMemberGUI implements GUI {
         if (meta != null) {
             meta.setDisplayName(ColorUtils.colorize("&c" + member.getPlayerName()));
             meta.setLore(Arrays.asList(
-                ColorUtils.colorize("&7职位: &e" + member.getRole().getDisplayName()),
-                ColorUtils.colorize("&7加入时间: &e" + member.getJoinedAt()),
-                ColorUtils.colorize("&c点击踢出该成员")
+                ColorUtils.colorize("&7Cargo: &e" + member.getRole().getDisplayName()),
+                ColorUtils.colorize("&7Entrou em: &e" + member.getJoinedAt()),
+                ColorUtils.colorize("&cClique para expulsar este membro")
             ));
             head.setItemMeta(meta);
         }
@@ -184,7 +184,7 @@ public class KickMemberGUI implements GUI {
     private void handleKickMember(Player kicker, GuildMember member) {
         // 检查权限
         if (!kicker.hasPermission("guild.kick")) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&c权限不足");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cSem permissão");
             kicker.sendMessage(ColorUtils.colorize(message));
             return;
         }
@@ -192,14 +192,14 @@ public class KickMemberGUI implements GUI {
         // 踢出成员
         plugin.getGuildService().removeGuildMemberAsync(member.getPlayerUuid(), kicker.getUniqueId()).thenAccept(success -> {
             if (success) {
-                String kickerMessage = plugin.getConfigManager().getMessagesConfig().getString("kick.success", "&a已踢出成员 &e{player} &a！")
+                String kickerMessage = plugin.getConfigManager().getMessagesConfig().getString("kick.success", "&aMembro &e{player} &aexpulso com sucesso!")
                     .replace("{player}", member.getPlayerName());
                 kicker.sendMessage(ColorUtils.colorize(kickerMessage));
                 
                 // 通知被踢出的玩家
                 Player kickedPlayer = plugin.getServer().getPlayer(member.getPlayerUuid());
                 if (kickedPlayer != null) {
-                    String kickedMessage = plugin.getConfigManager().getMessagesConfig().getString("kick.kicked", "&c你被踢出了工会 &e{guild} &c！")
+                    String kickedMessage = plugin.getConfigManager().getMessagesConfig().getString("kick.kicked", "&cVocê foi expulso da guilda &e{guild}&c!")
                         .replace("{guild}", guild.getName());
                     kickedPlayer.sendMessage(ColorUtils.colorize(kickedMessage));
                 }
@@ -207,7 +207,7 @@ public class KickMemberGUI implements GUI {
                 // 刷新GUI
                 plugin.getGuiManager().openGUI(kicker, new KickMemberGUI(plugin, guild));
             } else {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("kick.failed", "&c踢出成员失败！");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("kick.failed", "&cFalha ao expulsar membro!");
                 kicker.sendMessage(ColorUtils.colorize(message));
             }
         });

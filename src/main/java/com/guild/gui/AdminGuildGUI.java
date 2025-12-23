@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 管理员工会GUI
+ * GUI de Administração de Guildas
  */
 public class AdminGuildGUI implements GUI {
     
@@ -30,7 +30,7 @@ public class AdminGuildGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.title", "&4工会管理"));
+        return ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.title", "&4Administração de Guildas"));
     }
     
     @Override
@@ -40,59 +40,51 @@ public class AdminGuildGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 工会列表管理
+        // Gerenciamento de lista de guildas
         ItemStack guildList = createItem(
             Material.BOOKSHELF,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.guild-list.name", "&e工会列表管理")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.guild-list.lore.1", "&7查看和管理所有工会")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.guild-list.lore.2", "&7包括删除、冻结等操作"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.guild-list.name", "&eGerenciar Lista de Guildas")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.guild-list.lore.1", "&7Ver e gerenciar todas as guildas")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.guild-list.lore.2", "&7Inclui exclusão, congelamento, etc."))
         );
         inventory.setItem(20, guildList);
         
-        // 经济管理
-        ItemStack economy = createItem(
-            Material.GOLD_INGOT,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.economy.name", "&e经济管理")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.economy.lore.1", "&7管理工会经济系统")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.economy.lore.2", "&7设置资金、查看贡献等"))
-        );
-        inventory.setItem(22, economy);
-        
-        // 关系管理
+
+        // Gerenciamento de relações
         ItemStack relations = createItem(
             Material.RED_WOOL,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.relations.name", "&e关系管理")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.relations.lore.1", "&7管理工会关系")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.relations.lore.2", "&7盟友、敌对、开战等"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.relations.name", "&eGerenciar Relações")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.relations.lore.1", "&7Gerenciar relações entre guildas")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.relations.lore.2", "&7Aliados, Inimigos, Guerra, etc."))
         );
         inventory.setItem(24, relations);
         
-        // 统计信息
+        // Estatísticas
         ItemStack statistics = createItem(
             Material.PAPER,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.statistics.name", "&e统计信息")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.statistics.lore.1", "&7查看工会统计信息")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.statistics.lore.2", "&7成员数量、经济状况等"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.statistics.name", "&eEstatísticas")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.statistics.lore.1", "&7Ver estatísticas das guildas")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.statistics.lore.2", "&7Membros, economia, etc."))
         );
         inventory.setItem(29, statistics);
         
-        // 系统设置
+        // Configurações do sistema
         ItemStack settings = createItem(
             Material.COMPASS,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.settings.name", "&e系统设置")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.settings.lore.1", "&7管理系统设置")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.settings.lore.2", "&7重载配置、权限设置等"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.settings.name", "&eConfigurações do Sistema")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.settings.lore.1", "&7Gerenciar configurações do sistema")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.settings.lore.2", "&7Recarregar config, permissões, etc."))
         );
         inventory.setItem(31, settings);
         
-        // 返回按钮
+        // Botão de voltar
         ItemStack back = createItem(
             Material.ARROW,
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.back.name", "&c返回")),
-            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.back.lore.1", "&7返回主菜单"))
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.back.name", "&cVoltar")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("admin-gui.items.back.lore.1", "&7Voltar ao menu principal"))
         );
         inventory.setItem(49, back);
     }
@@ -100,19 +92,16 @@ public class AdminGuildGUI implements GUI {
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         switch (slot) {
-            case 20: // 工会列表管理
+            case 20: // Gerenciamento de lista de guildas
                 openGuildListManagement(player);
                 break;
-            case 22: // 经济管理
-                openEconomyManagement(player);
-                break;
-            case 24: // 关系管理
+            case 24: // Gerenciamento de relações
                 openRelationManagement(player);
                 break;
-            case 29: // 统计信息
+            case 29: // Estatísticas
                 openStatistics(player);
                 break;
-            case 31: // 系统设置
+            case 31: // Configurações do sistema
                 openSystemSettings(player);
                 break;
             case 49: // 返回
@@ -122,41 +111,34 @@ public class AdminGuildGUI implements GUI {
     }
     
     private void openGuildListManagement(Player player) {
-        // 打开工会列表管理GUI
+        // Abrir GUI de gerenciamento de lista de guildas
         GuildListManagementGUI guildListGUI = new GuildListManagementGUI(plugin, player);
         plugin.getGuiManager().openGUI(player, guildListGUI);
     }
     
-    private void openEconomyManagement(Player player) {
-        // 打开经济管理GUI
-        EconomyManagementGUI economyGUI = new EconomyManagementGUI(plugin, player);
-        plugin.getGuiManager().openGUI(player, economyGUI);
-    }
-    
+
     private void openRelationManagement(Player player) {
-        // 打开关系管理GUI
+        // Abrir GUI de gerenciamento de relações
         RelationManagementGUI relationGUI = new RelationManagementGUI(plugin, player);
         plugin.getGuiManager().openGUI(player, relationGUI);
     }
     
     private void openStatistics(Player player) {
-        // 显示统计信息
+        // Exibir estatísticas
         plugin.getGuildService().getAllGuildsAsync().thenAccept(guilds -> {
-            player.sendMessage(ColorUtils.colorize("&6=== 工会统计信息 ==="));
-            player.sendMessage(ColorUtils.colorize("&e总工会数量: &f" + guilds.size()));
+            player.sendMessage(ColorUtils.colorize("&6=== Estatísticas das Guildas ==="));
+            player.sendMessage(ColorUtils.colorize("&eTotal de Guildas: &f" + guilds.size()));
             
             if (!guilds.isEmpty()) {
-                final double[] totalBalance = {0};
                 final int[] frozenCount = {0};
                 
                 for (Guild guild : guilds) {
-                    totalBalance[0] += guild.getBalance();
                     if (guild.isFrozen()) {
                         frozenCount[0]++;
                     }
                 }
                 
-                // 获取总成员数
+                // Obter número total de membros
                 CompletableFuture<Integer>[] memberCountFutures = new CompletableFuture[guilds.size()];
                 for (int i = 0; i < guilds.size(); i++) {
                     memberCountFutures[i] = plugin.getGuildService().getGuildMemberCountAsync(guilds.get(i).getId());
@@ -168,28 +150,27 @@ public class AdminGuildGUI implements GUI {
                         try {
                             totalMembers[0] += future.get();
                         } catch (Exception e) {
-                            plugin.getLogger().severe("获取成员数量时发生错误: " + e.getMessage());
+                            plugin.getLogger().severe("Erro ao obter número de membros: " + e.getMessage());
                         }
                     }
                     
-                    player.sendMessage(ColorUtils.colorize("&e总成员数量: &f" + totalMembers[0]));
-                    player.sendMessage(ColorUtils.colorize("&e总资金: &f" + totalBalance[0]));
-                    player.sendMessage(ColorUtils.colorize("&e冻结工会数: &f" + frozenCount[0]));
-                    player.sendMessage(ColorUtils.colorize("&e正常工会数: &f" + (guilds.size() - frozenCount[0])));
+                    player.sendMessage(ColorUtils.colorize("&eTotal de Membros: &f" + totalMembers[0]));
+                    player.sendMessage(ColorUtils.colorize("&eGuildas Congeladas: &f" + frozenCount[0]));
+                    player.sendMessage(ColorUtils.colorize("&eGuildas Ativas: &f" + (guilds.size() - frozenCount[0])));
                 });
             }
         });
     }
     
     private void openSystemSettings(Player player) {
-        // 打开系统设置GUI
+        // Abrir GUI de configurações do sistema
         plugin.getGuiManager().openGUI(player, new SystemSettingsGUI(plugin, player));
     }
     
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
         
-        // 填充边框
+        // Preencher borda
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, border);
             inventory.setItem(i + 45, border);
@@ -222,11 +203,11 @@ public class AdminGuildGUI implements GUI {
     
     @Override
     public void onClose(Player player) {
-        // 关闭时的处理
+        // Processamento ao fechar
     }
     
     @Override
     public void refresh(Player player) {
-        // 刷新GUI
+        // Atualizar GUI
     }
 }

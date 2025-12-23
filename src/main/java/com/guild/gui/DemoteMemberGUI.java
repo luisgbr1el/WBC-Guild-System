@@ -46,7 +46,7 @@ public class DemoteMemberGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6降级成员 - 第" + (currentPage + 1) + "页");
+        return ColorUtils.colorize("&6Rebaixar Membro - Pág " + (currentPage + 1) + "");
     }
     
     @Override
@@ -133,8 +133,8 @@ public class DemoteMemberGUI implements GUI {
         if (currentPage > 0) {
             ItemStack prevPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e上一页"),
-                ColorUtils.colorize("&7点击查看上一页")
+                ColorUtils.colorize("&ePágina Anterior"),
+                ColorUtils.colorize("&7Clique para ver a página anterior")
             );
             inventory.setItem(45, prevPage);
         }
@@ -144,8 +144,8 @@ public class DemoteMemberGUI implements GUI {
         if (currentPage < maxPage) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e下一页"),
-                ColorUtils.colorize("&7点击查看下一页")
+                ColorUtils.colorize("&ePróxima Página"),
+                ColorUtils.colorize("&7Clique para ver a próxima página")
             );
             inventory.setItem(53, nextPage);
         }
@@ -153,8 +153,8 @@ public class DemoteMemberGUI implements GUI {
         // 返回按钮
         ItemStack back = createItem(
             Material.BARRIER,
-            ColorUtils.colorize("&c返回"),
-            ColorUtils.colorize("&7返回工会设置")
+            ColorUtils.colorize("&cVoltar"),
+            ColorUtils.colorize("&7Voltar para Configurações da Guilda")
         );
         inventory.setItem(49, back);
     }
@@ -169,9 +169,9 @@ public class DemoteMemberGUI implements GUI {
         if (meta != null) {
             meta.setDisplayName(ColorUtils.colorize("&7" + member.getPlayerName()));
             meta.setLore(Arrays.asList(
-                ColorUtils.colorize("&7当前职位: &e" + member.getRole().getDisplayName()),
-                ColorUtils.colorize("&7加入时间: &e" + member.getJoinedAt()),
-                ColorUtils.colorize("&7点击降级为成员")
+                ColorUtils.colorize("&7Cargo Atual: &e" + member.getRole().getDisplayName()),
+                ColorUtils.colorize("&7Entrou em: &e" + member.getJoinedAt()),
+                ColorUtils.colorize("&7Clique para rebaixar para Membro")
             ));
             head.setItemMeta(meta);
         }
@@ -185,7 +185,7 @@ public class DemoteMemberGUI implements GUI {
     private void handleDemoteMember(Player demoter, GuildMember member) {
         // 检查权限
         if (!demoter.hasPermission("guild.demote")) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&c权限不足");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cSem permissão");
             demoter.sendMessage(ColorUtils.colorize(message));
             return;
         }
@@ -193,14 +193,14 @@ public class DemoteMemberGUI implements GUI {
         // 降级成员
         plugin.getGuildService().updateMemberRoleAsync(member.getPlayerUuid(), GuildMember.Role.MEMBER, demoter.getUniqueId()).thenAccept(success -> {
             if (success) {
-                String demoterMessage = plugin.getConfigManager().getMessagesConfig().getString("demote.success", "&a已降级 &e{player} &a为成员！")
+                String demoterMessage = plugin.getConfigManager().getMessagesConfig().getString("demote.success", "&a{player} rebaixado para Membro!")
                     .replace("{player}", member.getPlayerName());
                 demoter.sendMessage(ColorUtils.colorize(demoterMessage));
                 
                 // 通知被降级的玩家
                 Player demotedPlayer = plugin.getServer().getPlayer(member.getPlayerUuid());
                 if (demotedPlayer != null) {
-                    String demotedMessage = plugin.getConfigManager().getMessagesConfig().getString("demote.demoted", "&c你被降级为工会 &e{guild} &c的成员！")
+                    String demotedMessage = plugin.getConfigManager().getMessagesConfig().getString("demote.demoted", "&cVocê foi rebaixado para Membro na guilda {guild}!")
                         .replace("{guild}", guild.getName());
                     demotedPlayer.sendMessage(ColorUtils.colorize(demotedMessage));
                 }
@@ -208,7 +208,7 @@ public class DemoteMemberGUI implements GUI {
                 // 刷新GUI
                 plugin.getGuiManager().openGUI(demoter, new DemoteMemberGUI(plugin, guild));
             } else {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("demote.failed", "&c降级成员失败！");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("demote.failed", "&cFalha ao rebaixar membro!");
                 demoter.sendMessage(ColorUtils.colorize(message));
             }
         });

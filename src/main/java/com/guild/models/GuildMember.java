@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 工会成员数据模型
+ * Modelo de dados de membro da guilda
  */
 public class GuildMember {
     
@@ -75,12 +75,12 @@ public class GuildMember {
     }
     
     /**
-     * 工会成员角色枚举
+     * Enumeração de cargos de membros da guilda
      */
     public enum Role {
-        LEADER("会长"),
-        OFFICER("官员"),
-        MEMBER("成员");
+        LEADER("Líder"),
+        OFFICER("Oficial"),
+        MEMBER("Membro");
         
         private final String displayName;
         

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 工会关系数据模型
+ * Modelo de dados de relação da guilda
  */
 public class GuildRelation {
     
@@ -22,11 +22,11 @@ public class GuildRelation {
     private LocalDateTime expiresAt;
     
     public enum RelationType {
-        ALLY("盟友", "&a"),
-        ENEMY("敌对", "&c"),
-        WAR("开战", "&4"),
-        TRUCE("停战", "&e"),
-        NEUTRAL("中立", "&7");
+        ALLY("Aliado", "&a"),
+        ENEMY("Inimigo", "&c"),
+        WAR("Guerra", "&4"),
+        TRUCE("Trégua", "&e"),
+        NEUTRAL("Neutro", "&7");
         
         private final String displayName;
         private final String color;
@@ -46,10 +46,10 @@ public class GuildRelation {
     }
     
     public enum RelationStatus {
-        PENDING("待处理"),
-        ACTIVE("活跃"),
-        EXPIRED("已过期"),
-        CANCELLED("已取消");
+        PENDING("Pendente"),
+        ACTIVE("Ativo"),
+        EXPIRED("Expirado"),
+        CANCELLED("Cancelado");
         
         private final String displayName;
         
@@ -77,7 +77,7 @@ public class GuildRelation {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         
-        // 设置过期时间（7天后）
+        // Define o tempo de expiração (7 dias depois)
         this.expiresAt = LocalDateTime.now().plusDays(7);
     }
     
@@ -179,28 +179,28 @@ public class GuildRelation {
     }
     
     /**
-     * 检查关系是否已过期
+     * Verifica se a relação expirou
      */
     public boolean isExpired() {
         return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
     }
     
     /**
-     * 检查是否为开战状态
+     * Verifica se está em estado de guerra
      */
     public boolean isWar() {
         return type == RelationType.WAR && status == RelationStatus.ACTIVE;
     }
     
     /**
-     * 获取另一个工会的ID
+     * Obtém o ID da outra guilda
      */
     public int getOtherGuildId(int currentGuildId) {
         return guild1Id == currentGuildId ? guild2Id : guild1Id;
     }
     
     /**
-     * 获取另一个工会的名称
+     * Obtém o nome da outra guilda
      */
     public String getOtherGuildName(int currentGuildId) {
         return guild1Id == currentGuildId ? guild2Name : guild1Name;

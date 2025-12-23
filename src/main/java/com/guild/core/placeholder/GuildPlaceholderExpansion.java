@@ -74,8 +74,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
                     return getGuildMaxMembers(player);
                 case "level":
                     return getGuildLevel(player);
-                case "balance":
-                    return getGuildBalance(player);
                 case "frozen":
                     return getGuildFrozenStatus(player);
                 
@@ -92,8 +90,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
                     return getPlayerRolePrefix(player);
                 case "joined":
                     return getPlayerJoinedTime(player);
-                case "contribution":
-                    return getPlayerContribution(player);
                 
                 // 工会状态检查
                 case "hasguild":
@@ -114,10 +110,6 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
                     return canPromote(player);
                 case "candemote":
                     return canDemote(player);
-                case "cansethome":
-                    return canSetHome(player);
-                case "canmanageeconomy":
-                    return canManageEconomy(player);
                 
                 default:
                     return "";
@@ -133,9 +125,9 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
     private String getGuildName(Player player) {
         try {
             Guild guild = guildService.getPlayerGuild(player.getUniqueId());
-            return guild != null ? guild.getName() : "无工会";
+            return guild != null ? guild.getName() : "Sem Guilda";
         } catch (Exception e) {
-            return "无工会";
+            return "Sem Guilda";
         }
     }
     
@@ -196,21 +188,13 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
         }
     }
     
-    private String getGuildBalance(Player player) {
-        try {
-            Guild guild = guildService.getPlayerGuild(player.getUniqueId());
-            return guild != null ? String.format("%.2f", guild.getBalance()) : "0.00";
-        } catch (Exception e) {
-            return "0.00";
-        }
-    }
-    
+
     private String getGuildFrozenStatus(Player player) {
         try {
             Guild guild = guildService.getPlayerGuild(player.getUniqueId());
-            return guild != null ? (guild.isFrozen() ? "已冻结" : "正常") : "无工会";
+            return guild != null ? (guild.isFrozen() ? "Congelado" : "Normal") : "Sem Guilda";
         } catch (Exception e) {
-            return "无工会";
+            return "Sem Guilda";
         }
     }
     
@@ -265,16 +249,7 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
         }
     }
     
-    private String getPlayerContribution(Player player) {
-        try {
-            GuildMember member = guildService.getGuildMember(player.getUniqueId());
-            // 暂时返回0，因为GuildMember类还没有contribution字段
-            return member != null ? "0" : "0";
-        } catch (Exception e) {
-            return "0";
-        }
-    }
-    
+
     // ==================== 工会状态检查 ====================
     
     private String hasGuild(Player player) {
@@ -359,25 +334,4 @@ public class GuildPlaceholderExpansion extends PlaceholderExpansion {
         }
     }
     
-    private String canSetHome(Player player) {
-        try {
-            GuildMember member = guildService.getGuildMember(player.getUniqueId());
-            if (member == null) return "否";
-            
-            return (member.getRole() == GuildMember.Role.LEADER || member.getRole() == GuildMember.Role.OFFICER) ? "是" : "否";
-        } catch (Exception e) {
-            return "否";
-        }
-    }
-    
-    private String canManageEconomy(Player player) {
-        try {
-            GuildMember member = guildService.getGuildMember(player.getUniqueId());
-            if (member == null) return "否";
-            
-            return (member.getRole() == GuildMember.Role.LEADER || member.getRole() == GuildMember.Role.OFFICER) ? "是" : "否";
-        } catch (Exception e) {
-            return "否";
-        }
-    }
 }

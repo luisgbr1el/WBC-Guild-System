@@ -112,10 +112,10 @@ public class GuildInvitation {
      * 邀请状态枚举
      */
     public enum InvitationStatus {
-        PENDING("待处理"),
-        ACCEPTED("已接受"),
-        DECLINED("已拒绝"),
-        EXPIRED("已过期");
+        PENDING("Pendente"),
+        ACCEPTED("Aceito"),
+        DECLINED("Recusado"),
+        EXPIRED("Expirado");
         
         private final String displayName;
         

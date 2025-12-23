@@ -37,13 +37,13 @@ public class GuildPlugin extends JavaPlugin {
         instance = this;
         Logger logger = getLogger();
         
-        logger.info("正在启动工会插件...");
-        logger.info("检测到服务器类型: " + ServerUtils.getServerType());
-        logger.info("服务器版本: " + ServerUtils.getServerVersion());
+        logger.info("Iniciando WBC Guild System...");
+        logger.info("Tipo de servidor detectado: " + ServerUtils.getServerType());
+        logger.info("Versão do servidor: " + ServerUtils.getServerVersion());
         
         // 检查API版本兼容性
         if (!ServerUtils.supportsApiVersion("1.21")) {
-            logger.severe("此插件需要1.21或更高版本！当前版本: " + ServerUtils.getServerVersion());
+            logger.severe("Este plugin requer a versão 1.21 ou superior! Versão atual: " + ServerUtils.getServerVersion());
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -100,11 +100,11 @@ public class GuildPlugin extends JavaPlugin {
             // 启动服务
             startServices();
             
-            logger.info("工会插件启动成功！");
-            logger.info("兼容模式: " + (ServerUtils.isFolia() ? "Folia" : "Spigot"));
+            logger.info("Plugin de guilda iniciado com sucesso!");
+            logger.info("Modo de compatibilidade: " + (ServerUtils.isFolia() ? "Folia" : "Spigot"));
             
         } catch (Exception e) {
-            logger.severe("工会插件启动失败: " + e.getMessage());
+            logger.severe("Falha ao iniciar o plugin de guilda: " + e.getMessage());
             e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
         }
@@ -113,7 +113,7 @@ public class GuildPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         Logger logger = getLogger();
-        logger.info("正在关闭工会插件...");
+        logger.info("Desligando plugin de guilda...");
         
         try {
             // 关闭所有GUI
@@ -126,10 +126,10 @@ public class GuildPlugin extends JavaPlugin {
                 serviceContainer.shutdown();
             }
             
-            logger.info("工会插件已关闭");
+            logger.info("Plugin de guilda desligado");
             
         } catch (Exception e) {
-            logger.severe("关闭工会插件时发生错误: " + e.getMessage());
+            logger.severe("Erro ao desligar o plugin de guilda: " + e.getMessage());
             e.printStackTrace();
         }
     }

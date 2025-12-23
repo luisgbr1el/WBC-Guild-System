@@ -46,7 +46,7 @@ public class PromoteMemberGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6提升成员 - 第" + (currentPage + 1) + "页");
+        return ColorUtils.colorize("&6Promover Membro - Pág " + (currentPage + 1) + "");
     }
     
     @Override
@@ -133,8 +133,8 @@ public class PromoteMemberGUI implements GUI {
         if (currentPage > 0) {
             ItemStack prevPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e上一页"),
-                ColorUtils.colorize("&7点击查看上一页")
+                ColorUtils.colorize("&ePágina Anterior"),
+                ColorUtils.colorize("&7Clique para ver a página anterior")
             );
             inventory.setItem(45, prevPage);
         }
@@ -144,8 +144,8 @@ public class PromoteMemberGUI implements GUI {
         if (currentPage < maxPage) {
             ItemStack nextPage = createItem(
                 Material.ARROW,
-                ColorUtils.colorize("&e下一页"),
-                ColorUtils.colorize("&7点击查看下一页")
+                ColorUtils.colorize("&ePróxima Página"),
+                ColorUtils.colorize("&7Clique para ver a próxima página")
             );
             inventory.setItem(53, nextPage);
         }
@@ -153,8 +153,8 @@ public class PromoteMemberGUI implements GUI {
         // 返回按钮
         ItemStack back = createItem(
             Material.BARRIER,
-            ColorUtils.colorize("&c返回"),
-            ColorUtils.colorize("&7返回工会设置")
+            ColorUtils.colorize("&cVoltar"),
+            ColorUtils.colorize("&7Voltar para configurações da guilda")
         );
         inventory.setItem(49, back);
     }
@@ -169,9 +169,9 @@ public class PromoteMemberGUI implements GUI {
         if (meta != null) {
             meta.setDisplayName(ColorUtils.colorize("&6" + member.getPlayerName()));
             meta.setLore(Arrays.asList(
-                ColorUtils.colorize("&7当前职位: &e" + member.getRole().getDisplayName()),
-                ColorUtils.colorize("&7加入时间: &e" + member.getJoinedAt()),
-                ColorUtils.colorize("&6点击提升为官员")
+                ColorUtils.colorize("&7Cargo Atual: &e" + member.getRole().getDisplayName()),
+                ColorUtils.colorize("&7Entrou em: &e" + member.getJoinedAt()),
+                ColorUtils.colorize("&6Clique para promover a Oficial")
             ));
             head.setItemMeta(meta);
         }
@@ -185,7 +185,7 @@ public class PromoteMemberGUI implements GUI {
     private void handlePromoteMember(Player promoter, GuildMember member) {
         // 检查权限
         if (!promoter.hasPermission("guild.promote")) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&c权限不足");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-permission", "&cPermissão insuficiente");
             promoter.sendMessage(ColorUtils.colorize(message));
             return;
         }
@@ -193,14 +193,14 @@ public class PromoteMemberGUI implements GUI {
         // 提升成员
         plugin.getGuildService().updateMemberRoleAsync(member.getPlayerUuid(), GuildMember.Role.OFFICER, promoter.getUniqueId()).thenAccept(success -> {
             if (success) {
-                String promoterMessage = plugin.getConfigManager().getMessagesConfig().getString("promote.success", "&a已提升 &e{player} &a为官员！")
+                String promoterMessage = plugin.getConfigManager().getMessagesConfig().getString("promote.success", "&a{player} promovido a Oficial!")
                     .replace("{player}", member.getPlayerName());
                 promoter.sendMessage(ColorUtils.colorize(promoterMessage));
                 
                 // 通知被提升的玩家
                 Player promotedPlayer = plugin.getServer().getPlayer(member.getPlayerUuid());
                 if (promotedPlayer != null) {
-                    String promotedMessage = plugin.getConfigManager().getMessagesConfig().getString("promote.promoted", "&a你被提升为工会 &e{guild} &a的官员！")
+                    String promotedMessage = plugin.getConfigManager().getMessagesConfig().getString("promote.promoted", "&aVocê foi promovido a Oficial da guilda {guild}!")
                         .replace("{guild}", guild.getName());
                     promotedPlayer.sendMessage(ColorUtils.colorize(promotedMessage));
                 }
@@ -208,7 +208,7 @@ public class PromoteMemberGUI implements GUI {
                 // 刷新GUI
                 plugin.getGuiManager().openGUI(promoter, new PromoteMemberGUI(plugin, guild));
             } else {
-                String message = plugin.getConfigManager().getMessagesConfig().getString("promote.failed", "&c提升成员失败！");
+                String message = plugin.getConfigManager().getMessagesConfig().getString("promote.failed", "&cFalha ao promover membro!");
                 promoter.sendMessage(ColorUtils.colorize(message));
             }
         });

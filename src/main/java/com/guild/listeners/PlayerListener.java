@@ -44,7 +44,7 @@ public class PlayerListener implements Listener {
                     CompatibleScheduler.runTask(plugin, () -> {
                         for (com.guild.models.GuildRelation relation : relations) {
                             if (relation.isWar()) {
-                                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.war-notification", "&4[工会战争] &c您的工会与 {guild} 处于开战状态！");
+                                String message = plugin.getConfigManager().getMessagesConfig().getString("relations.war-notification", "&4[Guerra de Guildas] &cSua guilda está em guerra com {guild}!");
                                 message = message.replace("{guild}", relation.getOtherGuildName(guild.getId()));
                                 player.sendMessage(com.guild.core.utils.ColorUtils.colorize(message));
                             }
@@ -84,7 +84,7 @@ public class PlayerListener implements Listener {
                 try {
                     guiManager.handleInput(event.getPlayer(), input);
                 } catch (Exception e) {
-                    plugin.getLogger().severe("处理GUI输入时发生错误: " + e.getMessage());
+                    plugin.getLogger().severe("Erro ao processar entrada da GUI: " + e.getMessage());
                     e.printStackTrace();
                     // 发生错误时清除输入模式
                     guiManager.clearInputMode(event.getPlayer());

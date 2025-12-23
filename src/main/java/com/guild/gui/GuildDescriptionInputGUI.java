@@ -31,7 +31,7 @@ public class GuildDescriptionInputGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6修改工会描述");
+        return ColorUtils.colorize("&6Modificar Descrição da Guilda");
     }
     
     @Override
@@ -87,8 +87,8 @@ public class GuildDescriptionInputGUI implements GUI {
     private void displayCurrentDescription(Inventory inventory) {
         ItemStack currentDesc = createItem(
             Material.BOOK,
-            ColorUtils.colorize("&e当前描述"),
-            ColorUtils.colorize("&7" + (currentDescription.isEmpty() ? "无描述" : currentDescription))
+            ColorUtils.colorize("&eDescrição Atual"),
+            ColorUtils.colorize("&7" + (currentDescription.isEmpty() ? "Sem descrição" : currentDescription))
         );
         inventory.setItem(11, currentDesc);
     }
@@ -100,16 +100,16 @@ public class GuildDescriptionInputGUI implements GUI {
         // 确认按钮
         ItemStack confirm = createItem(
             Material.EMERALD_BLOCK,
-            ColorUtils.colorize("&a确认修改"),
-            ColorUtils.colorize("&7确认修改工会描述")
+            ColorUtils.colorize("&aConfirmar Modificação"),
+            ColorUtils.colorize("&7Confirmar modificação da descrição da guilda")
         );
         inventory.setItem(15, confirm);
         
         // 取消按钮
         ItemStack cancel = createItem(
             Material.REDSTONE_BLOCK,
-            ColorUtils.colorize("&c取消"),
-            ColorUtils.colorize("&7取消修改")
+            ColorUtils.colorize("&cCancelar"),
+            ColorUtils.colorize("&7Cancelar modificação")
         );
         inventory.setItem(13, cancel);
     }
@@ -122,13 +122,13 @@ public class GuildDescriptionInputGUI implements GUI {
         player.closeInventory();
         
         // 发送消息提示输入
-        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.input-description", "&a请在聊天框中输入新的工会描述（最多100字符）：");
+        String message = plugin.getConfigManager().getMessagesConfig().getString("gui.input-description", "&aPor favor, digite a nova descrição da guilda no chat (máx 100 caracteres):");
         player.sendMessage(ColorUtils.colorize(message));
         
         // 设置玩家为输入模式
         plugin.getGuiManager().setInputMode(player, input -> {
             if (input.length() > 100) {
-                String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-too-long", "&c描述过长，最多100字符！");
+                String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-too-long", "&cDescrição muito longa, máximo de 100 caracteres!");
                 player.sendMessage(ColorUtils.colorize(errorMessage));
                 return false;
             }
@@ -139,13 +139,13 @@ public class GuildDescriptionInputGUI implements GUI {
             // 保存到数据库
             plugin.getGuildService().updateGuildDescriptionAsync(guild.getId(), input).thenAccept(success -> {
                 if (success) {
-                    String successMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-updated", "&a工会描述已更新！");
+                    String successMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-updated", "&aDescrição da guilda atualizada!");
                     player.sendMessage(ColorUtils.colorize(successMessage));
                     
                     // 安全刷新GUI
                     plugin.getGuiManager().refreshGUI(player);
                 } else {
-                    String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-update-failed", "&c工会描述更新失败！");
+                    String errorMessage = plugin.getConfigManager().getMessagesConfig().getString("gui.description-update-failed", "&cFalha ao atualizar descrição da guilda!");
                     player.sendMessage(ColorUtils.colorize(errorMessage));
                 }
             });

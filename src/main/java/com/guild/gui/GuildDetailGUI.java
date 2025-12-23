@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 工会详情GUI
+ * GUI de Detalhes da Guilda
  */
 public class GuildDetailGUI implements GUI {
     
@@ -37,7 +37,7 @@ public class GuildDetailGUI implements GUI {
     
     @Override
     public String getTitle() {
-        return ColorUtils.colorize("&6工会详情 - " + guild.getName());
+        return ColorUtils.colorize("&6Detalhes da Guilda - " + guild.getName());
     }
     
     @Override
@@ -47,111 +47,110 @@ public class GuildDetailGUI implements GUI {
     
     @Override
     public void setupInventory(Inventory inventory) {
-        // 填充边框
+        // Preencher borda
         fillBorder(inventory);
         
-        // 设置工会基本信息
+        // Configurar informações básicas da guilda
         setupGuildInfo(inventory);
         
-        // 设置工会成员列表
+        // Configurar lista de membros da guilda
         setupMembersList(inventory);
         
-        // 设置操作按钮
+        // Configurar botões de ação
         setupActionButtons(inventory);
     }
     
     private void setupGuildInfo(Inventory inventory) {
-        // 工会名称和标签 - 放在顶部中央
+        // Nome e tag da guilda - Centralizado no topo
         List<String> guildLore = new ArrayList<>();
         guildLore.add(ColorUtils.colorize("&7ID: " + guild.getId()));
-        guildLore.add(ColorUtils.colorize("&7标签: [" + (guild.getTag() != null ? guild.getTag() : "无") + "]"));
-        guildLore.add(ColorUtils.colorize("&7创建时间: " + formatTime(guild.getCreatedAt())));
-        guildLore.add(ColorUtils.colorize("&7状态: " + (guild.isFrozen() ? "&c已冻结" : "&a正常")));
+        guildLore.add(ColorUtils.colorize("&7Tag: [" + (guild.getTag() != null ? guild.getTag() : "Nenhuma") + "]"));
+        guildLore.add(ColorUtils.colorize("&7Criada em: " + formatTime(guild.getCreatedAt())));
+        guildLore.add(ColorUtils.colorize("&7Status: " + (guild.isFrozen() ? "&cCongelada" : "&aNormal")));
         
         inventory.setItem(4, createItem(Material.SHIELD, ColorUtils.colorize("&6" + guild.getName()), guildLore.toArray(new String[0])));
         
-        // 工会等级和资金 - 放在第二行
+        // Nível e fundos da guilda - Na segunda linha
         List<String> economyLore = new ArrayList<>();
-        economyLore.add(ColorUtils.colorize("&7当前等级: &e" + guild.getLevel()));
-        economyLore.add(ColorUtils.colorize("&7当前资金: &a" + plugin.getEconomyManager().format(guild.getBalance())));
-        economyLore.add(ColorUtils.colorize("&7最大成员数: &e" + guild.getMaxMembers()));
-        economyLore.add(ColorUtils.colorize("&7当前成员数: &e" + members.size()));
+        economyLore.add(ColorUtils.colorize("&7Nível Atual: &e" + guild.getLevel()));
+        economyLore.add(ColorUtils.colorize("&7Máx Membros: &e" + guild.getMaxMembers()));
+        economyLore.add(ColorUtils.colorize("&7Membros Atuais: &e" + members.size()));
         
-        inventory.setItem(19, createItem(Material.GOLD_INGOT, ColorUtils.colorize("&e经济信息"), economyLore.toArray(new String[0])));
+        inventory.setItem(19, createItem(Material.EXPERIENCE_BOTTLE, ColorUtils.colorize("&eInformações da Guilda"), economyLore.toArray(new String[0])));
         
-        // 工会会长 - 放在第二行
+        // Líder da guilda - Na segunda linha
         List<String> leaderLore = new ArrayList<>();
-        leaderLore.add(ColorUtils.colorize("&7会长: &e" + guild.getLeaderName()));
+        leaderLore.add(ColorUtils.colorize("&7Líder: &e" + guild.getLeaderName()));
         leaderLore.add(ColorUtils.colorize("&7UUID: &7" + guild.getLeaderUuid()));
         
-        inventory.setItem(21, createItem(Material.GOLDEN_HELMET, ColorUtils.colorize("&6工会会长"), leaderLore.toArray(new String[0])));
+        inventory.setItem(21, createItem(Material.GOLDEN_HELMET, ColorUtils.colorize("&6Líder da Guilda"), leaderLore.toArray(new String[0])));
         
-        // 工会描述 - 放在第二行
+        // Descrição da guilda - Na segunda linha
         List<String> descLore = new ArrayList<>();
         String description = guild.getDescription();
         if (description != null && !description.isEmpty()) {
             descLore.add(ColorUtils.colorize("&7" + description));
         } else {
-            descLore.add(ColorUtils.colorize("&7暂无描述"));
+            descLore.add(ColorUtils.colorize("&7Sem descrição"));
         }
         
-        inventory.setItem(23, createItem(Material.BOOK, ColorUtils.colorize("&e工会描述"), descLore.toArray(new String[0])));
+        inventory.setItem(23, createItem(Material.BOOK, ColorUtils.colorize("&eDescrição da Guilda"), descLore.toArray(new String[0])));
     }
     
     private void setupMembersList(Inventory inventory) {
-        // 成员列表标题 - 放在第三行中央
-        inventory.setItem(27, createItem(Material.PLAYER_HEAD, ColorUtils.colorize("&a工会成员"), 
-            ColorUtils.colorize("&7共 " + members.size() + " 名成员")));
+        // Título da lista de membros - Centralizado na terceira linha
+        inventory.setItem(27, createItem(Material.PLAYER_HEAD, ColorUtils.colorize("&aMembros da Guilda"), 
+            ColorUtils.colorize("&7Total " + members.size() + " membros")));
         
-        // 显示前6个成员 - 在第三行和第四行
+        // Exibir os primeiros 6 membros - Na terceira e quarta linha
         int maxDisplay = Math.min(6, members.size());
         for (int i = 0; i < maxDisplay; i++) {
             GuildMember member = members.get(i);
             int slot = 28 + i;
             
             List<String> memberLore = new ArrayList<>();
-            memberLore.add(ColorUtils.colorize("&7职位: " + getRoleDisplayName(member.getRole())));
-            memberLore.add(ColorUtils.colorize("&7加入时间: " + formatTime(member.getJoinedAt())));
-            memberLore.add(ColorUtils.colorize("&7在线状态: " + (isPlayerOnline(member.getPlayerUuid()) ? "&a在线" : "&7离线")));
+            memberLore.add(ColorUtils.colorize("&7Cargo: " + getRoleDisplayName(member.getRole())));
+            memberLore.add(ColorUtils.colorize("&7Entrou em: " + formatTime(member.getJoinedAt())));
+            memberLore.add(ColorUtils.colorize("&7Status Online: " + (isPlayerOnline(member.getPlayerUuid()) ? "&aOnline" : "&7Offline")));
             
             inventory.setItem(slot, createPlayerHead(member.getPlayerName(), memberLore.toArray(new String[0])));
         }
         
-        // 如果成员超过6个，显示更多信息
+        // Se houver mais de 6 membros, exibir mais informações
         if (members.size() > 6) {
-            inventory.setItem(34, createItem(Material.PAPER, ColorUtils.colorize("&e更多成员"), 
-                ColorUtils.colorize("&7还有 " + (members.size() - 6) + " 名成员未显示")));
+            inventory.setItem(34, createItem(Material.PAPER, ColorUtils.colorize("&eMais Membros"), 
+                ColorUtils.colorize("&7Mais " + (members.size() - 6) + " membros não exibidos")));
         }
     }
     
     private void setupActionButtons(Inventory inventory) {
-        // 返回按钮 - 放在底部左侧
-        inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&c返回")));
+        // Botão de voltar - No canto inferior esquerdo
+        inventory.setItem(45, createItem(Material.ARROW, ColorUtils.colorize("&cVoltar")));
         
-        // 管理操作按钮 - 放在底部中央
+        // Botões de gerenciamento - Centralizado na parte inferior
         if (viewer.hasPermission("guild.admin")) {
-            // 冻结/解冻按钮
-            String freezeText = guild.isFrozen() ? "&a解冻工会" : "&c冻结工会";
-            String freezeLore = guild.isFrozen() ? "&7点击解冻工会" : "&7点击冻结工会";
+            // Botão de congelar/descongelar
+            String freezeText = guild.isFrozen() ? "&aDescongelar Guilda" : "&cCongelar Guilda";
+            String freezeLore = guild.isFrozen() ? "&7Clique para descongelar a guilda" : "&7Clique para congelar a guilda";
             inventory.setItem(47, createItem(Material.ICE, ColorUtils.colorize(freezeText), ColorUtils.colorize(freezeLore)));
             
-            // 删除工会按钮
-            inventory.setItem(49, createItem(Material.TNT, ColorUtils.colorize("&4删除工会"), 
-                ColorUtils.colorize("&7点击删除工会")));
+            // Botão de excluir guilda
+            inventory.setItem(49, createItem(Material.TNT, ColorUtils.colorize("&4Excluir Guilda"), 
+                ColorUtils.colorize("&7Clique para excluir a guilda")));
             
-            // 资金管理按钮
-            inventory.setItem(51, createItem(Material.GOLD_BLOCK, ColorUtils.colorize("&e资金管理"), 
-                ColorUtils.colorize("&7管理工会资金")));
+            // Botão de gerenciamento de fundos
+            inventory.setItem(51, createItem(Material.GOLD_BLOCK, ColorUtils.colorize("&eGerenciamento de Fundos"), 
+                ColorUtils.colorize("&7Gerenciar fundos da guilda")));
         }
         
-        // 刷新按钮 - 放在底部右侧
-        inventory.setItem(53, createItem(Material.EMERALD, ColorUtils.colorize("&a刷新信息")));
+        // Botão de atualizar - No canto inferior direito
+        inventory.setItem(53, createItem(Material.EMERALD, ColorUtils.colorize("&aAtualizar Informações")));
     }
     
     private void fillBorder(Inventory inventory) {
         ItemStack border = createItem(Material.BLACK_STAINED_GLASS_PANE, " ");
         
-        // 填充边框
+        // Preencher borda
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, border);
             inventory.setItem(i + 45, border);
@@ -177,19 +176,19 @@ public class GuildDetailGUI implements GUI {
     @Override
     public void onClick(Player player, int slot, ItemStack clickedItem, ClickType clickType) {
         if (slot == 45) {
-            // 返回
+            // Voltar
             plugin.getGuiManager().openGUI(player, new GuildListManagementGUI(plugin, player));
         } else if (slot == 53) {
-            // 刷新
+            // Atualizar
             loadMembers();
         } else if (slot == 47 && player.hasPermission("guild.admin")) {
-            // 冻结/解冻工会
+            // Congelar/Descongelar guilda
             toggleGuildFreeze(player);
         } else if (slot == 49 && player.hasPermission("guild.admin")) {
-            // 删除工会
+            // Excluir guilda
             deleteGuild(player);
         } else if (slot == 51 && player.hasPermission("guild.admin")) {
-            // 资金管理
+            // Gerenciamento de fundos
             openEconomyManagement(player);
         }
     }
@@ -198,40 +197,40 @@ public class GuildDetailGUI implements GUI {
         boolean newStatus = !guild.isFrozen();
         plugin.getGuildService().updateGuildFrozenStatusAsync(guild.getId(), newStatus).thenAccept(success -> {
             if (success) {
-                String message = newStatus ? "&a工会 " + guild.getName() + " 已被冻结！" : "&a工会 " + guild.getName() + " 已被解冻！";
+                String message = newStatus ? "&aGuilda " + guild.getName() + " foi congelada!" : "&aGuilda " + guild.getName() + " foi descongelada!";
                 player.sendMessage(ColorUtils.colorize(message));
                 // 更新本地guild对象
                 guild.setFrozen(newStatus);
                 refresh(player);
             } else {
-                player.sendMessage(ColorUtils.colorize("&c操作失败！"));
+                player.sendMessage(ColorUtils.colorize("&cOperação falhou!"));
             }
         });
     }
     
     private void deleteGuild(Player player) {
-        // 确认删除
-        player.sendMessage(ColorUtils.colorize("&c您确定要删除工会 " + guild.getName() + " 吗？"));
-        player.sendMessage(ColorUtils.colorize("&c输入 &f/guildadmin delete " + guild.getName() + " confirm &c确认删除"));
+        // Confirmar exclusão
+        player.sendMessage(ColorUtils.colorize("&cTem certeza que deseja excluir a guilda " + guild.getName() + "?"));
+        player.sendMessage(ColorUtils.colorize("&cDigite &f/guildadmin delete " + guild.getName() + " confirm &cpara confirmar exclusão"));
         player.closeInventory();
     }
     
     private void openEconomyManagement(Player player) {
-        // 打开资金管理GUI
+        // Abrir GUI de gerenciamento de fundos
         plugin.getGuiManager().openGUI(player, new EconomyManagementGUI(plugin, player));
     }
     
     private String formatTime(java.time.LocalDateTime dateTime) {
-        if (dateTime == null) return "未知";
+        if (dateTime == null) return "Desconhecido";
         return dateTime.format(com.guild.core.time.TimeProvider.FULL_FORMATTER);
     }
     
     private String getRoleDisplayName(GuildMember.Role role) {
         switch (role) {
-            case LEADER: return "&6会长";
-            case OFFICER: return "&e官员";
-            case MEMBER: return "&7成员";
-            default: return "&7未知";
+            case LEADER: return "&6Líder";
+            case OFFICER: return "&eOficial";
+            case MEMBER: return "&7Membro";
+            default: return "&7Desconhecido";
         }
     }
     
@@ -271,11 +270,11 @@ public class GuildDetailGUI implements GUI {
             }
             meta.setLore(loreList);
             
-            // 尝试设置玩家头颅
+            // Tentar definir cabeça do jogador
             try {
                 meta.setOwningPlayer(Bukkit.getOfflinePlayer(playerName));
             } catch (Exception e) {
-                // 如果设置失败，使用默认头颅
+                // Se falhar, usar cabeça padrão
             }
             
             head.setItemMeta(meta);
@@ -286,7 +285,7 @@ public class GuildDetailGUI implements GUI {
     
     @Override
     public void onClose(Player player) {
-        // 关闭时的处理
+        // Processamento ao fechar
     }
     
     @Override

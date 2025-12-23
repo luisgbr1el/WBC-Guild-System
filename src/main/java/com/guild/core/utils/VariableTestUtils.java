@@ -18,28 +18,28 @@ public class VariableTestUtils {
      * @param player 玩家对象
      */
     public static void testGUIVariables(GuildPlugin plugin, Guild guild, Player player) {
-        player.sendMessage("§6=== GUI变量测试 ===");
+        player.sendMessage("§6=== Teste de Variáveis GUI ===");
         
         // 测试基础变量
         String[] testTexts = {
-            "工会名称: {guild_name}",
-            "工会标签: {guild_tag}",
-            "工会描述: {guild_description}",
-            "工会ID: {guild_id}",
-            "会长: {leader_name}",
-            "工会等级: {guild_level}",
-            "工会资金: {guild_balance_formatted}",
-            "最大成员: {guild_max_members}",
-            "工会状态: {guild_frozen}",
-            "创建时间: {guild_created_date}",
-            "成员数量: {member_count}/{guild_max_members}",
-            "升级需求: {guild_next_level_requirement}",
-            "升级进度: {guild_level_progress}"
+            "Nome da Guilda: {guild_name}",
+            "Tag da Guilda: {guild_tag}",
+            "Descrição da Guilda: {guild_description}",
+            "ID da Guilda: {guild_id}",
+            "Líder: {leader_name}",
+            "Nível da Guilda: {guild_level}",
+            "Saldo da Guilda: {guild_balance_formatted}",
+            "Máx. Membros: {guild_max_members}",
+            "Status da Guilda: {guild_frozen}",
+            "Criado em: {guild_created_date}",
+            "Membros: {member_count}/{guild_max_members}",
+            "Requisito de Upgrade: {guild_next_level_requirement}",
+            "Progresso de Upgrade: {guild_level_progress}"
         };
         
         for (String testText : testTexts) {
             String processed = GUIUtils.processGUIVariables(testText, guild, player);
-            player.sendMessage("§e原始: §f" + testText);
+            player.sendMessage("§eOriginal: §f" + testText);
             player.sendMessage("§a处理后: §f" + processed);
             
             // 检查是否有未解析的变量
@@ -104,7 +104,7 @@ public class VariableTestUtils {
         String testText = "工会: {guild_name}, 会长: {leader_name}, 等级: {guild_level}, 资金: {guild_balance_formatted}";
         String processed = PlaceholderUtils.replaceGuildPlaceholders(testText, guild, player);
         
-        player.sendMessage("§e原始: §f" + testText);
+        player.sendMessage("§eOriginal: §f" + testText);
         player.sendMessage("§a处理后: §f" + processed);
         
         // 检查是否有未解析的变量
