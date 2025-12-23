@@ -392,22 +392,10 @@ economy:
   # Operações básicas
   no-guild: "&cVocê ainda não entrou em uma guilda!"
   info: "&6Informações Econômicas"
-  balance: "&7Saldo Atual: &e{balance}"
   level: "&7Nível Atual: &e{level}"
   max-members: "&7Máx Membros: &e{max_members}"
-  insufficient-balance: "&cSeu saldo é insuficiente!"
-  guild-insufficient-balance: "&cSaldo da guilda insuficiente!"
   leader-only: "&cApenas o líder da guilda pode executar esta ação!"
   target-guild-not-found: "&cGuilda alvo não encontrada!"
-  cannot-transfer-to-self: "&cNão é possível transferir para a própria guilda!"
-  deposit-success: "&aDepósito de &e{amount} &ana guilda realizado com sucesso!"
-  deposit-failed: "&cFalha no depósito!"
-  withdraw-success: "&aSaque de &e{amount} &ada guilda realizado com sucesso!"
-  withdraw-failed: "&cFalha no saque!"
-  transfer-success: "&aTransferência de &e{amount} &apara a guilda &e{target} &arealizada com sucesso!"
-  transfer-failed: "&cFalha na transferência!"
-  insufficient-funds: "&cFundos da guilda insuficientes!"
-  insufficient-personal-funds: "&cSeus fundos pessoais são insuficientes!"
   
   # Sistema de nível
   level-up: "&aGuilda subiu de nível! Nível atual: {level}, Máx membros: {max_members}"
@@ -415,19 +403,8 @@ economy:
   max-level-reached: "&cGuilda já atingiu o nível máximo!"
   upgrade-progress: "&eProgresso: {progress}%"
   
-  # Sistema de contribuição
-  contribution-recorded: "&aContribuição registrada!"
-  total-contribution: "&eSua contribuição total: {amount} moedas"
-  
   # Dissolução
-  disband-compensation: "&aGuilda dissolvida, você recebeu {amount} moedas de compensação!"
-  
-  # Operações de administrador
-  admin-set-balance: "&aSaldo da guilda {guild} definido para {amount}!"
-  admin-add-balance: "&aAdicionado {amount} ao saldo da guilda {guild}!"
-  admin-remove-balance: "&aRemovido {amount} do saldo da guilda {guild}!"
-  admin-balance-updated: "&aSaldo da guilda {guild} atualizado para {amount}!"
-  admin-balance-failed: "&cFalha ao atualizar saldo da guilda!"
+  disband-compensation: "&aGuilda dissolvida!"
   
   # Requisitos de nível
   level-1-requirement: "0-5000 Moedas"

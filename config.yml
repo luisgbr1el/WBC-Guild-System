@@ -12,8 +12,6 @@ guild:
   max-description-length: 100
   # Número máximo de membros da guilda
   max-members: 50
-  # Custo para criar guilda (Requer Vault)
-  creation-cost: 0
   # Cor da tag da guilda
   tag-color: "&6"
   # Cor do nome da guilda

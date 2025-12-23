@@ -5,7 +5,7 @@ api-version: '1.21'
 authors: [chenasyd]
 description: Um plugin de guilda completo para Minecraft, suportando Spigot e Folia
 website: https://github.com/chenasyd
-softdepend: [PlaceholderAPI, Vault]
+softdepend: [PlaceholderAPI]
 
 # Versão mínima suportada
 load: POSTWORLD
@@ -52,16 +52,4 @@ permissions:
     default: op
   guild.relation:
     description: Permite gerenciar relações da guilda
-    default: true
-  guild.economy:
-    description: Permite gerenciar economia da guilda
-    default: true
-  guild.deposit:
-    description: Permite depositar fundos na guilda
-    default: true
-  guild.withdraw:
-    description: Permite sacar fundos da guilda
-    default: true
-  guild.transfer:
-    description: Permite transferir para outras guildas
     default: true

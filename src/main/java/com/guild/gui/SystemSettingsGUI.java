@@ -81,22 +81,6 @@ public class SystemSettingsGUI implements GUI {
         );
         inventory.setItem(21, autoSaveToggle);
         
-        // Alternar sistema de economia
-        boolean economyEnabled = plugin.getConfigManager().getMainConfig().getBoolean("economy.enabled", true);
-        Material economyMaterial = economyEnabled ? Material.LIME_WOOL : Material.RED_WOOL;
-        String economyStatus = economyEnabled ? "&aAtivado" : "&cDesativado";
-        
-        ItemStack economyToggle = createItem(
-            economyMaterial,
-            ColorUtils.colorize("&eSistema de Economia"),
-            ColorUtils.colorize("&7Status atual: " + economyStatus),
-            ColorUtils.colorize("&7Alternar função de economia da guilda"),
-            ColorUtils.colorize("&7Inclui depósito, retirada, transferência, etc."),
-            "",
-            ColorUtils.colorize("&eClique para alternar o status")
-        );
-        inventory.setItem(23, economyToggle);
-        
         // Alternar sistema de relações
         boolean relationEnabled = plugin.getConfigManager().getMainConfig().getBoolean("relations.enabled", true);
         Material relationMaterial = relationEnabled ? Material.LIME_WOOL : Material.RED_WOOL;
@@ -240,9 +224,6 @@ public class SystemSettingsGUI implements GUI {
             case 21: // Alternar salvamento automático
                 toggleAutoSave(player);
                 break;
-            case 23: // Alternar sistema de economia
-                toggleEconomy(player);
-                break;
             case 25: // Alternar sistema de relações
                 toggleRelations(player);
                 break;
@@ -291,17 +272,6 @@ public class SystemSettingsGUI implements GUI {
         plugin.getConfigManager().saveMainConfig();
         
         String message = newValue ? "&aSalvamento automático de dados ativado!" : "&cSalvamento automático de dados desativado!";
-        player.sendMessage(ColorUtils.colorize(message));
-        refresh(player);
-    }
-    
-    private void toggleEconomy(Player player) {
-        boolean current = plugin.getConfigManager().getMainConfig().getBoolean("economy.enabled", true);
-        boolean newValue = !current;
-        plugin.getConfigManager().getMainConfig().set("economy.enabled", newValue);
-        plugin.getConfigManager().saveMainConfig();
-        
-        String message = newValue ? "&aSistema de economia ativado!" : "&cSistema de economia desativado!";
         player.sendMessage(ColorUtils.colorize(message));
         refresh(player);
     }

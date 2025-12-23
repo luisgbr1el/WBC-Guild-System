@@ -88,7 +88,7 @@ public class MainGuildGUI implements GUI {
         );
         inventory.setItem(31, guildList);
         
-        // 工会关系按钮
+        // Relações da Guilda
         ItemStack guildRelations = createItem(
             Material.RED_WOOL,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-relations.name", "&eRelações da Guilda")),
@@ -97,7 +97,16 @@ public class MainGuildGUI implements GUI {
         );
         inventory.setItem(33, guildRelations);
         
-        // 创建工会按钮
+        // Status da Guilda
+        ItemStack guildStatus = createItem(
+            Material.BEACON,
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-status.name", "&eStatus da Guilda")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-status.lore.1", "&7Ver status da guilda")),
+            ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.guild-status.lore.2", "&7Nível, membros, etc."))
+        );
+        inventory.setItem(32, guildStatus);
+        
+        // Criar Guilda
         ItemStack createGuild = createItem(
             Material.EMERALD_BLOCK,
             ColorUtils.colorize(plugin.getConfigManager().getGuiConfig().getString("main-menu.items.create-guild.name", "&aCriar Guilda")),
@@ -124,6 +133,9 @@ public class MainGuildGUI implements GUI {
                 break;
             case 31: // 工会列表
                 openGuildListGUI(player);
+                break;
+            case 32: // Status da Guilda
+                openGuildStatusGUI(player);
                 break;
             case 33: // 工会关系
                 openGuildRelationsGUI(player);
@@ -284,6 +296,27 @@ public class MainGuildGUI implements GUI {
         });
     }
     
+    /**
+     * Abrir GUI de Status da Guilda
+     */
+    private void openGuildStatusGUI(Player player) {
+        // Verificar se o jogador tem guilda
+        plugin.getGuildService().getPlayerGuildAsync(player.getUniqueId()).thenAccept(guild -> {
+            // Executar na thread principal
+            CompatibleScheduler.runTask(plugin, () -> {
+                if (guild == null) {
+                    String message = plugin.getConfigManager().getMessagesConfig().getString("gui.no-guild", "&cVocê ainda não tem uma guilda");
+                    player.sendMessage(ColorUtils.colorize(message));
+                    return;
+                }
+                
+                // Abrir GUI de detalhes
+                GuildDetailGUI guildDetailGUI = new GuildDetailGUI(plugin, guild, player);
+                plugin.getGuiManager().openGUI(player, guildDetailGUI);
+            });
+        });
+    }
+
     /**
      * 打开创建工会GUI
      */

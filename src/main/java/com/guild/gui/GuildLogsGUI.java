@@ -194,12 +194,6 @@ public class GuildLogsGUI implements GUI {
                 return Material.IRON_INGOT;
             case LEADER_TRANSFERRED:
                 return Material.DIAMOND;
-            case FUND_DEPOSITED:
-                return Material.GOLD_NUGGET;
-            case FUND_WITHDRAWN:
-                return Material.IRON_NUGGET;
-            case FUND_TRANSFERRED:
-                return Material.EMERALD_BLOCK;
             case RELATION_CREATED:
             case RELATION_ACCEPTED:
                 return Material.BLUE_WOOL;

@@ -7,7 +7,6 @@ import com.guild.core.events.EventBus;
 import com.guild.core.gui.GUIManager;
 import com.guild.core.placeholder.PlaceholderManager;
 import com.guild.core.permissions.PermissionManager;
-import com.guild.core.economy.EconomyManager;
 import com.guild.commands.GuildCommand;
 import com.guild.commands.GuildAdminCommand;
 import com.guild.listeners.PlayerListener;
@@ -29,7 +28,6 @@ public class GuildPlugin extends JavaPlugin {
     private GUIManager guiManager;
     private PlaceholderManager placeholderManager;
     private PermissionManager permissionManager;
-    private EconomyManager economyManager;
     private GuildService guildService;
     
     @Override
@@ -79,10 +77,6 @@ public class GuildPlugin extends JavaPlugin {
             // Inicializar o gerenciador de permissões
             permissionManager = new PermissionManager(this);
             serviceContainer.register(PermissionManager.class, permissionManager);
-            
-            // Inicializar o gerenciador de economia
-            economyManager = new EconomyManager(this);
-            serviceContainer.register(EconomyManager.class, economyManager);
             
             // Registrar o serviço da guilda
             guildService = new GuildService(this);
@@ -190,10 +184,6 @@ public class GuildPlugin extends JavaPlugin {
     
     public PermissionManager getPermissionManager() {
         return permissionManager;
-    }
-    
-    public EconomyManager getEconomyManager() {
-        return economyManager;
     }
     
     public GuildService getGuildService() {

@@ -122,13 +122,13 @@ guild-info:
         - "&7Máx Membros: {guild_max_members} Pessoas"
         - "&7Progresso de Upgrade: {guild_level_progress}"
     
-    guild-balance:
+    guild-status:
       slot: 32
-      material: GOLD_INGOT
-      name: "&eFundos da Guilda"
+      material: BEACON
+      name: "&eStatus da Guilda"
       lore:
-        - "&f{guild_balance_formatted}"
-        - "&7Necessário para upgrade: {guild_next_level_requirement}"
+        - "&f{guild_frozen}"
+        - "&7Status atual da guilda"
     
     created-date:
       slot: 34
@@ -137,14 +137,6 @@ guild-info:
       lore:
         - "&f{guild_created_date}"
         - "&7{guild_created_time}"
-    
-    guild-status:
-      slot: 36
-      material: BEACON
-      name: "&eStatus da Guilda"
-      lore:
-        - "&f{guild_frozen}"
-        - "&7Status atual da guilda"
     
     back:
       slot: 49
@@ -575,17 +567,6 @@ admin-gui:
         - "&cBotão Direito: Deletar Guilda"
         - "&6Botão do Meio: Congelar/Descongelar"
     
-    economy:
-      slot: 22
-      material: GOLD_INGOT
-      name: "&eGerenciamento Econômico"
-      lore:
-        - "&7Gerenciar sistema econômico da guilda"
-        - "&7Definir fundos, ver contribuições, etc."
-        - "&eBotão Esquerdo: Definir Fundos"
-        - "&aBotão Direito: Adicionar Fundos"
-        - "&cBotão do Meio: Reduzir Fundos"
-    
     relations:
       slot: 24
       material: RED_WOOL
@@ -602,7 +583,7 @@ admin-gui:
       name: "&eInformações Estatísticas"
       lore:
         - "&7Ver estatísticas da guilda"
-        - "&7Quantidade de membros, status econômico, etc."
+        - "&7Quantidade de membros, etc."
         - "&eClique para ver estatísticas detalhadas"
     
     settings:
@@ -620,67 +601,6 @@ admin-gui:
       name: "&cVoltar"
       lore:
         - "&7Voltar ao menu principal"
-
-# GUI de Economia da Guilda
-guild-economy:
-  title: "&6Economia da Guilda"
-  size: 54
-  items:
-    balance:
-      slot: 20
-      material: GOLD_INGOT
-      name: "&eSaldo Atual"
-      lore:
-        - "&7Saldo atual da guilda"
-        - "&f{balance} Moedas"
-    
-    deposit:
-      slot: 22
-      material: EMERALD_BLOCK
-      name: "&aDepositar Fundos"
-      lore:
-        - "&7Depositar fundos na guilda"
-        - "&7Clique para inserir valor"
-    
-    withdraw:
-      slot: 24
-      material: REDSTONE_BLOCK
-      name: "&cSacar Fundos"
-      lore:
-        - "&7Sacar fundos da guilda"
-        - "&7Clique para inserir valor"
-    
-    level:
-      slot: 29
-      material: EXPERIENCE_BOTTLE
-      name: "&eNível da Guilda"
-      lore:
-        - "&7Nível Atual: {level}"
-        - "&7Progresso de Upgrade: {progress}%"
-        - "&7Máx Membros: {max_members}"
-    
-    contributions:
-      slot: 31
-      material: BOOK
-      name: "&eRegistro de Contribuições"
-      lore:
-        - "&7Ver registro de contribuições"
-        - "&7Sua contribuição: {contribution}"
-    
-    transfer:
-      slot: 33
-      material: DIAMOND
-      name: "&bTransferência"
-      lore:
-        - "&7Transferir para outra guilda"
-        - "&7Clique para selecionar guilda alvo"
-    
-    back:
-      slot: 49
-      material: ARROW
-      name: "&cVoltar"
-      lore:
-        - "&7Voltar ao menu anterior"
 
 # Interface de detalhes da guilda
 guild-detail:

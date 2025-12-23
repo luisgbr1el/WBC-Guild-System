@@ -183,37 +183,20 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
-        double creationCost = plugin.getConfigManager().getConfig("config.yml").getDouble("guild.creation-cost", 5000.0);
-        if (!plugin.getEconomyManager().isVaultAvailable()) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("create.economy-not-available", "&cSistema de economia indisponível, não é possível criar guilda!");
-            player.sendMessage(ColorUtils.colorize(message));
-            return;
-        }
-        if (!plugin.getEconomyManager().hasBalance(player, creationCost)) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("create.insufficient-funds", "&cSaldo insuficiente! Criar uma guilda custa &e{amount}!")
-                .replace("{amount}", plugin.getEconomyManager().format(creationCost));
-            player.sendMessage(ColorUtils.colorize(message));
-            return;
-        }
+        
         GuildService guildService = plugin.getServiceContainer().get(GuildService.class);
         if (guildService == null) {
             String message = plugin.getConfigManager().getMessagesConfig().getString("general.service-error", "&cServiço de guilda não inicializado!");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }
-        if (!plugin.getEconomyManager().withdraw(player, creationCost)) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("create.payment-failed", "&cFalha ao deduzir taxa de criação!");
-            player.sendMessage(ColorUtils.colorize(message));
-            return;
-        }
+        
         guildService.createGuildAsync(name, tag, description, player.getUniqueId(), player.getName())
             .thenAcceptAsync(success -> {
                 if (success) {
                     String template = plugin.getConfigManager().getMessagesConfig().getString("create.success", "&aGuilda {name} criada com sucesso!");
                     player.sendMessage(ColorUtils.replaceWithColorIsolation(template, "{name}", name));
-                    String costMessage = plugin.getConfigManager().getMessagesConfig().getString("create.cost-info", "&eTaxa de criação: {amount}")
-                        .replace("{amount}", plugin.getEconomyManager().format(creationCost));
-                    player.sendMessage(ColorUtils.colorize(costMessage));
+                    
                     String nameMessage = plugin.getConfigManager().getMessagesConfig().getString("create.name-info", "&eNome da Guilda: {name}");
                     player.sendMessage(ColorUtils.colorize(nameMessage.replace("{name}", name)));
                     if (tag != null) {
@@ -225,7 +208,6 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
                         player.sendMessage(ColorUtils.colorize(descMessage.replace("{description}", description)));
                     }
                 } else {
-                    plugin.getEconomyManager().deposit(player, creationCost);
                     String failMessage = plugin.getConfigManager().getMessagesConfig().getString("create.failed", "&cFalha ao criar guilda! Possíveis razões:");
                     player.sendMessage(ColorUtils.colorize(failMessage));
                     String reason1 = plugin.getConfigManager().getMessagesConfig().getString("create.failed-reason-1", "&c- Nome ou tag da guilda já existem");
