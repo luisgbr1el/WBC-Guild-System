@@ -254,7 +254,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ColorUtils.colorize(roleMessage.replace("{role}", member.getRole().getDisplayName())));
         java.time.format.DateTimeFormatter TF = com.guild.core.time.TimeProvider.FULL_FORMATTER;
         String createdMessage = plugin.getConfigManager().getMessagesConfig().getString("info.created", "&eCriado em: &f{date}");
-        String createdFormatted = guild.getCreatedAt() != null ? guild.getCreatedAt().format(TF) : "未知";
+        String createdFormatted = guild.getCreatedAt() != null ? guild.getCreatedAt().format(TF) : "Desconhecido";
         player.sendMessage(ColorUtils.colorize(createdMessage.replace("{date}", createdFormatted)));
     }
     private void handleMembers(Player player) {
@@ -397,7 +397,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
         }
         Player targetPlayer = Bukkit.getPlayer(targetPlayerName);
         if (targetPlayer == null) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("kick.player-not-found", "&c玩家 {player} 不在线！");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("kick.player-not-found", "&cJogador {player} não está online!");
             player.sendMessage(ColorUtils.colorize(message.replace("{player}", targetPlayerName)));
             return;
         }
@@ -625,7 +625,7 @@ public class GuildCommand implements CommandExecutor, TabCompleter {
     }
     private void handleAccept(Player player, String[] args) {
         if (args.length < 2) {
-            String message = plugin.getConfigManager().getMessagesConfig().getString("invite.accept-command", "&e输入 &a/guild accept {inviter} &e接受邀请");
+            String message = plugin.getConfigManager().getMessagesConfig().getString("invite.accept-command", "&eDigite &a/guild accept {inviter} &e para aceitar o convite");
             player.sendMessage(ColorUtils.colorize(message));
             return;
         }

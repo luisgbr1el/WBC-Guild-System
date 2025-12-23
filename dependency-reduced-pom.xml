@@ -5,7 +5,7 @@
   <artifactId>guild-plugin</artifactId>
   <name>WBC Guild System</name>
   <version>1.2.1</version>
-  <description>一个功能完整的我的世界工会插件</description>
+  <description>Um sistema de guildas usado pelo WBCSMP</description>
   <build>
     <plugins>
       <plugin>

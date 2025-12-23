@@ -10,13 +10,13 @@
     <packaging>jar</packaging>
 
     <name>WBC Guild System</name>
-    <description>一个功能完整的我的世界工会插件</description>
+    <description>Um sistema de guildas usado pelo WBCSMP</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- 添加版本属性 -->
+        <!-- Propriedades de versão -->
         <spigot.version>1.21.8-R0.1-SNAPSHOT</spigot.version>
         <folia.version>1.21.8-R0.1-SNAPSHOT</folia.version>
     </properties>
@@ -68,28 +68,28 @@
             <version>8.0.33</version>
         </dependency>
 
-        <!-- HikariCP for connection pooling -->
+        <!-- HikariCP para pool de conexões -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
         </dependency>
 
-        <!-- JSON处理 -->
+        <!-- Processamento JSON -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
 
-        <!-- 配置管理 -->
+        <!-- Gerenciamento de configuração -->
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>configurate-yaml</artifactId>
             <version>4.1.2</version>
         </dependency>
 
-        <!-- 日志框架 -->
+        <!-- Framework de log -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

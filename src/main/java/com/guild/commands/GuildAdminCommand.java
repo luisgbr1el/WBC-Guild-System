@@ -276,7 +276,7 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
                                 try {
                                     allRelations.addAll(future.get());
                                 } catch (Exception e) {
-                                    plugin.getLogger().warning("获取工会关系时发生错误: " + e.getMessage());
+                                    plugin.getLogger().warning("Erro ao obter relações da guilda: " + e.getMessage());
                                 }
                             }
                             return allRelations;
@@ -332,11 +332,11 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
                 Guild guild1 = guild1Future.get();
                 Guild guild2 = guild2Future.get();
                 if (guild1 == null) {
-                    sender.sendMessage(ColorUtils.colorize("&c工会 " + guild1Name + " 不存在！"));
+                    sender.sendMessage(ColorUtils.colorize("&cGuilda " + guild1Name + " não existe!"));
                     return;
                 }
                 if (guild2 == null) {
-                    sender.sendMessage(ColorUtils.colorize("&c工会 " + guild2Name + " 不存在！"));
+                    sender.sendMessage(ColorUtils.colorize("&cGuilda " + guild2Name + " não existe!"));
                     return;
                 }
                 if (guild1.getId() == guild2.getId()) {
@@ -346,7 +346,7 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
                 plugin.getGuildService().createGuildRelationAsync(
                     guild1.getId(), guild2.getId(), 
                     guild1.getName(), guild2.getName(), 
-                    relationType, UUID.randomUUID(), "管理员"
+                    relationType, UUID.randomUUID(), "Administrador"
                 ).thenAccept(success -> {
                     if (success) {
                         sender.sendMessage(ColorUtils.colorize("&aRelação criada: " + guild1Name + " ↔ " + guild2Name + " (" + getRelationTypeText(relationType) + ")"));
@@ -369,11 +369,11 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
                 Guild guild1 = guild1Future.get();
                 Guild guild2 = guild2Future.get();
                 if (guild1 == null) {
-                    sender.sendMessage(ColorUtils.colorize("&c工会 " + guild1Name + " 不存在！"));
+                    sender.sendMessage(ColorUtils.colorize("&cGuilda " + guild1Name + " não existe!"));
                     return;
                 }
                 if (guild2 == null) {
-                    sender.sendMessage(ColorUtils.colorize("&c工会 " + guild2Name + " 不存在！"));
+                    sender.sendMessage(ColorUtils.colorize("&cGuilda " + guild2Name + " não existe!"));
                     return;
                 }
                 plugin.getGuildService().getGuildRelationsAsync(guild1.getId()).thenAccept(relations -> {
@@ -460,12 +460,12 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
                 }
                 plugin.getGuildService().getGuildByNameAsync(guild1NameTest).thenAccept(guild1 -> {
                     if (guild1 == null) {
-                        sender.sendMessage(ColorUtils.colorize("&c工会 " + guild1NameTest + " 不存在！"));
+                        sender.sendMessage(ColorUtils.colorize("&cGuilda " + guild1NameTest + " não existe!"));
                         return;
                     }
                     plugin.getGuildService().getGuildByNameAsync(guild2NameTest).thenAccept(guild2 -> {
                         if (guild2 == null) {
-                            sender.sendMessage(ColorUtils.colorize("&c工会 " + guild2NameTest + " 不存在！"));
+                            sender.sendMessage(ColorUtils.colorize("&cGuilda " + guild2NameTest + " não existe!"));
                             return;
                         }
                         if (guild1.getId() == guild2.getId()) {
@@ -475,7 +475,7 @@ public class GuildAdminCommand implements CommandExecutor, TabCompleter {
                         plugin.getGuildService().createGuildRelationAsync(
                             guild1.getId(), guild2.getId(), 
                             guild1.getName(), guild2.getName(), 
-                            relationTypeTest, UUID.randomUUID(), "管理员"
+                            relationTypeTest, UUID.randomUUID(), "Administrador"
                         ).thenAccept(success -> {
                             if (success) {
                                 sender.sendMessage(ColorUtils.colorize("&aRelação criada: " + guild1NameTest + " ↔ " + guild2NameTest + " (" + getRelationTypeText(relationTypeTest) + ")"));
