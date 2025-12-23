@@ -10,7 +10,7 @@ import com.guild.core.time.TimeProvider;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 占位符处理工具类
+ * Utilitários de processamento de placeholders
  */
 public class PlaceholderUtils {
     
@@ -24,11 +24,11 @@ public class PlaceholderUtils {
     private static String cachedSeparatorDefaultColor;
     
     /**
-     * 替换工会相关占位符
-     * @param text 原始文本
-     * @param guild 工会对象
-     * @param player 玩家对象
-     * @return 替换后的文本
+     * Substitui placeholders relacionados à guilda
+     * @param text Texto original
+     * @param guild Objeto da guilda
+     * @param player Objeto do jogador
+     * @return Texto substituído
      */
     public static String replaceGuildPlaceholders(String text, Guild guild, Player player) {
         if (text == null || guild == null) {
@@ -36,7 +36,7 @@ public class PlaceholderUtils {
         }
         
         String result = text
-            // 工会基本信息
+            // Informações básicas da guilda
             .replace("{guild_name}", guild.getName())
             .replace("{guild_tag}", guild.getTag() != null ? guild.getTag() : "")
             .replace("{guild_description}", guild.getDescription() != null ? guild.getDescription() : "")
@@ -44,48 +44,48 @@ public class PlaceholderUtils {
             .replace("{guild_created_time}", guild.getCreatedAt().format(DATE_FORMATTER))
             .replace("{guild_created_date}", guild.getCreatedAt().toLocalDate().toString())
             
-            // 工会领导信息
+            // Informações do líder da guilda
             .replace("{leader_name}", guild.getLeaderName())
             .replace("{leader_uuid}", guild.getLeaderUuid().toString())
             
-            // 玩家信息
+            // Informações do jogador
             .replace("{player_name}", player != null ? player.getName() : "")
             .replace("{player_uuid}", player != null ? player.getUniqueId().toString() : "")
             .replace("{player_display_name}", player != null ? player.getDisplayName() : "")
             
-            // 静态信息
+            // Informações estáticas
             .replace("{guild_level}", String.valueOf(guild.getLevel()))
             .replace("{guild_max_members}", String.valueOf(guild.getMaxMembers()))
-            .replace("{guild_frozen}", guild.isFrozen() ? "已冻结" : "正常");
+            .replace("{guild_frozen}", guild.isFrozen() ? "Congelado" : "Normal");
         
-        // 处理颜色代码
+        // Processa códigos de cores
         return ColorUtils.colorize(result);
     }
     
     /**
-     * 异步替换工会相关占位符（包含动态数据）
-     * @param text 原始文本
-     * @param guild 工会对象
-     * @param player 玩家对象
-     * @param guildService 工会服务
-     * @return 替换后的文本的CompletableFuture
+     * Substitui assincronamente placeholders relacionados à guilda (incluindo dados dinâmicos)
+     * @param text Texto original
+     * @param guild Objeto da guilda
+     * @param player Objeto do jogador
+     * @param guildService Serviço da guilda
+     * @return CompletableFuture do texto substituído
      */
     public static CompletableFuture<String> replaceGuildPlaceholdersAsync(String text, Guild guild, Player player, com.guild.services.GuildService guildService) {
         if (text == null || guild == null) {
             return CompletableFuture.completedFuture(text);
         }
         
-        // 先替换静态占位符
+        // Substitui placeholders estáticos primeiro
         String result = replaceGuildPlaceholders(text, guild, player);
         
-        // 异步获取动态数据
+        // Obtém dados dinâmicos assincronamente
         return guildService.getGuildMemberCountAsync(guild.getId()).thenApply(memberCount -> {
             try {
                 return result
                     .replace("{member_count}", String.valueOf(memberCount))
-                    .replace("{online_member_count}", String.valueOf(memberCount)); // 暂时使用总成员数，后续可以添加在线统计
+                    .replace("{online_member_count}", String.valueOf(memberCount)); // Usando contagem total de membros temporariamente, pode adicionar estatísticas online depois
             } catch (Exception e) {
-                // 如果获取失败，使用默认值
+                // Se falhar ao obter, usa valor padrão
                 return result
                     .replace("{member_count}", "0")
                     .replace("{online_member_count}", "0");
@@ -94,11 +94,11 @@ public class PlaceholderUtils {
     }
     
     /**
-     * 替换成员相关占位符
-     * @param text 原始文本
-     * @param member 成员对象
-     * @param guild 工会对象
-     * @return 替换后的文本
+     * Substitui placeholders relacionados a membros
+     * @param text Texto original
+     * @param member Objeto do membro
+     * @param guild Objeto da guilda
+     * @return Texto substituído
      */
     public static String replaceMemberPlaceholders(String text, GuildMember member, Guild guild) {
         if (text == null || member == null) {
@@ -106,7 +106,7 @@ public class PlaceholderUtils {
         }
         
         String result = text
-            // 成员基本信息
+            // Informações básicas do membro
             .replace("{member_name}", member.getPlayerName())
             .replace("{member_uuid}", member.getPlayerUuid().toString())
             .replace("{member_role}", getRoleDisplayName(member.getRole()))
@@ -114,21 +114,21 @@ public class PlaceholderUtils {
             .replace("{member_join_time}", member.getJoinedAt().format(DATE_FORMATTER))
             .replace("{member_join_date}", member.getJoinedAt().toLocalDate().toString())
             
-            // 工会信息
+            // Informações da guilda
             .replace("{guild_name}", guild != null ? guild.getName() : "")
             .replace("{guild_tag}", guild != null && guild.getTag() != null ? guild.getTag() : "");
         
-        // 处理颜色代码
+        // Processa códigos de cores
         return ColorUtils.colorize(result);
     }
     
     /**
-     * 替换申请相关占位符
-     * @param text 原始文本
-     * @param applicantName 申请人名称
-     * @param guildName 工会名称
-     * @param applyTime 申请时间
-     * @return 替换后的文本
+     * Substitui placeholders relacionados a aplicações
+     * @param text Texto original
+     * @param applicantName Nome do solicitante
+     * @param guildName Nome da guilda
+     * @param applyTime Data da solicitação
+     * @return Texto substituído
      */
     public static String replaceApplicationPlaceholders(String text, String applicantName, String guildName, java.time.LocalDateTime applyTime) {
         if (text == null) {
@@ -141,15 +141,15 @@ public class PlaceholderUtils {
             .replace("{apply_time}", applyTime != null ? applyTime.format(DATE_FORMATTER) : "")
             .replace("{apply_date}", applyTime != null ? applyTime.toLocalDate().toString() : "");
         
-        // 处理颜色代码
+        // Processa códigos de cores
         return ColorUtils.colorize(result);
     }
     
     /**
-     * 替换通用占位符
-     * @param text 原始文本
-     * @param placeholders 占位符映射
-     * @return 替换后的文本
+     * Substitui placeholders gerais
+     * @param text Texto original
+     * @param placeholders Mapeamento de placeholders
+     * @return Texto substituído
      */
     public static String replacePlaceholders(String text, String... placeholders) {
         if (text == null) {
@@ -165,25 +165,25 @@ public class PlaceholderUtils {
             }
         }
         
-        // 处理颜色代码
+        // Processa códigos de cores
         return ColorUtils.colorize(result);
     }
     
 
     /**
-     * 获取角色显示名称
+     * Obtém o nome de exibição do cargo
      */
     private static String getRoleDisplayName(GuildMember.Role role) {
         switch (role) {
-            case LEADER: return "会长";
-            case OFFICER: return "官员";
-            case MEMBER: return "成员";
-            default: return "未知";
+            case LEADER: return "Líder";
+            case OFFICER: return "Oficial";
+            case MEMBER: return "Membro";
+            default: return "Desconhecido";
         }
     }
     
     /**
-     * 从配置获取角色颜色
+     * Obtém a cor do cargo da configuração
      */
     private static String getRoleColorFromConfig(GuildMember.Role role) {
         ensureRoleConfigCached();
@@ -196,14 +196,14 @@ public class PlaceholderUtils {
     }
 
     /**
-     * 对外提供：获取职位颜色代码（如 "&6"）
+     * Fornece externamente: Obtém o código de cor do cargo (ex: "&6")
      */
     public static String getRoleColorCode(GuildMember.Role role) {
         return getRoleColorFromConfig(role);
     }
 
     /**
-     * 对外提供：获取带颜色的职位显示文本
+     * Fornece externamente: Obtém o texto de exibição do cargo com cor
      */
     public static String getColoredRoleDisplay(GuildMember.Role role) {
         String color = getRoleColorFromConfig(role);
@@ -211,14 +211,14 @@ public class PlaceholderUtils {
     }
 
     /**
-     * 获取职位分隔符（根据配置与是否有职位决定是否返回）
+     * Obtém o separador de cargo (decide se retorna com base na configuração e se tem cargo)
      */
     public static String getRoleSeparator(GuildMember.Role roleOrNull) {
         ensureRoleConfigCached();
         if (!cachedSeparatorEnabled) {
             return "";
         }
-        // 未入会或无角色时不显示分隔符
+        // Não mostra separador se não for membro ou não tiver cargo
         if (roleOrNull == null) {
             return "";
         }
@@ -232,7 +232,7 @@ public class PlaceholderUtils {
         }
         GuildPlugin plugin = GuildPlugin.getInstance();
         if (plugin == null || plugin.getConfigManager() == null) {
-            // 合理的默认值
+            // Valores padrão razoáveis
             cachedLeaderColor = "&6";
             cachedOfficerColor = "&b";
             cachedMemberColor = "&7";
