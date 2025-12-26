@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.guild.GuildPlugin;
 import com.guild.core.gui.GUI;
+import com.guild.core.utils.BannerSerializer;
 import com.guild.core.utils.ColorUtils;
 import com.guild.core.utils.CompatibleScheduler;
 import com.guild.models.Guild;
@@ -137,6 +138,7 @@ public class GuildBannerConfirmGUI implements GUI {
                 if (success) {
                     // Atualizar o objeto guild
                     guild.setBanner(banner);
+                    guild.setBannerJson(BannerSerializer.serializeToJson(banner));
                     
                     // Registrar log
                     plugin.getGuildService().logGuildActionAsync(

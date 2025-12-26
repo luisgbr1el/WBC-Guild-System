@@ -849,6 +849,15 @@ public class GuildService {
             // Coluna banner_data pode não existir em bancos antigos
         }
         
+        try {
+            String bannerJson = rs.getString("banner_json");
+            if (bannerJson != null && !bannerJson.isEmpty()) {
+                guild.setBannerJson(bannerJson);
+            }
+        } catch (SQLException e) {
+            // Coluna banner_json pode não existir em bancos antigos
+        }
+        
         return guild;
     }
     
@@ -1520,13 +1529,15 @@ public class GuildService {
          return CompletableFuture.supplyAsync(() -> {
              try {
                  String bannerData = com.guild.core.utils.BannerSerializer.serialize(banner);
-                 String sql = "UPDATE guilds SET banner_data = ? WHERE id = ?";
+                 String bannerJson = com.guild.core.utils.BannerSerializer.serializeToJson(banner);
+                 String sql = "UPDATE guilds SET banner_data = ?, banner_json = ? WHERE id = ?";
                  
                  try (Connection conn = databaseManager.getConnection();
                       PreparedStatement stmt = conn.prepareStatement(sql)) {
                      
                      stmt.setString(1, bannerData);
-                     stmt.setInt(2, guildId);
+                     stmt.setString(2, bannerJson);
+                     stmt.setInt(3, guildId);
                      
                      int rowsAffected = stmt.executeUpdate();
                      return rowsAffected > 0;

@@ -20,6 +20,7 @@ public class Guild {
     private int maxMembers;
     private boolean frozen;
     private ItemStack banner;
+    private String bannerJson;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
@@ -132,6 +133,14 @@ public class Guild {
     
     public void setBanner(ItemStack banner) {
         this.banner = banner;
+    }
+    
+    public String getBannerJson() {
+        return bannerJson;
+    }
+    
+    public void setBannerJson(String bannerJson) {
+        this.bannerJson = bannerJson;
     }
     
 

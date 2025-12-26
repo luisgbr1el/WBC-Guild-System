@@ -138,6 +138,7 @@ public class DatabaseManager {
                 max_members INTEGER DEFAULT 6,
                 frozen INTEGER DEFAULT 0,
                 banner_data TEXT,
+                banner_json TEXT,
                 created_at TEXT DEFAULT (datetime('now','localtime')),
                 updated_at TEXT DEFAULT (datetime('now','localtime'))
             )
@@ -233,6 +234,7 @@ public class DatabaseManager {
                 max_members INT DEFAULT 6,
                 frozen BOOLEAN DEFAULT FALSE,
                 banner_data TEXT,
+                banner_json TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
