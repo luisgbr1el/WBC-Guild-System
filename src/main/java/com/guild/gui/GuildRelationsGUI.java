@@ -361,8 +361,15 @@ public class GuildRelationsGUI implements GUI {
      * Rejeita relação
      */
     private void rejectRelation(Player player, GuildRelation relation) {
-        plugin.getGuildService().updateGuildRelationStatusAsync(relation.getId(), GuildRelation.RelationStatus.CANCELLED)
-            .thenAccept(success -> {
+        if (relation.getType() == GuildRelation.RelationType.TRUCE) {
+            // Se for trégua, volta para GUERRA e ATIVO
+            plugin.getGuildService().updateGuildRelationAsync(
+                relation.getId(),
+                GuildRelation.RelationType.WAR,
+                GuildRelation.RelationStatus.ACTIVE,
+                relation.getInitiatorUuid(),
+                relation.getInitiatorName()
+            ).thenAccept(success -> {
                 CompatibleScheduler.runTask(plugin, () -> {
                     if (success) {
                         String message = plugin.getConfigManager().getMessagesConfig().getString("relations.reject-success", "&cRelação com {guild} rejeitada!");
@@ -375,14 +382,36 @@ public class GuildRelationsGUI implements GUI {
                     }
                 });
             });
+        } else {
+            plugin.getGuildService().updateGuildRelationStatusAsync(relation.getId(), GuildRelation.RelationStatus.CANCELLED)
+                .thenAccept(success -> {
+                    CompatibleScheduler.runTask(plugin, () -> {
+                        if (success) {
+                            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.reject-success", "&cRelação com {guild} rejeitada!");
+                            message = message.replace("{guild}", relation.getOtherGuildName(guild.getId()));
+                            player.sendMessage(ColorUtils.colorize(message));
+                            refreshInventory(player);
+                        } else {
+                            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.reject-failed", "&cFalha ao rejeitar relação!");
+                            player.sendMessage(ColorUtils.colorize(message));
+                        }
+                    });
+                });
+        }
     }
     
     /**
      * Cancela relação
      */
     private void cancelRelation(Player player, GuildRelation relation) {
-        plugin.getGuildService().updateGuildRelationStatusAsync(relation.getId(), GuildRelation.RelationStatus.CANCELLED)
-            .thenAccept(success -> {
+        if (relation.getType() == GuildRelation.RelationType.TRUCE) {
+            plugin.getGuildService().updateGuildRelationAsync(
+                relation.getId(),
+                GuildRelation.RelationType.WAR,
+                GuildRelation.RelationStatus.ACTIVE,
+                relation.getInitiatorUuid(),
+                relation.getInitiatorName()
+            ).thenAccept(success -> {
                 CompatibleScheduler.runTask(plugin, () -> {
                     if (success) {
                         String message = plugin.getConfigManager().getMessagesConfig().getString("relations.cancel-success", "&cRelação com {guild} cancelada!");
@@ -395,6 +424,22 @@ public class GuildRelationsGUI implements GUI {
                     }
                 });
             });
+        } else {
+            plugin.getGuildService().updateGuildRelationStatusAsync(relation.getId(), GuildRelation.RelationStatus.CANCELLED)
+                .thenAccept(success -> {
+                    CompatibleScheduler.runTask(plugin, () -> {
+                        if (success) {
+                            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.cancel-success", "&cRelação com {guild} cancelada!");
+                            message = message.replace("{guild}", relation.getOtherGuildName(guild.getId()));
+                            player.sendMessage(ColorUtils.colorize(message));
+                            refreshInventory(player);
+                        } else {
+                            String message = plugin.getConfigManager().getMessagesConfig().getString("relations.cancel-failed", "&cFalha ao cancelar relação!");
+                            player.sendMessage(ColorUtils.colorize(message));
+                        }
+                    });
+                });
+        }
     }
     
     /**
@@ -402,22 +447,15 @@ public class GuildRelationsGUI implements GUI {
      */
     private void endTruce(Player player, GuildRelation relation) {
         // Termina trégua, muda para relação neutra
-        GuildRelation newRelation = new GuildRelation(
-            relation.getGuild1Id(), relation.getGuild2Id(),
-            relation.getGuild1Name(), relation.getGuild2Name(),
-            GuildRelation.RelationType.NEUTRAL, player.getUniqueId(), player.getName()
-        );
-        
-        plugin.getGuildService().createGuildRelationAsync(
-            newRelation.getGuild1Id(), newRelation.getGuild2Id(),
-            newRelation.getGuild1Name(), newRelation.getGuild2Name(),
-            newRelation.getType(), newRelation.getInitiatorUuid(), newRelation.getInitiatorName()
+        plugin.getGuildService().updateGuildRelationAsync(
+            relation.getId(),
+            GuildRelation.RelationType.NEUTRAL,
+            GuildRelation.RelationStatus.ACTIVE,
+            player.getUniqueId(),
+            player.getName()
         ).thenAccept(success -> {
             CompatibleScheduler.runTask(plugin, () -> {
                 if (success) {
-                    // Remove relação de trégua antiga
-                    plugin.getGuildService().deleteGuildRelationAsync(relation.getId());
-                    
                     String message = plugin.getConfigManager().getMessagesConfig().getString("relations.truce-end", "&aTrégua com {guild} terminou, relação agora é neutra!");
                     message = message.replace("{guild}", relation.getOtherGuildName(guild.getId()));
                     player.sendMessage(ColorUtils.colorize(message));
@@ -435,16 +473,12 @@ public class GuildRelationsGUI implements GUI {
      */
     private void proposeTruce(Player player, GuildRelation relation) {
         // Cria proposta de trégua
-        GuildRelation truceRelation = new GuildRelation(
-            relation.getGuild1Id(), relation.getGuild2Id(),
-            relation.getGuild1Name(), relation.getGuild2Name(),
-            GuildRelation.RelationType.TRUCE, player.getUniqueId(), player.getName()
-        );
-        
-        plugin.getGuildService().createGuildRelationAsync(
-            truceRelation.getGuild1Id(), truceRelation.getGuild2Id(),
-            truceRelation.getGuild1Name(), truceRelation.getGuild2Name(),
-            truceRelation.getType(), truceRelation.getInitiatorUuid(), truceRelation.getInitiatorName()
+        plugin.getGuildService().updateGuildRelationAsync(
+            relation.getId(),
+            GuildRelation.RelationType.TRUCE,
+            GuildRelation.RelationStatus.PENDING,
+            player.getUniqueId(),
+            player.getName()
         ).thenAccept(success -> {
             CompatibleScheduler.runTask(plugin, () -> {
                 if (success) {
