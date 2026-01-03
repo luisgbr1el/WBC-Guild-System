@@ -1606,6 +1606,34 @@ public class GuildService {
              }
          });
      }
+
+     /**
+      * Atualizar tipo, status e iniciador da relação de guilda (Assíncrono)
+      */
+     public CompletableFuture<Boolean> updateGuildRelationAsync(int relationId, GuildRelation.RelationType type, GuildRelation.RelationStatus status, UUID initiatorUuid, String initiatorName) {
+         return CompletableFuture.supplyAsync(() -> {
+             try {
+                 String sql = "UPDATE guild_relations SET relation_type = ?, status = ?, initiator_uuid = ?, initiator_name = ?, updated_at = ? WHERE id = ?";
+                 
+                 try (Connection conn = databaseManager.getConnection();
+                      PreparedStatement stmt = conn.prepareStatement(sql)) {
+                 
+                     stmt.setString(1, type.name());
+                     stmt.setString(2, status.name());
+                     stmt.setString(3, initiatorUuid.toString());
+                     stmt.setString(4, initiatorName);
+                     stmt.setString(5, nowString());
+                     stmt.setInt(6, relationId);
+                 
+                     int rowsAffected = stmt.executeUpdate();
+                     return rowsAffected > 0;
+                 }
+             } catch (SQLException e) {
+                 logger.severe("Erro ao atualizar relação de guilda: " + e.getMessage());
+                 return false;
+             }
+         });
+     }
      
      /**
       * Obter relação de guilda (Assíncrono)
